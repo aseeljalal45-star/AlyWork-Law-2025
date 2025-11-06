@@ -1,0 +1,70 @@
+# helpers/ai_logs_manager.py
+
+import pandas as pd
+import os
+from datetime import datetime
+
+class AILogsManager:
+    """
+    إدارة سجلات المحادثات الذكية للمساعد القانوني.
+    يتم حفظ كل استفسار واستجابة مع تفاصيل إضافية.
+    """
+    def __init__(self, file_path="data/AI_Analysis_Logs.csv"):
+        self.file_path = file_path
+        # التحقق من وجود الملف، وإنشاؤه إذا لم يكن موجودًا
+        if not os.path.exists(self.file_path):
+            self.create_empty_log()
+
+    def create_empty_log(self):
+        """إنشاء ملف CSV فارغ مع الأعمدة المطلوبة"""
+        df = pd.DataFrame(columns=[
+            "timestamp", "role", "query", "response",
+            "reference", "example", "notes"
+        ])
+        df.to_csv(self.file_path, index=False, encoding="utf-8-sig")
+
+    def log_interaction(self, role, query, response, reference="", example="", notes=""):
+        """إضافة سجل جديد للتفاعل"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        new_entry = {
+            "timestamp": timestamp,
+            "role": role,
+            "query": query,
+            "response": response,
+            "reference": reference,
+            "example": example,
+            "notes": notes
+        }
+        df = pd.read_csv(self.file_path, encoding="utf-8-sig")
+        df = pd.concat([df, pd.DataFrame([new_entry])], ignore_index=True)
+        df.to_csv(self.file_path, index=False, encoding="utf-8-sig")
+
+    def load_logs(self):
+        """تحميل كل السجلات الحالية"""
+        return pd.read_csv(self.file_path, encoding="utf-8-sig")
+
+    def search_logs(self, keyword):
+        """البحث في السجلات حسب كلمة مفتاحية"""
+        df = self.load_logs()
+        mask = df.apply(lambda row: row.astype(str).str.contains(keyword, case=False).any(), axis=1)
+        return df[mask]
+
+# ==============================
+# 👷 مثال للاستخدام داخل Streamlit
+# ==============================
+if __name__ == "__main__":
+    logs_manager = AILogsManager()
+
+    # تسجيل مثال
+    logs_manager.log_interaction(
+        role="العمال",
+        query="كيف أحسب مكافأة نهاية الخدمة؟",
+        response="يجب حساب مكافأة نهاية الخدمة وفق المادة 40 من قانون العمل الأردني.",
+        reference="المادة 40 قانون العمل",
+        example="عامل أجره 500 دينار وعمل 5 سنوات يحصل على مكافأة 2500 دينار",
+        notes="✅ ممتاز"
+    )
+
+    # تحميل وعرض السجلات
+    df = logs_manager.load_logs()
+    print(df.head())
