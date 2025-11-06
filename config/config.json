@@ -1,0 +1,40 @@
+{
+    "APP_NAME": "AlyWork Law Pro",
+    "VERSION": "v25.0",
+    "LANG": "ar",
+    "THEME": "فاتح",
+    "WORKBOOK_PATH": "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx",
+    "SHEET_URL": "https://docs.google.com/spreadsheets/d/1aCnqHzxWh8RlIgCleHByoCPHMzI1i5fCjrpizcTxGVc/export?format=csv",
+    "CACHE": {
+        "ENABLED": true,
+        "TTL_SECONDS": 600
+    },
+    "UI": {
+        "STYLES_LIGHT": "assets/styles_light.css",
+        "STYLES_DARK": "assets/styles_dark.css",
+        "ICON_PATH": "assets/icons/"
+    },
+    "AI": {
+        "ENABLE": true,
+        "MEMORY_PATH": "ai_memory.json",
+        "LOGS_PATH": "AI_Analysis_Logs.csv",
+        "MAX_HISTORY": 20
+    },
+    "RECOMMENDER": {
+        "MAX_CARDS": 6,
+        "ROLES": ["العمال", "اصحاب العمل", "مفتشو العمل", "الباحثون والمتدربون"]
+    },
+    "SIDEBAR": {
+        "MENU_ITEMS": [
+            {"label": "🏠 الصفحة الرئيسية", "func": "show_home", "icon": "house"},
+            {"label": "👷 العمال", "func": "workers_section", "icon": "person"},
+            {"label": "🏢 أصحاب العمل", "func": "employers_section", "icon": "building"},
+            {"label": "🕵️ مفتشو العمل", "func": "inspectors_section", "icon": "shield"},
+            {"label": "📖 الباحثون والمتدربون", "func": "researchers_section", "icon": "book"},
+            {"label": "⚙️ الإعدادات", "func": "settings_page", "icon": "gear"}
+        ]
+    },
+    "FOOTER": {
+        "TEXT": "© 2025 AlyWork Law Pro — جميع الحقوق محفوظة."
+    }
+}
