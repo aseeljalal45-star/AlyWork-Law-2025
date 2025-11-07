@@ -93,17 +93,18 @@ def init_ai():
 
 ai = init_ai()
 
-def show_ai_assistant():
+def show_ai_assistant(key_prefix=""):
     if not config.get("AI", {}).get("ENABLE", True) or ai is None:
         st.info("🤖 المساعد غير مفعل حالياً.")
         return
     section_header("🤖 المساعد القانوني الذكي", "🤖")
-    query = st.text_input("💬 اكتب سؤالك القانوني هنا:")
+    query = st.text_input("💬 اكتب سؤالك القانوني هنا:", key=f"{key_prefix}_ai_query")
     if query:
         answer, reference, example = ai.advanced_search(query)
-        st.session_state.setdefault("chat_history", []).append({"user": query, "ai": answer})
+        chat_key = f"chat_history_{key_prefix}" if key_prefix else "chat_history"
+        st.session_state.setdefault(chat_key, []).append({"user": query, "ai": answer})
         max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
-        for chat in st.session_state["chat_history"][-max_history:]:
+        for chat in st.session_state[chat_key][-max_history:]:
             message_bubble("👤 المستخدم", chat["user"], is_user=True)
             message_bubble("🤖 المساعد", chat["ai"], is_user=False)
         if reference:
@@ -122,14 +123,13 @@ CARD_TEXT_COLOR = "#000000"
 def get_recommendations(role):
     mapping = {
         "العمال": [
-            {"العنوان": "احسب مكافأة نهاية الخدمة", "الوصف": "استخدم الحاسبة لتقدير مستحقاتك.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
             {"العنوان": "راجع حقوقك الأساسية", "الوصف": "تعرف على حقوقك وفق القانون الأردني.", "النوع": "توعية", "link": "#", "icon": "📚", "img": f"{ICON_PATH}rights.png"}
         ],
         "اصحاب العمل": [
-            {"العنوان": "حاسبة تكاليف الموظفين", "الوصف": "تقدير التزامات الأجور والضرائب.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"}
+            {"العنوان": "نماذج وتقارير أصحاب العمل", "الوصف": "نماذج قانونية جاهزة.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}service_end.png"}
         ],
         "مفتشو العمل": [
-            {"العنوان": "نموذج تقرير تفتيش", "الوصف": "نماذج جاهزة للتوثيق.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}practice.png"}
+            {"العنوان": "نماذج التفتيش", "الوصف": "نماذج جاهزة للتوثيق.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}practice.png"}
         ],
         "الباحثون والمتدربون": [
             {"العنوان": "استعراض السوابق القانونية", "الوصف": "اطلع على الحالات السابقة.", "النوع": "بحث", "link": "#", "icon": "🔍", "img": f"{ICON_PATH}legal_case.png"}
@@ -170,38 +170,60 @@ def smart_recommender(role="العمال", n=None):
             )
 
 # =====================================================
-# 🏠 صفحات الفئات
+# 🏢 أصحاب العمل
 # =====================================================
-def workers_section():
-    section_header("👷 قسم العمال", "👷")
-    show_ai_assistant()
-    smart_recommender("العمال")
-
 def employers_section():
     section_header("🏢 قسم أصحاب العمل", "🏢")
-    show_ai_assistant()
+    show_ai_assistant("employers")
     smart_recommender("اصحاب العمل")
+    st.subheader("📄 نماذج وتقارير")
+    templates = [
+        {"title": "عقد عمل", "desc": "عقد عمل رسمي", "file": f"{ICON_PATH}contract.png"},
+        {"title": "تقرير الرواتب", "desc": "كشف الرواتب الشهرية", "file": f"{ICON_PATH}salary_report.png"},
+        {"title": "تقرير الالتزام القانوني", "desc": "التأكد من الالتزام بالقانون", "file": f"{ICON_PATH}compliance_report.png"}
+    ]
+    cols = st.columns(3)
+    for idx, tpl in enumerate(templates):
+        with cols[idx % 3]:
+            st.image(tpl["file"], width=60)
+            st.markdown(f"**{tpl['title']}**\n\n{tpl['desc']}")
 
+# =====================================================
+# 🕵️ مفتشو العمل
+# =====================================================
 def inspectors_section():
-    section_header("🕵️ قسم المفتشين", "🕵️")
-    show_ai_assistant()
+    section_header("🕵️ قسم مفتشو العمل", "🕵️")
+    show_ai_assistant("inspectors")
     smart_recommender("مفتشو العمل")
+    st.subheader("📄 نماذج التفتيش")
+    templates = [
+        {"title": "تقرير تفتيش شهري", "desc": "نموذج جاهز للتفتيش الشهري", "file": f"{ICON_PATH}inspection_monthly.png"},
+        {"title": "متابعة المخالفات", "desc": "تقرير متابعة المخالفات", "file": f"{ICON_PATH}inspection_followup.png"},
+        {"title": "محضر غرامات", "desc": "نماذج لتسجيل المخالفات", "file": f"{ICON_PATH}penalty_report.png"}
+    ]
+    cols = st.columns(3)
+    for idx, tpl in enumerate(templates):
+        with cols[idx % 3]:
+            st.image(tpl["file"], width=60)
+            st.markdown(f"**{tpl['title']}**\n\n{tpl['desc']}")
 
+# =====================================================
+# 📖 الباحثون والمتدربون
+# =====================================================
 def researchers_section():
     section_header("📖 الباحثون والمتدربون", "📖")
-    show_ai_assistant()
+    show_ai_assistant("researchers")
     smart_recommender("الباحثون والمتدربون")
-
-def settings_page():
-    section_header("⚙️ الإعدادات", "⚙️")
-    st.write("يمكنك تعديل الإعدادات من هنا.")
-    new_path = st.text_input("📁 مسار ملف Excel:", value=WORKBOOK_PATH)
-    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
-    if st.button("💾 حفظ"):
-        settings.settings["WORKBOOK_PATH"] = new_path
-        settings.settings["SHEET_URL"] = new_sheet
-        settings.save_settings()
-        st.success("✅ تم حفظ الإعدادات بنجاح!")
+    st.subheader("📚 مكتبة السوابق والتقارير")
+    reports = [
+        {"title": "حالات سابقة", "desc": "أمثلة عن المخالفات", "file": f"{ICON_PATH}past_cases.png"},
+        {"title": "نتائج التفتيش السابقة", "desc": "سجل كامل للتفتيش", "file": f"{ICON_PATH}inspection_results.png"}
+    ]
+    cols = st.columns(2)
+    for idx, rpt in enumerate(reports):
+        with cols[idx % 2]:
+            st.image(rpt["file"], width=50)
+            st.markdown(f"**{rpt['title']}**\n\n{rpt['desc']}")
 
 # =====================================================
 # 🏠 الصفحة الرئيسية
@@ -244,11 +266,24 @@ def show_home():
                 st.session_state.current_page = cat["key"]
 
 # =====================================================
+# ⚙️ الإعدادات
+# =====================================================
+def settings_page():
+    section_header("⚙️ الإعدادات", "⚙️")
+    new_path = st.text_input("📁 مسار ملف Excel:", value=WORKBOOK_PATH)
+    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
+    if st.button("💾 حفظ"):
+        settings.settings["WORKBOOK_PATH"] = new_path
+        settings.settings["SHEET_URL"] = new_sheet
+        settings.save_settings()
+        st.success("✅ تم حفظ الإعدادات بنجاح!")
+
+# =====================================================
 # 🏠 قاموس الصفحات
 # =====================================================
 pages = {
     "home": show_home,
-    "workers": workers_section,
+    "workers": lambda: st.info("👷 صفحة العمال سيتم تطويرها لاحقاً."),
     "employers": employers_section,
     "inspectors": inspectors_section,
     "researchers": researchers_section,
