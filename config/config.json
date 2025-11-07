@@ -1,40 +1,212 @@
 {
-    "APP_NAME": "AlyWork Law Pro",
-    "VERSION": "v25.0",
-    "LANG": "ar",
-    "THEME": "فاتح",
-    "WORKBOOK_PATH": "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx",
-    "SHEET_URL": "https://docs.google.com/spreadsheets/d/1aCnqHzxWh8RlIgCleHByoCPHMzI1i5fCjrpizcTxGVc/export?format=csv",
-    "CACHE": {
-        "ENABLED": true,
-        "TTL_SECONDS": 600
+    "APP_INFO": {
+        "APP_NAME": "⚖️ منصة قانون العمل الذكية",
+        "VERSION": "v25.1",
+        "DESCRIPTION": "منصة شاملة للاستشارات القانونية وحساب المستحقات",
+        "DEVELOPER": "فريق التطوير القانوني",
+        "RELEASE_DATE": "2025-01-01",
+        "SUPPORT_EMAIL": "support@alyworklaw.com",
+        "WEBSITE": "https://alyworklaw.com"
     },
-    "UI": {
-        "STYLES_LIGHT": "assets/styles_light.css",
+    "LANGUAGE": {
+        "LANG": "ar",
+        "RTL": true,
+        "DATE_FORMAT": "YYYY-MM-DD",
+        "TIMEZONE": "Asia/Amman",
+        "SUPPORTED_LANGS": ["ar", "en"]
+    },
+    "THEME": {
+        "THEME": "فاتح",
+        "PRIMARY_COLOR": "#1E3A8A",
+        "SECONDARY_COLOR": "#2563EB",
+        "ACCENT_COLOR": "#10B981",
+        "BACKGROUND_COLOR": "#F9FAFB",
+        "CARD_BACKGROUND": "#FFFFFF",
+        "TEXT_COLOR": "#111827",
+        "MUTED_TEXT": "#6B7280"
+    },
+    "DATA_SOURCES": {
+        "WORKBOOK_PATH": "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx",
+        "SHEET_URL": "https://docs.google.com/spreadsheets/d/1aCnqHzxWh8RlIgCleHByoCPHMzI1i5fCjrpizcTxGVc/export?format=csv",
+        "BACKUP_ENABLED": true,
+        "AUTO_SYNC": true,
+        "SYNC_INTERVAL_MINUTES": 60
+    },
+    "PERFORMANCE": {
+        "CACHE_ENABLED": true,
+        "CACHE_TTL_SECONDS": 600,
+        "MAX_FILE_SIZE_MB": 50,
+        "AUTO_REFRESH_INTERVAL": 300,
+        "LAZY_LOADING": true
+    },
+    "UI_SETTINGS": {
+        "STYLES_LIGHT": "assets/styles_official.css",
         "STYLES_DARK": "assets/styles_dark.css",
-        "ICON_PATH": "assets/icons/"
+        "ICON_PATH": "assets/icons/",
+        "DEFAULT_AVATAR": "assets/images/default_avatar.png",
+        "FAVICON": "assets/icons/favicon.ico",
+        "SHOW_ANALYTICS": true,
+        "ENABLE_ANIMATIONS": true
     },
-    "AI": {
-        "ENABLE": true,
+    "AI_FEATURES": {
+        "ENABLE_AI": true,
         "MEMORY_PATH": "ai_memory.json",
         "LOGS_PATH": "AI_Analysis_Logs.csv",
-        "MAX_HISTORY": 20
+        "MAX_HISTORY": 20,
+        "MIN_SIMILARITY_THRESHOLD": 0.15,
+        "ENABLE_LEARNING": true,
+        "SEARCH_LIMIT": 5
     },
-    "RECOMMENDER": {
+    "RECOMMENDATION_SYSTEM": {
         "MAX_CARDS": 6,
-        "ROLES": ["العمال", "اصحاب العمل", "مفتشو العمل", "الباحثون والمتدربون"]
+        "ENABLE_PERSONALIZATION": true,
+        "ROLES": [
+            {
+                "id": "workers",
+                "label": "👷 العمال",
+                "description": "العاملون في القطاعين العام والخاص"
+            },
+            {
+                "id": "employers", 
+                "label": "🏢 أصحاب العمل",
+                "description": "أصحاب المنشآت ومديرو الموارد البشرية"
+            },
+            {
+                "id": "inspectors",
+                "label": "🕵️ مفتشو العمل", 
+                "description": "موظفو التفتيش والجهات الرقابية"
+            },
+            {
+                "id": "researchers",
+                "label": "📖 الباحثون والمتدربون",
+                "description": "باحثون قانونيون وطلاب ومتدربون"
+            }
+        ],
+        "UPDATE_FREQUENCY": "daily"
     },
-    "SIDEBAR": {
-        "MENU_ITEMS": [
-            {"label": "🏠 الصفحة الرئيسية", "func": "show_home", "icon": "house"},
-            {"label": "👷 العمال", "func": "workers_section", "icon": "person"},
-            {"label": "🏢 أصحاب العمل", "func": "employers_section", "icon": "building"},
-            {"label": "🕵️ مفتشو العمل", "func": "inspectors_section", "icon": "shield"},
-            {"label": "📖 الباحثون والمتدربون", "func": "researchers_section", "icon": "book"},
-            {"label": "⚙️ الإعدادات", "func": "settings_page", "icon": "gear"}
-        ]
+    "NAVIGATION": {
+        "SIDEBAR_MENU": [
+            {
+                "id": "home",
+                "label": "🏠 الصفحة الرئيسية",
+                "function": "show_home",
+                "icon": "house",
+                "order": 1,
+                "visible": true
+            },
+            {
+                "id": "workers",
+                "label": "👷 قسم العمال", 
+                "function": "workers_section",
+                "icon": "person",
+                "order": 2,
+                "visible": true
+            },
+            {
+                "id": "employers",
+                "label": "🏢 قسم أصحاب العمل",
+                "function": "employers_section", 
+                "icon": "building",
+                "order": 3,
+                "visible": true
+            },
+            {
+                "id": "inspectors",
+                "label": "🕵️ قسم المفتشين",
+                "function": "inspectors_section",
+                "icon": "shield",
+                "order": 4,
+                "visible": true
+            },
+            {
+                "id": "researchers", 
+                "label": "📖 قسم الباحثين",
+                "function": "researchers_section",
+                "icon": "book",
+                "order": 5,
+                "visible": true
+            },
+            {
+                "id": "calculators",
+                "label": "🧮 الحاسبات القانونية",
+                "function": "calculators_section",
+                "icon": "calculator",
+                "order": 6,
+                "visible": true
+            },
+            {
+                "id": "database",
+                "label": "📊 قاعدة البيانات",
+                "function": "database_section", 
+                "icon": "database",
+                "order": 7,
+                "visible": true
+            },
+            {
+                "id": "settings",
+                "label": "⚙️ الإعدادات",
+                "function": "settings_page",
+                "icon": "gear",
+                "order": 8,
+                "visible": true
+            }
+        ],
+        "SHOW_FOOTER": true,
+        "SHOW_HEADER": true
+    },
+    "CALCULATORS": {
+        "ENABLED_CALCULATORS": [
+            "end_of_service",
+            "overtime", 
+            "vacation",
+            "transportation",
+            "housing",
+            "maternity",
+            "sick_leave",
+            "work_injury"
+        ],
+        "CURRENCY": "JOD",
+        "CURRENCY_SYMBOL": "د.أ"
+    },
+    "SECURITY": {
+        "ENABLE_VALIDATION": true,
+        "MAX_LOGIN_ATTEMPTS": 5,
+        "SESSION_TIMEOUT_MINUTES": 60,
+        "ENABLE_AUDIT_LOG": true,
+        "DATA_ENCRYPTION": false
+    },
+    "NOTIFICATIONS": {
+        "ENABLE_EMAIL_ALERTS": false,
+        "ENABLE_BROWSER_NOTIFICATIONS": true,
+        "UPDATE_NOTIFICATIONS": true,
+        "NEW_FEATURE_ALERTS": true
+    },
+    "ANALYTICS": {
+        "ENABLE_TRACKING": true,
+        "TRACK_SEARCHES": true,
+        "TRACK_CALCULATIONS": true,
+        "TRACK_USER_BEHAVIOR": true,
+        "PRIVACY_MODE": false
+    },
+    "EXPORT_SETTINGS": {
+        "ALLOW_CSV_EXPORT": true,
+        "ALLOW_PDF_EXPORT": true,
+        "ALLOW_EXCEL_EXPORT": true,
+        "MAX_EXPORT_ROWS": 1000
+    },
+    "METADATA": {
+        "CREATED_AT": "2025-01-01T00:00:00Z",
+        "LAST_UPDATED": "2025-01-01T00:00:00Z", 
+        "UPDATED_BY": "system",
+        "TOTAL_UPDATES": 0,
+        "CONFIG_VERSION": "2.0"
     },
     "FOOTER": {
-        "TEXT": "© 2025 AlyWork Law Pro — جميع الحقوق محفوظة."
+        "TEXT": "© 2025 منصة قانون العمل الذكية — جميع الحقوق محفوظة.",
+        "SHOW_VERSION": true,
+        "SHOW_DEVELOPER": true,
+        "CONTACT_EMAIL": "info@alyworklaw.com",
+        "PRIVACY_POLICY_URL": "https://alyworklaw.com/privacy",
+        "TERMS_OF_SERVICE_URL": "https://alyworklaw.com/terms"
     }
 }
