@@ -7,30 +7,39 @@ import streamlit as st
 class MiniLegalAI:
     def __init__(self, workbook_path=None):
         """تهيئة المساعد الذكي وربط قاعدة البيانات القانونية."""
-        # التحقق من تمكين AI
         config = st.session_state.get("config", {})
         self.ai_enabled = config.get("AI", {}).get("ENABLE", True)
         if not self.ai_enabled:
             st.warning("🤖 المساعد الذكي معطل من إعدادات النظام.")
-            return
-
-        self.workbook_path = workbook_path or config.get("WORKBOOK_PATH", "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx")
+        
+        self.workbook_path = workbook_path or config.get("WORKBOOK_PATH", "")
         self.vectorizer = None
         self.tfidf_matrix = None
         self.db = pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])  # افتراضي
 
+        # إذا الملف موجود، يتم تحميله مباشرة
+        if self.workbook_path and os.path.exists(self.workbook_path):
+            self.load_database_from_excel()
+            self.build_tfidf_matrix()
+
     # ==============================
-    # تحميل قاعدة البيانات بدون مشاكل caching
+    # تحميل قاعدة البيانات
     # ==============================
     def load_database_from_excel(self, path=None):
         path = path or self.workbook_path
         if not os.path.exists(path):
             st.warning(f"⚠️ ملف قاعدة البيانات غير موجود: {path}")
-            return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
+            self.db = pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
+            return
         try:
             df = pd.read_excel(path, engine='openpyxl')
+            for col in ['المادة', 'القسم', 'النص', 'مثال']:
+                if col not in df.columns:
+                    df[col] = ""
+            df = df[['المادة', 'القسم', 'النص', 'مثال']]
             df.fillna("", inplace=True)
             self.db = df
+            st.session_state['ai_db'] = df  # حفظ نسخة في session state
         except Exception as e:
             st.error(f"⚠️ خطأ عند تحميل قاعدة البيانات: {e}")
             self.db = pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
@@ -51,11 +60,7 @@ class MiniLegalAI:
     def build_tfidf_matrix(self):
         if self.db.empty:
             return
-        text_col = next((c for c in self.db.columns if "نص" in c), None)
-        if not text_col:
-            st.error("⚠️ لم يتم العثور على عمود يحتوي على نصوص قانونية في الملف.")
-            return
-        corpus = self.db[text_col].apply(self.preprocess_text).tolist()
+        corpus = self.db['النص'].apply(self.preprocess_text).tolist()
         self.vectorizer = TfidfVectorizer()
         self.tfidf_matrix = self.vectorizer.fit_transform(corpus)
 
@@ -68,8 +73,7 @@ class MiniLegalAI:
         if self.db.empty or self.tfidf_matrix is None:
             return "⚠️ قاعدة البيانات فارغة.", "", ""
 
-        query_clean = self.preprocess_text(query)
-        query_vec = self.vectorizer.transform([query_clean])
+        query_vec = self.vectorizer.transform([self.preprocess_text(query)])
         similarities = cosine_similarity(query_vec, self.tfidf_matrix).flatten()
         top_indices = similarities.argsort()[::-1][:top_n]
 
