@@ -11,7 +11,7 @@ import plotly.express as px
 # ==============================
 # ⚙️ Initialize Settings
 # ==============================
-settings = SettingsManager()  # تحميل الإعدادات أو إنشاء config.json
+settings = SettingsManager()
 config = st.session_state["config"]
 
 # ==============================
@@ -24,13 +24,12 @@ st.set_page_config(
 )
 
 # ==============================
-# 🌈 Load CSS dynamically
+# 🌈 Load CSS officially
 # ==============================
 def load_css(theme=None):
     theme = theme or config.get("THEME", "فاتح")
-    ui = config.get("UI", {})
-    css_file = ui.get("STYLES_LIGHT") if theme=="فاتح" else ui.get("STYLES_DARK")
-    if css_file and os.path.exists(css_file):
+    css_file = "assets/styles_light.css" if theme=="فاتح" else "assets/styles_dark.css"
+    if os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
@@ -149,7 +148,7 @@ def show_statistics(df):
 # ==============================
 # 💡 Smart Recommender
 # ==============================
-from helpers.recommender import smart_recommender  # النسخة الجديدة
+from helpers.recommender import smart_recommender
 
 # ==============================
 # 🏠 Pages
