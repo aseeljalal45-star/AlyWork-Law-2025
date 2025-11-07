@@ -7,30 +7,30 @@ from sklearn.metrics.pairwise import cosine_similarity
 class MiniLegalAI:
     def __init__(self, workbook_path=None):
         """تهيئة المساعد الذكي وربط قاعدة البيانات القانونية."""
-        # جلب الإعدادات من config
         config = st.session_state.get("config", {})
         self.ai_enabled = config.get("AI", {}).get("ENABLE", True)
         if not self.ai_enabled:
             st.warning("🤖 المساعد الذكي معطل من إعدادات النظام.")
             return
 
-        self.workbook_path = workbook_path or config.get("WORKBOOK_PATH", "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx")
+        self.workbook_path = workbook_path or config.get(
+            "WORKBOOK_PATH", "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx"
+        )
         self.memory_path = config.get("AI", {}).get("MEMORY_PATH", "ai_memory.json")
         self.logs_path = config.get("AI", {}).get("LOGS_PATH", "AI_Analysis_Logs.csv")
         self.max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
 
-        # تحميل قاعدة البيانات وبناء المصفوفة
+        # تحميل قاعدة البيانات
         self.db = self.load_database()
-        self.vectorizer = None
-        self.tfidf_matrix = None
-        self.build_tfidf_matrix()
+        
+        # بناء TF-IDF ككائن مورد (resource)
+        self.vectorizer, self.tfidf_matrix = self.build_tfidf_matrix()
 
     # ==============================
     # تحميل قاعدة البيانات
     # ==============================
-    @st.cache_data(show_spinner=False, allow_output_mutation=True)
+    @st.cache_data(show_spinner=False)
     def load_database(self):
-        """تحميل ملف قاعدة البيانات القانونية."""
         if not os.path.exists(self.workbook_path):
             st.warning(f"⚠️ ملف قاعدة البيانات غير موجود: {self.workbook_path}")
             return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
@@ -55,24 +55,23 @@ class MiniLegalAI:
     # ==============================
     # بناء مصفوفة TF-IDF
     # ==============================
-    @st.cache_data(show_spinner=False, allow_output_mutation=True)
+    @st.cache_resource(show_spinner=False)
     def build_tfidf_matrix(self):
-        """بناء مصفوفة TF-IDF للنصوص القانونية."""
         if self.db.empty:
-            return
+            return None, None
         text_col = next((c for c in self.db.columns if "نص" in c), None)
         if not text_col:
             st.error("⚠️ لم يتم العثور على عمود يحتوي على نصوص قانونية في الملف.")
-            return
+            return None, None
         corpus = self.db[text_col].apply(self.preprocess_text).tolist()
-        self.vectorizer = TfidfVectorizer()
-        self.tfidf_matrix = self.vectorizer.fit_transform(corpus)
+        vectorizer = TfidfVectorizer()
+        tfidf_matrix = vectorizer.fit_transform(corpus)
+        return vectorizer, tfidf_matrix
 
     # ==============================
     # البحث الذكي
     # ==============================
     def advanced_search(self, query, top_n=1):
-        """البحث عن النصوص الأكثر تطابقًا مع الاستعلام."""
         if not self.ai_enabled:
             return "🤖 المساعد الذكي معطل.", "", ""
 
@@ -106,9 +105,8 @@ class MiniLegalAI:
     # إعادة تحميل القاعدة
     # ==============================
     def reload(self, new_path=None):
-        """إعادة تحميل قاعدة البيانات بعد تغيير الملف أو التحديث."""
         if new_path:
             self.workbook_path = new_path
         self.db = self.load_database()
-        self.build_tfidf_matrix()
+        self.vectorizer, self.tfidf_matrix = self.build_tfidf_matrix()
         st.success("✅ تم تحديث قاعدة البيانات بنجاح.")
