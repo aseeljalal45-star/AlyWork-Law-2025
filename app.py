@@ -1,15 +1,12 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
 import os, pandas as pd
 from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
 from helpers.ui_components import message_bubble, section_header, info_card
-from st_aggrid import AgGrid
-from st_aggrid.grid_options_builder import GridOptionsBuilder
 import plotly.express as px
 
 # =====================================================
-# ⚙️ تهيئة الإعدادات العامة
+# ⚙️ إعدادات عامة
 # =====================================================
 settings = SettingsManager()
 config = st.session_state["config"]
@@ -21,7 +18,7 @@ st.set_page_config(
 )
 
 # =====================================================
-# 🌈 تحميل ملف CSS الرسمي
+# 🌈 تحميل CSS رسمي
 # =====================================================
 def load_official_css():
     css_file = "assets/styles_official.css"
@@ -30,11 +27,10 @@ def load_official_css():
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     else:
         st.info("ℹ️ ملف CSS الرسمي غير موجود: assets/styles_official.css")
-
 load_official_css()
 
 # =====================================================
-# 🧮 تحميل Google Sheets بأمان
+# 🧮 تحميل Google Sheet و Excel
 # =====================================================
 def sheet_to_csv_url(sheet_url):
     import re
@@ -45,6 +41,7 @@ def sheet_to_csv_url(sheet_url):
     return sheet_url
 
 SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL"))
+workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
 
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def load_google_sheets(url):
@@ -60,11 +57,6 @@ def load_google_sheets(url):
 
 data = load_google_sheets(SHEET_URL)
 
-# =====================================================
-# 📘 تحميل ملف Excel للذكاء القانوني
-# =====================================================
-workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
-
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def safe_load_excel(path):
     expected_cols = ['المادة', 'القسم', 'النص', 'مثال']
@@ -76,7 +68,7 @@ def safe_load_excel(path):
         for col in expected_cols:
             if col not in df.columns:
                 df[col] = ""
-        df = df[expected_cols]  # ترتيب الأعمدة بشكل ثابت
+        df = df[expected_cols]
         df.fillna("", inplace=True)
         return df
     except Exception as e:
@@ -99,9 +91,6 @@ if os.path.exists(workbook_path):
 else:
     ai = None
 
-# =====================================================
-# 🤖 واجهة المساعد القانوني الذكي
-# =====================================================
 def show_ai_assistant():
     if not config.get("AI", {}).get("ENABLE", True) or ai is None:
         st.info("🤖 المساعد غير مفعل حالياً.")
@@ -132,16 +121,13 @@ ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
 MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
 
 def get_recommendations_data():
-    data = {
+    return {
         "العمال": [
             {"العنوان": "احسب مكافأة نهاية الخدمة", "الوصف": "استخدم الحاسبة لتقدير مستحقاتك.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
-            {"العنوان": "راجع حقوقك الأساسية", "الوصف": "تعرف على حقوقك وفق القانون الأردني.", "النوع": "توعية", "link": "#", "icon": "📚", "img": f"{ICON_PATH}rights.png"},
-            {"العنوان": "اطلع على سوابق قضائية", "الوصف": "أحكام مشابهة لحالتك.", "النوع": "قانوني", "link": "#", "icon": "⚖️", "img": f"{ICON_PATH}legal_case.png"},
-            {"العنوان": "تطبيقات عملية", "الوصف": "أمثلة تطبيقية للمواد القانونية.", "النوع": "تعليمي", "link": "#", "icon": "💡", "img": f"{ICON_PATH}practice.png"}
+            {"العنوان": "راجع حقوقك الأساسية", "الوصف": "تعرف على حقوقك وفق القانون الأردني.", "النوع": "توعية", "link": "#", "icon": "📚", "img": f"{ICON_PATH}rights.png"}
         ],
         "اصحاب العمل": [
-            {"العنوان": "حاسبة تكاليف الموظفين", "الوصف": "تقدير التزامات الأجور والضرائب.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
-            {"العنوان": "الامتثال القانوني", "الوصف": "راجع التزاماتك وفق القانون الأردني.", "النوع": "امتثال", "link": "#", "icon": "⚖️", "img": f"{ICON_PATH}legal_case.png"}
+            {"العنوان": "حاسبة تكاليف الموظفين", "الوصف": "تقدير التزامات الأجور والضرائب.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"}
         ],
         "مفتشو العمل": [
             {"العنوان": "نموذج تقرير تفتيش", "الوصف": "نماذج جاهزة للتوثيق.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}practice.png"}
@@ -150,7 +136,6 @@ def get_recommendations_data():
             {"العنوان": "استعراض السوابق القانونية", "الوصف": "اطلع على الحالات السابقة.", "النوع": "بحث", "link": "#", "icon": "🔍", "img": f"{ICON_PATH}legal_case.png"}
         ]
     }
-    return data
 
 def smart_recommender(role_label="العمال", n=None):
     recommendations = get_recommendations_data().get(role_label, [])
@@ -166,9 +151,6 @@ def smart_recommender(role_label="العمال", n=None):
         "توعية": "linear-gradient(135deg, #10b981, #059669)",
         "قانوني": "linear-gradient(135deg, #6366f1, #4338ca)",
         "تعليمي": "linear-gradient(135deg, #f59e0b, #d97706)",
-        "امتثال": "linear-gradient(135deg, #9333ea, #7e22ce)",
-        "مالي": "linear-gradient(135deg, #ec4899, #db2777)",
-        "مرجع": "linear-gradient(135deg, #14b8a6, #0d9488)",
         "نموذج": "linear-gradient(135deg, #f97316, #ea580c)",
         "بحث": "linear-gradient(135deg, #22c55e, #16a34a)"
     }
@@ -195,85 +177,60 @@ def smart_recommender(role_label="العمال", n=None):
             )
 
 # =====================================================
-# 🏠 الصفحات الرئيسية
+# 🏠 الصفحة الرئيسية الحديثة مع بطاقات الفئات
 # =====================================================
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "home"
+
 def show_home():
     st.title(f"⚖️ {config.get('APP_NAME')}")
-    st.markdown("منصة ذكية لتبسيط وفهم <b>قانون العمل الأردني</b>.", unsafe_allow_html=True)
-    st.info("💡 هذه المنصة لأغراض التوعية القانونية فقط.")
-    show_ai_assistant()
-    smart_recommender("العمال")
+    st.markdown("<h4 style='color:gray;'>اختر فئتك للانتقال إلى القسم المناسب:</h4>", unsafe_allow_html=True)
 
-def workers_section():
-    section_header("👷 قسم العمال", "👷")
-    show_ai_assistant()
-    smart_recommender("العمال")
+    categories = [
+        {"label": "👷 العمال", "key": "workers", "color":"#3b82f6", "img": f"{ICON_PATH}workers.png"},
+        {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#10b981", "img": f"{ICON_PATH}employers.png"},
+        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "color":"#f59e0b", "img": f"{ICON_PATH}inspectors.png"},
+        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#6366f1", "img": f"{ICON_PATH}researchers.png"},
+        {"label": "⚙️ الإعدادات", "key": "settings", "color":"#9333ea", "img": f"{ICON_PATH}settings.png"}
+    ]
 
-def employers_section():
-    section_header("🏢 قسم أصحاب العمل", "🏢")
-    show_ai_assistant()
-    smart_recommender("اصحاب العمل")
+    cols = st.columns(len(categories))
+    for idx, cat in enumerate(categories):
+        with cols[idx]:
+            st.markdown(
+                f"""
+                <div style='
+                    background: {cat['color']};
+                    padding: 25px;
+                    border-radius: 20px;
+                    text-align: center;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                '>
+                    <img src='{cat['img']}' width='60px' style='margin-bottom:15px;'/>
+                    <h4 style='color:white; margin-bottom:5px;'>{cat['label']}</h4>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            if st.button(f"اختيار {cat['label']}", key=f"btn_{cat['key']}"):
+                st.session_state.current_page = cat["key"]
 
-def inspectors_section():
-    section_header("🕵️ قسم المفتشين", "🕵️")
-    show_ai_assistant()
-    smart_recommender("مفتشو العمل")
-
-def researchers_section():
-    section_header("📖 قسم الباحثين والمتدربين", "📖")
-    show_ai_assistant()
-    smart_recommender("الباحثون والمتدربون")
-
-def settings_page():
-    section_header("⚙️ الإعدادات", "⚙️")
-    st.write("يمكنك تعديل الإعدادات من هنا.")
-    new_path = st.text_input("📁 مسار ملف Excel:", value=workbook_path)
-    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
-    if st.button("💾 حفظ"):
-        settings.settings["WORKBOOK_PATH"] = new_path
-        settings.settings["SHEET_URL"] = new_sheet
-        settings.save_settings()
-        st.success("✅ تم حفظ الإعدادات بنجاح!")
-
-# =====================================================
-# 🧭 القائمة الجانبية
-# =====================================================
-menu_labels = [
-    "🏠 الصفحة الرئيسية",
-    "👷 العمال",
-    "🏢 أصحاب العمل",
-    "🕵️ مفتشو العمل",
-    "📖 الباحثون والمتدربون",
-    "⚙️ الإعدادات"
-]
-menu_icons = ["house", "people", "briefcase", "search", "book", "gear"]
-
-with st.sidebar:
-    if os.path.exists("assets/logo.png"):
-        st.image("assets/logo.png", width=180)
-    else:
-        st.info("ℹ️ شعار المنصة غير موجود.")
-
-    choice = option_menu(
-        "القائمة الرئيسية",
-        menu_labels,
-        icons=menu_icons,
-        default_index=0
-    )
-
+# الانتقال للصفحة الحالية
 pages = {
-    "🏠 الصفحة الرئيسية": show_home,
-    "👷 العمال": workers_section,
-    "🏢 أصحاب العمل": employers_section,
-    "🕵️ مفتشو العمل": inspectors_section,
-    "📖 الباحثون والمتدربون": researchers_section,
-    "⚙️ الإعدادات": settings_page
+    "home": show_home,
+    "workers": workers_section,
+    "employers": employers_section,
+    "inspectors": inspectors_section,
+    "researchers": researchers_section,
+    "settings": settings_page
 }
 
-if choice in pages:
-    pages[choice]()
+# زر العودة للصفحة الرئيسية
+if st.session_state.current_page != "home" and st.button("⬅️ العودة للصفحة الرئيسية"):
+    st.session_state.current_page = "home"
 else:
-    show_home()
+    pages[st.session_state.current_page]()
 
 # =====================================================
 # 🕒 تذييل رسمي
