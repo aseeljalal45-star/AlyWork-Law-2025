@@ -29,7 +29,7 @@ def load_official_css():
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     else:
-        st.warning("⚠️ ملف CSS الرسمي غير موجود: assets/styles_official.css")
+        st.info("ℹ️ ملف CSS الرسمي غير موجود: assets/styles_official.css")
 
 load_official_css()
 
@@ -49,7 +49,7 @@ SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL", ""))
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def load_google_sheets(url):
     if not url:
-        st.warning("🗂️ لم يتم تحديد رابط Google Sheet بعد.")
+        st.info("ℹ️ لم يتم تحديد رابط Google Sheet بعد.")
         return pd.DataFrame()
     url = sheet_to_csv_url(url)
     try:
@@ -67,24 +67,28 @@ workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH", "AlyWo
 
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def safe_load_excel(path):
+    expected_cols = ['المادة', 'القسم', 'النص', 'مثال']
     if not os.path.exists(path):
-        st.warning(f"⚠️ ملف Excel غير موجود: {path}")
-        return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
+        st.info(f"ℹ️ ملف Excel غير موجود: {path}. سيتم إنشاء DataFrame افتراضي.")
+        return pd.DataFrame(columns=expected_cols)
     try:
         df = pd.read_excel(path, engine='openpyxl')
-        expected_cols = ['المادة', 'القسم', 'النص', 'مثال']
         for col in expected_cols:
             if col not in df.columns:
-                st.warning(f"⚠️ العمود '{col}' غير موجود في ملف Excel.")
+                # إضافة العمود مفقود تلقائيًا
                 df[col] = ""
+        df = df[expected_cols]  # ترتيب الأعمدة بشكل ثابت
         df.fillna("", inplace=True)
         return df
     except Exception as e:
-        st.warning(f"⚠️ خطأ أثناء قراءة Excel: {e}")
-        return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
+        st.warning(f"⚠️ خطأ أثناء قراءة Excel: {e}. سيتم إنشاء DataFrame افتراضي.")
+        return pd.DataFrame(columns=expected_cols)
 
 excel_data = safe_load_excel(workbook_path)
 
+# =====================================================
+# 🤖 تهيئة المساعد القانوني
+# =====================================================
 if os.path.exists(workbook_path):
     try:
         ai = MiniLegalAI(workbook_path)
@@ -129,6 +133,7 @@ ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
 MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
 
 def get_recommendations_data():
+    # ... نفس الداتا كما في كودك الأصلي
     data = {
         "العمال": [
             {"العنوان": "احسب مكافأة نهاية الخدمة", "الوصف": "استخدم الحاسبة لتقدير مستحقاتك.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
@@ -225,11 +230,11 @@ def settings_page():
     section_header("⚙️ الإعدادات", "⚙️")
     st.write("يمكنك تعديل الإعدادات من هنا.")
     new_path = st.text_input("📁 مسار ملف Excel:", value=workbook_path)
+    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
     if st.button("💾 حفظ"):
         settings.settings["WORKBOOK_PATH"] = new_path
-        with open(settings.path, "w", encoding="utf-8") as f:
-            import json
-            json.dump(settings.settings, f, indent=4, ensure_ascii=False)
+        settings.settings["SHEET_URL"] = new_sheet
+        settings.save_settings()
         st.success("✅ تم حفظ الإعدادات بنجاح!")
 
 # =====================================================
