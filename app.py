@@ -110,7 +110,6 @@ def calculators_tab():
     ]
     choice = st.selectbox("اختر الحاسبة:", calc_options)
     st.success(f"💡 تم اختيار الحاسبة: **{choice}**")
-    # لاحقًا يمكن إضافة الحاسبة التفاعلية لكل خيار
 
 # =====================================================
 # 📚 حقوق العمال والتزاماتهم
@@ -120,7 +119,7 @@ def rights_tab():
     st.markdown("""
     <style>
     .rights-card {
-        background: linear-gradient(135deg, #FFD700, #D4AF37);
+        background: linear-gradient(135deg, #A9CCE3, #D6EAF8);
         color: #000;
         padding: 20px;
         border-radius: 20px;
@@ -262,7 +261,6 @@ def complaints_places_tab():
     الجهات = {
         "عمان": {"الجهة":"مديرية العمل – عمان","العنوان":"عمان، شارع عيسى الناوري 11","الهاتف":"06‑5802666","البريد":"info@mol.gov.jo","الموقع":"http://www.mol.gov.jo"},
         "إربد": {"الجهة":"مديرية العمل – إربد","العنوان":"إربد، الأردن","الهاتف":"06‑xxxxxxx","البريد":"irbid@mol.gov.jo","الموقع":"http://www.mol.gov.jo/irbid"},
-        # … باقي المحافظات
     }
     info = الجهات.get(محافظة)
     if info:
@@ -283,7 +281,9 @@ def complaints_places_tab():
 # =====================================================
 def workers_section():
     tabs = ["🧮 الحاسبات", "📚 حقوق العمال", "📝 محاكي الشكوى", "🏛️ الجهات المختصة"]
-    selected_tab = st.radio("اختر التبويب:", tabs, horizontal=True)
+    selected_tab = st.session_state.get("workers_tab", tabs[0])
+    st.radio("اختر التبويب:", tabs, index=tabs.index(selected_tab), horizontal=True)
+    
     if selected_tab == "🧮 الحاسبات":
         calculators_tab()
     elif selected_tab == "📚 حقوق العمال":
@@ -300,17 +300,63 @@ if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
 
 def show_home():
-    CARD_GRADIENT = "linear-gradient(135deg, #FFD700, #D4AF37)"
+    # 🎨 ألوان هادئة وباردة
+    CARD_GRADIENT = "linear-gradient(135deg, #89CFF0, #B0E0E6)"
     CARD_TEXT_COLOR = "#000000"
+    TAB_BG = "#E6F2F8"
+    TAB_HOVER_BG = "#D0E7F2"
+    TAB_ICON_SIZE = "40px"
+    
     st.markdown(f"""
-    <div style="text-align:center; padding:20px; background: {CARD_GRADIENT};
-                border-radius:15px; color:{CARD_TEXT_COLOR}; margin-bottom:20px;">
-        <h1>⚖️ {config.get('APP_NAME')}</h1>
-        <p>الوصول السريع إلى أقسام المنصة الذكية</p>
+    <div style="text-align:center; padding:25px; background: {CARD_GRADIENT};
+                border-radius:20px; color:{CARD_TEXT_COLOR}; margin-bottom:30px;">
+        <h1 style="margin-bottom:10px;">⚖️ {config.get('APP_NAME')}</h1>
+        <p style="font-size:18px; margin:0;">
+        منصة ذكية للوصول إلى حقوق العمال، الحاسبات القانونية، محاكي الشكاوى، والجهات المختصة
+        </p>
     </div>
     """, unsafe_allow_html=True)
-    if st.button("👷 قسم العمال"):
-        st.session_state.current_page = "workers"
+
+    st.markdown("### 👷 أقسام صفحة العمال")
+    
+    tab_style = f"""
+    <style>
+    .tab-card {{
+        background-color: {TAB_BG};
+        border-radius: 20px;
+        padding: 25px;
+        text-align: center;
+        transition: transform 0.2s, background-color 0.2s;
+        cursor: pointer;
+        font-weight: bold;
+        color: #000;
+        font-size: 16px;
+    }}
+    .tab-card:hover {{
+        transform: translateY(-5px);
+        background-color: {TAB_HOVER_BG};
+    }}
+    .tab-icon {{
+        font-size: {TAB_ICON_SIZE};
+        margin-bottom: 10px;
+    }}
+    </style>
+    """
+    st.markdown(tab_style, unsafe_allow_html=True)
+
+    tabs = [
+        {"label": "🧮", "name": "🧮 الحاسبات"},
+        {"label": "📚", "name": "📚 حقوق العمال"},
+        {"label": "📝", "name": "📝 محاكي الشكوى"},
+        {"label": "🏛️", "name": "🏛️ الجهات المختصة"},
+    ]
+
+    cols = st.columns(len(tabs))
+    for i, tab in enumerate(tabs):
+        with cols[i]:
+            if st.button(f'<div class="tab-card"><div class="tab-icon">{tab["label"]}</div>{tab["name"]}</div>', key=tab["name"], use_container_width=True):
+                st.session_state.current_page = "workers"
+                st.session_state["workers_tab"] = tab["name"]
 
 # =====================================================
 # 🧭 نظام التنقل
