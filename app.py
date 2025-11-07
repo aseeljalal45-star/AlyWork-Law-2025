@@ -31,7 +31,14 @@ def load_config():
         "UI": {"STYLES_LIGHT": "assets/styles_light.css", "STYLES_DARK": "assets/styles_dark.css"},
         "AI": {"ENABLE": True, "MAX_HISTORY": 20},
         "RECOMMENDER": {"MAX_CARDS": 6},
-        "SIDEBAR": {"MENU_ITEMS": []},
+        "SIDEBAR": {"MENU_ITEMS": [
+            {"label": "🏠 الصفحة الرئيسية", "icon": "house"},
+            {"label": "👷 العمال", "icon": "person"},
+            {"label": "🏢 أصحاب العمل", "icon": "building"},
+            {"label": "🕵️ مفتشو العمل", "icon": "search"},
+            {"label": "📖 الباحثون والمتدربون", "icon": "book"},
+            {"label": "⚙️ الإعدادات", "icon": "gear"}
+        ]},
         "FOOTER": {"TEXT": f"© {datetime.datetime.now().year} AlyWork Law Pro — جميع الحقوق محفوظة."}
     }
 
@@ -175,7 +182,7 @@ def show_statistics(df):
         st.plotly_chart(fig, use_container_width=True)
 
 # ==============================
-# 🏠 Pages
+# 🏠 Pages placeholders
 # ==============================
 def show_home():
     st.title(f"⚖️ {config.get('APP_NAME')}")
@@ -186,7 +193,12 @@ def show_home():
     show_ai_assistant()
     smart_recommender("العمال", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
-# (بقية الأقسام: العمال، أصحاب العمل، المفتشون، الباحثون كما في الكود السابق)
+def workers_section(): st.write("👷 قسم العمال")
+def employers_section(): st.write("🏢 قسم أصحاب العمل")
+def inspectors_section(): st.write("🕵️ قسم المفتشين")
+def researchers_section(): st.write("📖 قسم الباحثين والمتدربين")
+def settings_page(): st.write("⚙️ صفحة الإعدادات")
+
 # ==============================
 # ⚙️ Sidebar
 # ==============================
@@ -195,7 +207,11 @@ labels = [i.get("label", "غير معروف") for i in menu_items]
 icons = [i.get("icon", "") for i in menu_items]
 
 with st.sidebar:
-    choice = option_menu("القائمة الرئيسية", labels, icons=icons, default_index=0 if labels else None)
+    if labels:
+        choice = option_menu("القائمة الرئيسية", labels, icons=icons, default_index=0)
+    else:
+        st.info("⚠️ لم يتم تعريف عناصر القائمة الرئيسية.")
+        choice = None
 
 pages = {
     "🏠 الصفحة الرئيسية": show_home,
