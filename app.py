@@ -117,6 +117,10 @@ def show_ai_assistant():
 ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
 MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
 
+# اللون الموحد المميز
+CARD_COLOR = "#1E3A8A"  # أزرق ملكي غامق
+CARD_TEXT_COLOR = "#ffffff"
+
 def get_recommendations(role):
     mapping = {
         "العمال": [
@@ -143,26 +147,17 @@ def smart_recommender(role="العمال", n=None):
     section_header("💡 اقتراحات ذكية لك", "💡")
     n = n or MAX_CARDS
     cols = st.columns(3)
-    type_styles = {
-        "حاسبة": "linear-gradient(135deg, #b0b0b0, #909090)",
-        "توعية": "linear-gradient(135deg, #909090, #707070)",
-        "قانوني": "linear-gradient(135deg, #707070, #6a7f8c)",
-        "تعليمي": "linear-gradient(135deg, #6a7f8c, #8b7fa6)",
-        "نموذج": "linear-gradient(135deg, #8b7fa6, #b0a0c0)",
-        "بحث": "linear-gradient(135deg, #b0a0c0, #c0c0c0)"
-    }
     for idx, rec in enumerate(recs[:n]):
         with cols[idx % len(cols)]:
-            style = type_styles.get(rec["النوع"], "linear-gradient(135deg, #d0d0d0, #a0a0a0)")
             st.markdown(
                 f"""
-                <div style="background: {style};
+                <div style="background: {CARD_COLOR};
                             border-radius:20px;
                             padding:20px;
                             margin:10px;
                             box-shadow: 0px 8px 20px rgba(0,0,0,0.15);
                             text-align:center;
-                            color:white;
+                            color:{CARD_TEXT_COLOR};
                             transition: transform 0.3s;
                             cursor:pointer;"
                             onmouseover="this.style.transform='scale(1.05)';"
@@ -217,34 +212,34 @@ if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
 
 def show_home():
-    st.markdown("""
-        <div style="text-align:center; padding:20px; background: linear-gradient(90deg, #b0b0b0, #909090);
-                    border-radius:15px; color:#222; margin-bottom:20px;">
-            <h1 style="margin:0; font-size:40px;">⚖️ {}</h1>
+    st.markdown(f"""
+        <div style="text-align:center; padding:20px; background: {CARD_COLOR};
+                    border-radius:15px; color:{CARD_TEXT_COLOR}; margin-bottom:20px;">
+            <h1 style="margin:0; font-size:40px;">⚖️ {config.get('APP_NAME')}</h1>
             <p style="font-size:18px; margin-top:5px;">الوصول السريع إلى أقسام المنصة الذكية</p>
         </div>
-    """.format(config.get('APP_NAME')), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
     categories = [
-        {"label": "👷 العمال", "key": "workers", "color":"#b0b0b0", "icon": "workers.png"},
-        {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#909090", "icon": "employers.png"},
-        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "color":"#707070", "icon": "inspectors.png"},
-        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#6a7f8c", "icon": "researchers.png"},
-        {"label": "⚙️ الإعدادات", "key": "settings", "color":"#8b7fa6", "icon": "settings.png"}
+        {"label": "👷 العمال", "key": "workers", "icon": "workers.png"},
+        {"label": "🏢 أصحاب العمل", "key": "employers", "icon": "employers.png"},
+        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "icon": "inspectors.png"},
+        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "icon": "researchers.png"},
+        {"label": "⚙️ الإعدادات", "key": "settings", "icon": "settings.png"}
     ]
 
     cols = st.columns(3)
     for idx, cat in enumerate(categories):
         with cols[idx % 3]:
             st.markdown(f"""
-                <div style="background: {cat['color']};
+                <div style="background: {CARD_COLOR};
                             padding: 25px; border-radius: 25px;
                             text-align: center; cursor: pointer;
                             transition: transform 0.3s, box-shadow 0.3s;
                             box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
                             margin-bottom:20px;">
                     <img src='{ICON_PATH}{cat['icon']}' width='70px' style='margin-bottom:15px;'/>
-                    <h3 style='color:white; margin-bottom:5px;'>{cat['label']}</h3>
+                    <h3 style='color:{CARD_TEXT_COLOR}; margin-bottom:5px;'>{cat['label']}</h3>
                 </div>
             """, unsafe_allow_html=True)
             if st.button(f"اختيار {cat['label']}", key=f"btn_{cat['key']}"):
