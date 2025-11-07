@@ -32,13 +32,14 @@
 ```plaintext
 AlyWork-Law-Pro/
 ├── app.py                     ← الواجهة الرئيسية للتطبيق (Streamlit)
-├── recommender.py             ← نظام التوصيات الذكية مع صور مصغرة
+├── recommender.py             ← نظام التوصيات الذكية
 ├── requirements.txt           ← مكتبات التشغيل (Streamlit, pandas, Plotly,...)
+├── runtime.txt                ← نسخة Python المطلوبة (مثلاً 3.11.8)
 ├── .env.template              ← إعدادات البيئة (WORKBOOK_PATH, SHEET_URL, THEME, LANG,...)
 │
 ├── helpers/
 │   ├── mini_ai_smart.py       ← المساعد القانوني الذكي (Advanced Search)
-│   ├── settings_manager.py    ← إدارة الإعدادات العامة واللغة/النمط
+│   ├── settings_manager.py    ← إدارة الإعدادات العامة
 │   ├── ui_components.py       ← عناصر واجهة جاهزة (بطاقات / رسائل / Headers)
 │   └── data_loader.py         ← تحميل البيانات من Excel أو Google Sheets
 │
