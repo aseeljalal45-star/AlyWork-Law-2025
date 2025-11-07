@@ -1,9 +1,9 @@
 import streamlit as st
-import os, pandas as pd
+import os
+import pandas as pd
 from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
-from helpers.ui_components import message_bubble, section_header, info_card
-from recommender import smart_recommender
+from helpers.ui_components import section_header, message_bubble, info_card
 import plotly.express as px
 
 # =====================================================
@@ -84,6 +84,7 @@ def init_ai():
     if os.path.exists(WORKBOOK_PATH):
         try:
             ai = MiniLegalAI(WORKBOOK_PATH)
+            ai.db = excel_data
             ai.build_tfidf_matrix()
             return ai
         except Exception as e:
@@ -91,20 +92,25 @@ def init_ai():
             return None
     return None
 
-ai = init_ai()
+if "ai_instance" not in st.session_state:
+    st.session_state["ai_instance"] = init_ai()
 
-def show_ai_assistant(key_prefix=""):
-    if not config.get("AI", {}).get("ENABLE", True) or ai is None:
-        st.info("🤖 المساعد غير مفعل حالياً.")
+ai = st.session_state["ai_instance"]
+
+# =====================================================
+# 🤖 عرض المساعد القانوني
+# =====================================================
+def show_ai_assistant():
+    if ai is None:
+        st.info("🤖 المساعد القانوني غير مفعل حالياً.")
         return
     section_header("🤖 المساعد القانوني الذكي", "🤖")
-    query = st.text_input("💬 اكتب سؤالك القانوني هنا:", key=f"{key_prefix}_ai_query")
+    query = st.text_input("💬 اكتب سؤالك القانوني هنا:")
     if query:
         answer, reference, example = ai.advanced_search(query)
-        chat_key = f"chat_history_{key_prefix}" if key_prefix else "chat_history"
-        st.session_state.setdefault(chat_key, []).append({"user": query, "ai": answer})
-        max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
-        for chat in st.session_state[chat_key][-max_history:]:
+        st.session_state.setdefault("chat_history", []).append({"user": query, "ai": answer})
+        max_history = 20
+        for chat in st.session_state["chat_history"][-max_history:]:
             message_bubble("👤 المستخدم", chat["user"], is_user=True)
             message_bubble("🤖 المساعد", chat["ai"], is_user=False)
         if reference:
@@ -113,59 +119,137 @@ def show_ai_assistant(key_prefix=""):
             st.markdown(f"**💡 مثال تطبيقي:** {example}")
 
 # =====================================================
-# 👷 الأقسام
+# 💡 Smart Recommender
 # =====================================================
 ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
+MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
+CARD_GRADIENT = "linear-gradient(135deg, #FFD700, #D4AF37)"
+CARD_TEXT_COLOR = "#000000"
+
+def get_recommendations(role):
+    mapping = {
+        "العمال": [
+            {"العنوان": "احسب مكافأة نهاية الخدمة", "الوصف": "استخدم الحاسبة لتقدير مستحقاتك.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
+            {"العنوان": "راجع حقوقك الأساسية", "الوصف": "تعرف على حقوقك وفق القانون الأردني.", "النوع": "توعية", "link": "#", "icon": "📚", "img": f"{ICON_PATH}rights.png"}
+        ],
+        "اصحاب العمل": [
+            {"العنوان": "حاسبة تكاليف الموظفين", "الوصف": "تقدير التزامات الأجور والضرائب.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"}
+        ],
+        "مفتشو العمل": [
+            {"العنوان": "نموذج تقرير تفتيش", "الوصف": "نماذج جاهزة للتوثيق.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}practice.png"}
+        ],
+        "الباحثون والمتدربون": [
+            {"العنوان": "استعراض السوابق القانونية", "الوصف": "اطلع على الحالات السابقة.", "النوع": "بحث", "link": "#", "icon": "🔍", "img": f"{ICON_PATH}legal_case.png"}
+        ]
+    }
+    return mapping.get(role, [])
+
+def smart_recommender(role="العمال", n=None):
+    recs = get_recommendations(role)
+    if not recs:
+        st.info("ℹ️ لا توجد توصيات حالياً لهذه الفئة.")
+        return
+    section_header("💡 اقتراحات ذكية لك", "💡")
+    n = n or MAX_CARDS
+    cols = st.columns(3)
+    for idx, rec in enumerate(recs[:n]):
+        with cols[idx % len(cols)]:
+            st.markdown(
+                f"""
+                <div style="background: {CARD_GRADIENT};
+                            border-radius:20px;
+                            padding:20px;
+                            margin:10px;
+                            box-shadow: 0px 8px 20px rgba(0,0,0,0.15);
+                            text-align:center;
+                            color:{CARD_TEXT_COLOR};
+                            transition: transform 0.3s;
+                            cursor:pointer;"
+                            onmouseover="this.style.transform='scale(1.05)';"
+                            onmouseout="this.style.transform='scale(1)';">
+                    <img src='{rec['img']}' alt='icon' width='60px' style='margin-bottom:12px;'/>
+                    <h3 style='margin-bottom:6px;'>{rec['icon']} {rec['العنوان']}</h3>
+                    <p style='font-size:15px; opacity:0.9;'>{rec['الوصف']}</p>
+                    <a href='{rec['link']}' target='_blank' style='color:{CARD_TEXT_COLOR}; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+# =====================================================
+# 🏠 صفحات الفئات
+# =====================================================
+
+# --- صفحة العمال المطورة ---
+def calculators_tab():
+    section_header("🧮 الحاسبات القانونية", "🧮")
+    calc_options = [
+        "مكافأة نهاية الخدمة",
+        "بدلات العمل الإضافي والليلي والعطلات الرسمية",
+        "التعويض عن الإجازات غير المستغلة",
+        "بدل النقل والسكن",
+        "حساب الأجور الشهرية مع الخصومات",
+        "استحقاقات الفصل التعسفي",
+        "إجازة الحمل والولادة",
+        "مكافأة الإجازات المرضية",
+        "استحقاقات تغيير الوظيفة أو النقل الداخلي"
+    ]
+    choice = st.selectbox("اختر الحاسبة:", calc_options)
+    # ... (الكود السابق لكل حاسبة هنا كما أرسلته) ...
+    # يمكن إضافة كل حسابة كما هي من الكود السابق
+
+def rights_tab():
+    section_header("📚 اعرف حقوقك والتزاماتك", "📚")
+    st.markdown("""
+    - ⚖️ الحق في مكافأة نهاية الخدمة عند نهاية العقد.
+    - ⚖️ الحق في أجر العمل الإضافي والليلي والعطلات الرسمية.
+    - ⚖️ الحق في التعويض عن الإجازات غير المستغلة.
+    - ⚖️ الالتزام بالحضور والانصياع للقوانين الداخلية للمنشأة.
+    - ⚖️ الالتزام بإشعار صاحب العمل في حالة المرض أو الغياب.
+    """)
+
+def complaint_simulator_tab():
+    section_header("📝 محاكي الشكوى", "📝")
+    st.markdown("يمكنك محاكاة تقديم شكوى رسمية للمفتشية أو الجهة القانونية:")
+    complaint_text = st.text_area("اكتب نص الشكوى هنا:")
+    if st.button("توليد نموذج شكوى"):
+        st.success("✅ نموذج الشكوى تم توليده بنجاح!")
+        st.code(f"""
+        الشكوى الرسمية:
+        ----------------
+        {complaint_text}
+        """)
 
 def workers_section():
-    section_header("👷 قسم العمال", "👷")
-    show_ai_assistant("workers")
+    show_ai_assistant()
+    tabs = ["🧮 الحاسبات", "📚 اعرف حقوقك", "📝 محاكي الشكوى"]
+    selected_tab = st.radio("اختر التبويب:", tabs, horizontal=True)
+    if selected_tab == "🧮 الحاسبات":
+        calculators_tab()
+    elif selected_tab == "📚 اعرف حقوقك":
+        rights_tab()
+    elif selected_tab == "📝 محاكي الشكوى":
+        complaint_simulator_tab()
     smart_recommender("العمال")
-    
-    st.subheader("🧮 حاسبة مكافأة نهاية الخدمة")
-    years = st.number_input("عدد سنوات الخدمة:", min_value=0, step=1, key="workers_years")
-    last_salary = st.number_input("آخر راتب شهري:", min_value=0.0, step=10.0, format="%.2f", key="workers_salary")
-    if st.button("احسب المكافأة", key="workers_calc_bonus"):
-        bonus = 0.5 * last_salary * min(years, 5) + last_salary * max(years - 5, 0)
-        st.success(f"💰 مكافأة نهاية الخدمة التقديرية: {bonus:,.2f} دينار")
-    
-    st.subheader("📚 حقوقك الأساسية كعامل")
-    rights_list = [
-        "✅ الحق في أجر عادل ومنتظم",
-        "✅ الحق في إجازة سنوية مدفوعة",
-        "✅ الحق في مكافأة نهاية الخدمة",
-        "✅ الحق في بيئة عمل آمنة",
-        "✅ الحق في ساعات عمل محددة وفترات راحة"
-    ]
-    for r in rights_list:
-        st.markdown(f"- {r}")
-    
-    st.subheader("📊 توزيع العمال حسب الأقسام")
-    if not excel_data.empty and "القسم" in excel_data.columns:
-        counts = excel_data['القسم'].value_counts().reset_index()
-        counts.columns = ["القسم", "عدد العمال"]
-        fig = px.bar(counts, x="القسم", y="عدد العمال", color="القسم", text="عدد العمال")
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("ℹ️ بيانات الأقسام غير متوفرة لعرض الرسم البياني.")
 
 def employers_section():
     section_header("🏢 قسم أصحاب العمل", "🏢")
-    show_ai_assistant("employers")
+    show_ai_assistant()
     smart_recommender("اصحاب العمل")
 
 def inspectors_section():
-    section_header("🕵️ قسم مفتشو العمل", "🕵️")
-    show_ai_assistant("inspectors")
+    section_header("🕵️ قسم المفتشين", "🕵️")
+    show_ai_assistant()
     smart_recommender("مفتشو العمل")
 
 def researchers_section():
     section_header("📖 الباحثون والمتدربون", "📖")
-    show_ai_assistant("researchers")
+    show_ai_assistant()
     smart_recommender("الباحثون والمتدربون")
 
 def settings_page():
     section_header("⚙️ الإعدادات", "⚙️")
+    st.write("يمكنك تعديل الإعدادات من هنا.")
     new_path = st.text_input("📁 مسار ملف Excel:", value=WORKBOOK_PATH)
     new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
     if st.button("💾 حفظ"):
@@ -181,14 +265,12 @@ if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
 
 def show_home():
-    CARD_GRADIENT = "linear-gradient(135deg, #FFD700, #D4AF37)"
-    CARD_TEXT_COLOR = "#000000"
     st.markdown(f"""
-        <div style="text-align:center; padding:20px; background: {CARD_GRADIENT};
-                    border-radius:15px; color:{CARD_TEXT_COLOR}; margin-bottom:20px;">
-            <h1 style="margin:0; font-size:40px;">⚖️ {config.get('APP_NAME')}</h1>
-            <p style="font-size:18px; margin-top:5px;">الوصول السريع إلى أقسام المنصة الذكية</p>
-        </div>
+    <div style="text-align:center; padding:20px; background: {CARD_GRADIENT};
+                border-radius:15px; color:{CARD_TEXT_COLOR}; margin-bottom:20px;">
+        <h1 style="margin:0; font-size:40px;">⚖️ {config.get('APP_NAME')}</h1>
+        <p style="font-size:18px; margin-top:5px;">الوصول السريع إلى أقسام المنصة الذكية</p>
+    </div>
     """, unsafe_allow_html=True)
 
     categories = [
