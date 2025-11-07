@@ -10,38 +10,41 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 import plotly.express as px
 
 # ==============================
-# ⚙️ تحميل الإعدادات من config.json
+# ⚙️ Paths
 # ==============================
 CONFIG_PATH = "config.json"
 
+# ==============================
+# ⚙️ Load config.json or default
+# ==============================
 def load_config():
-    """تحميل ملف الإعدادات أو إنشاء إعداد افتراضي إن لم يكن موجودًا"""
     if os.path.exists(CONFIG_PATH):
         with open(CONFIG_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
-    else:
-        st.warning("⚠️ لم يتم العثور على ملف config.json — سيتم استخدام إعدادات افتراضية.")
-        return {
-            "APP_NAME": "منصة قانون العمل الأردني الذكية",
-            "THEME": "فاتح",
-            "UI": {},
-            "AI": {"ENABLE": True, "MAX_HISTORY": 10},
-            "SIDEBAR": {"MENU_ITEMS": [
-                {"label": "🏠 الرئيسية", "icon": "house", "func": "show_home"},
-                {"label": "👷 العمال", "icon": "person", "func": "workers_section"},
-                {"label": "🏢 أصحاب العمل", "icon": "building", "func": "employers_section"},
-                {"label": "🕵️ مفتشو العمل", "icon": "search", "func": "inspectors_section"},
-                {"label": "📖 الباحثون والمتدربون", "icon": "book", "func": "researchers_section"},
-                {"label": "⚙️ الإعدادات", "icon": "gear", "func": "settings_page"}
-            ]},
-            "FOOTER": {"TEXT": "© 2025 AlyWork Law Pro — جميع الحقوق محفوظة."}
-        }
+    st.warning("⚠️ لم يتم العثور على config.json، سيتم استخدام إعدادات افتراضية.")
+    return {
+        "APP_NAME": "منصة قانون العمل الأردني الذكية",
+        "THEME": "فاتح",
+        "WORKBOOK_PATH": "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx",
+        "SHEET_URL": "",
+        "CACHE": {"ENABLED": True, "TTL_SECONDS": 600},
+        "UI": {"STYLES_LIGHT": "assets/styles_light.css", "STYLES_DARK": "assets/styles_dark.css"},
+        "AI": {"ENABLE": True, "MAX_HISTORY": 20},
+        "RECOMMENDER": {"MAX_CARDS": 6, "ROLES": ["العمال", "اصحاب العمل", "مفتشو العمل", "الباحثون والمتدربون"]},
+        "SIDEBAR": {"MENU_ITEMS": []},
+        "FOOTER": {"TEXT": f"© {datetime.datetime.now().year} AlyWork Law Pro — جميع الحقوق محفوظة."}
+    }
 
-config = load_config()
+# ==============================
+# ⚙️ Initialize settings
+# ==============================
+if "config" not in st.session_state:
+    st.session_state["config"] = load_config()
+config = st.session_state["config"]
 settings = SettingsManager()
 
 # ==============================
-# ⚙️ إعداد الصفحة العامة
+# ⚙️ Page config
 # ==============================
 st.set_page_config(
     page_title=config.get("APP_NAME", "منصة قانون العمل الأردني الذكية"),
@@ -50,84 +53,75 @@ st.set_page_config(
 )
 
 # ==============================
-# 🌈 Theme ديناميكي
+# 🌈 Load CSS dynamically
 # ==============================
 def load_css(theme=None):
-    """تحميل ملف CSS حسب الثيم (فاتح/غامق)"""
-    if theme is None:
-        theme = config.get("THEME", "فاتح")
+    theme = theme or config.get("THEME", "فاتح")
     ui = config.get("UI", {})
-    css_file = ui.get("STYLES_LIGHT") if theme == "فاتح" else ui.get("STYLES_DARK")
+    css_file = ui.get("STYLES_LIGHT") if theme=="فاتح" else ui.get("STYLES_DARK")
     if css_file and os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        st.write("")  # صامت بدون خطأ
-
-load_css(settings.get("THEME", config.get("THEME", "فاتح")))
+load_css(settings.get("THEME"))
 
 # ==============================
-# 📊 تحميل بيانات Google Sheets
+# 📊 Load Google Sheet
 # ==============================
 def sheet_to_csv_url(sheet_url):
-    """تحويل رابط Google Sheet إلى رابط CSV مباشر"""
+    import re
     if "docs.google.com/spreadsheets" in sheet_url and "export?format=csv" not in sheet_url:
-        import re
         m = re.search(r"/d/([a-zA-Z0-9-_]+)", sheet_url)
-        if m:
-            sheet_id = m.group(1)
-            return f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+        if m: return f"https://docs.google.com/spreadsheets/d/{m.group(1)}/export?format=csv"
     return sheet_url
 
-SHEET_URL = config.get("SHEET_URL", "")
+SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL", ""))
 
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def load_google_sheets(url):
-    try:
-        if not url:
-            st.info("🗂️ لم يتم تحديد رابط Google Sheet بعد.")
-            return pd.DataFrame()
-        url = sheet_to_csv_url(url)
-        with st.spinner("⏳ جاري تحميل البيانات..."):
-            df = pd.read_csv(url)
-        return df
-    except Exception as e:
-        st.error(f"حدث خطأ أثناء تحميل البيانات: {e}")
+    if not url:
+        st.info("🗂️ لم يتم تحديد رابط Google Sheet بعد.")
         return pd.DataFrame()
+    url = sheet_to_csv_url(url)
+    with st.spinner("⏳ جاري تحميل البيانات..."):
+        try: return pd.read_csv(url)
+        except Exception as e:
+            st.error(f"⚠️ خطأ أثناء تحميل Google Sheet: {e}")
+            return pd.DataFrame()
 
 data = load_google_sheets(SHEET_URL)
 
 # ==============================
-# 🤖 إعداد المساعد الذكي
+# 🤖 Initialize MiniLegalAI
 # ==============================
-workbook_path = os.getenv("WORKBOOK_PATH", config.get("WORKBOOK_PATH", "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx"))
-if not os.path.exists(workbook_path):
-    st.warning("⚠️ ملف Excel الخاص بـ MiniLegalAI غير موجود. سيتم تفعيل المساعد فقط بعد رفع الملف.")
-ai = MiniLegalAI(workbook_path) if os.path.exists(workbook_path) else None
+workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
+if os.path.exists(workbook_path):
+    ai = MiniLegalAI(workbook_path)
+else:
+    ai = None
+    st.warning("⚠️ ملف Excel للمساعد القانوني غير موجود، سيتم تفعيل المساعد عند توفره.")
 
 # ==============================
-# 🧠 المساعد القانوني الذكي
+# 🧠 AI Assistant
 # ==============================
 def show_ai_assistant():
-    if not config.get("AI", {}).get("ENABLE", True):
+    if not config.get("AI", {}).get("ENABLE", True) or ai is None:
         return
     section_header("🤖 المساعد القانوني الذكي", "🤖")
     query = st.text_input("💬 اكتب سؤالك هنا:")
-    if query and ai:
+    if query:
         answer, reference, example = ai.advanced_search(query)
-        if 'chat_history' not in st.session_state:
-            st.session_state.chat_history = []
-        st.session_state.chat_history.append({"user": query, "ai": answer})
-        for chat in st.session_state.chat_history[-config.get("AI", {}).get("MAX_HISTORY", 20):]:
-            message_bubble("User", chat['user'], is_user=True)
-            message_bubble("AI", chat['ai'], is_user=False)
+        if "chat_history" not in st.session_state:
+            st.session_state["chat_history"] = []
+        st.session_state["chat_history"].append({"user": query, "ai": answer})
+        max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
+        for chat in st.session_state["chat_history"][-max_history:]:
+            message_bubble("User", chat["user"], is_user=True)
+            message_bubble("AI", chat["ai"], is_user=False)
         st.markdown(f"**📜 نص القانون:** {reference}")
         st.markdown(f"**💡 مثال تطبيقي:** {example}")
-    elif query and not ai:
-        st.error("⚠️ المساعد غير مفعل حالياً لعدم توفر ملف Excel.")
 
 # ==============================
-# 📈 عرض البيانات بشكل تفاعلي
+# 📈 Data Table
 # ==============================
 def show_data_table(df):
     if df.empty:
@@ -137,135 +131,101 @@ def show_data_table(df):
     gb.configure_pagination(paginationAutoPageSize=True)
     gb.configure_side_bar()
     gb.configure_default_column(editable=True, filter=True)
-    grid_options = gb.build()
-    AgGrid(df, gridOptions=grid_options, enable_enterprise_modules=False, height=400)
+    AgGrid(df, gridOptions=gb.build(), enable_enterprise_modules=False, height=400)
 
 # ==============================
-# 📊 Charts و Metrics
+# 📊 Statistics
 # ==============================
 def show_statistics(df):
+    if df.empty: return
     st.markdown("### 📊 إحصائيات سريعة")
     col1, col2, col3 = st.columns(3)
     col1.metric("عدد المواد القانونية", len(df))
     col2.metric("عدد التعديلات", df['المادة'].nunique() if 'المادة' in df.columns else 0)
     col3.metric("عدد الأقسام القانونية", df['القسم'].nunique() if 'القسم' in df.columns else 0)
     if 'القسم' in df.columns:
-        section_counts = df['القسم'].value_counts()
-        fig = px.pie(values=section_counts.values, names=section_counts.index,
-                     title="نسبة المواد حسب القسم", hole=0.3)
+        counts = df['القسم'].value_counts()
+        fig = px.pie(values=counts.values, names=counts.index, title="نسبة المواد حسب القسم", hole=0.3)
         st.plotly_chart(fig, use_container_width=True)
 
 # ==============================
-# 🏠 الصفحة الرئيسية
+# 🏠 Pages (Home, Workers, Employers, Inspectors, Researchers)
 # ==============================
 def show_home():
-    st.title(f"⚖️ {config.get('APP_NAME', 'منصة قانون العمل الأردني الذكية')}")
-    st.markdown(f"""
-    منصة ذكية لتبسيط وفهم <b>قانون العمل الأردني لعام 1996</b>
-    وتعديلاته حتى <b>2024</b>.
-    """, unsafe_allow_html=True)
-    st.info("⚠️ المنصة لأغراض التوعية القانونية فقط ولا تُغني عن الاستشارة القانونية.")
-    st.markdown("---")
-
-    sections = config.get("SIDEBAR", {}).get("MENU_ITEMS", [])
-    cols = st.columns(3)
-    for i, section in enumerate(sections[:-1]):  # تجاهل الإعدادات
-        with cols[i % 3]:
-            if st.button(f"{section['icon']} {section['label']}", key=section['label']):
-                func_name = section.get('func')
-                if func_name in globals() and callable(globals()[func_name]):
-                    globals()[func_name]()
-
+    st.title(f"⚖️ {config.get('APP_NAME')}")
+    st.markdown("منصة ذكية لتبسيط وفهم <b>قانون العمل الأردني</b>.", unsafe_allow_html=True)
+    st.info("⚠️ المنصة لأغراض التوعية القانونية فقط.")
     show_data_table(data.head(10))
     show_statistics(data)
+    show_ai_assistant()
+    smart_recommender("العمال", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
-# ==============================
-# 👷 العمال
-# ==============================
 def workers_section():
     section_header("👷 العمال", "👷")
     info_card("حقوق العامل", "الأجر، الإجازات، مكافأة نهاية الخدمة، بيئة عمل آمنة.")
     info_card("واجبات العامل", "الالتزام بالقوانين الداخلية واحترام النظام.")
-    tabs = st.tabs(["مكافأة نهاية الخدمة", "الإجازات", "العمل الإضافي"])
-    for tab in tabs:
-        with tab:
-            st.markdown(f"🛠️ أداة: {tab.title()}")
     show_ai_assistant()
     smart_recommender("العمال", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
-# ==============================
-# 🏢 أصحاب العمل
-# ==============================
 def employers_section():
     section_header("🏢 أصحاب العمل", "🏢")
     info_card("حقوق صاحب العمل", "إدارة المنشأة ضمن القانون وتنظيم العقود.")
     info_card("الالتزامات", "دفع الأجور، تطبيق أنظمة السلامة، توثيق العقود.")
-    tabs = st.tabs(["تكاليف الموظف", "التزامات الضمان", "الفصل القانوني"])
-    for tab in tabs:
-        with tab:
-            st.markdown(f"🛠️ أداة: {tab.title()}")
     show_ai_assistant()
     smart_recommender("اصحاب العمل", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
-# ==============================
-# 🕵️ مفتشو العمل
-# ==============================
 def inspectors_section():
     section_header("🕵️ مفتشو العمل", "🕵️")
-    info_card("المهام", "مراقبة تطبيق أحكام القانون وضمان العدالة في بيئة العمل.")
-    tabs = st.tabs(["دوري", "بناء على شكوى", "طارئ"])
-    for tab in tabs:
-        with tab:
-            st.markdown(f"🛠️ نوع التفتيش: {tab.title()}")
+    info_card("المهام", "مراقبة تطبيق أحكام القانون وضمان العدالة.")
     show_ai_assistant()
     smart_recommender("مفتشو العمل", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
-# ==============================
-# 📖 الباحثون والمتدربون
-# ==============================
 def researchers_section():
     section_header("📖 الباحثون والمتدربون", "📖")
-    tabs = st.tabs(["تحليل التعديلات", "اختبار قانوني", "استعراض السوابق"])
-    for tab in tabs:
-        with tab:
-            st.markdown(f"🛠️ نوع التحليل: {tab.title()}")
     show_ai_assistant()
     smart_recommender("الباحثون والمتدربون", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
 # ==============================
-# ⚙️ الإعدادات
+# ⚙️ Settings Page
 # ==============================
 def settings_page():
     section_header("⚙️ الإعدادات", "⚙️")
-    theme = st.radio("اختر النمط:", ["فاتح", "غامق"], index=0 if settings.get("THEME", "فاتح")=="فاتح" else 1)
-    lang = st.selectbox("اختر اللغة:", ["العربية", "English"], index=0 if settings.get("LANG", "ar")=="ar" else 1)
-    settings.set("THEME", theme)
-    settings.set("LANG", lang)
-    load_css(theme)
-    st.success("✅ تم حفظ الإعدادات.")
+    theme = st.radio("اختر النمط:", ["فاتح", "غامق"], index=0 if settings.get("THEME")=="فاتح" else 1)
+    lang = st.selectbox("اختر اللغة:", ["العربية", "English"], index=0 if settings.get("LANG")=="ar" else 1)
+    workbook = st.text_input("مسار ملف Excel:", settings.get("WORKBOOK_PATH"))
+    sheet_url = st.text_input("رابط Google Sheet:", settings.get("SHEET_URL"))
+    max_cards = st.number_input("عدد بطاقات التوصيات:", value=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6), min_value=1, max_value=12)
+
+    if st.button("حفظ الإعدادات"):
+        settings.set("THEME", theme)
+        settings.set("LANG", "ar" if lang=="العربية" else "en")
+        settings.set("WORKBOOK_PATH", workbook)
+        settings.set("SHEET_URL", sheet_url)
+        config["RECOMMENDER"]["MAX_CARDS"] = max_cards
+        settings.save_settings()
+        st.success("✅ تم حفظ الإعدادات.")
+        load_css(theme)
+        if os.path.exists(workbook):
+            ai.reload(workbook)
 
 # ==============================
-# 🧭 القائمة الجانبية (محسّنة وآمنة)
+# 🧭 Sidebar
 # ==============================
 menu_items = config.get("SIDEBAR", {}).get("MENU_ITEMS", [])
-labels = [item.get('label', 'غير معروف') for item in menu_items]
-icons = [item.get('icon', '') for item in menu_items]
+labels = [i.get("label", "غير معروف") for i in menu_items]
+icons = [i.get("icon", "") for i in menu_items]
 
 with st.sidebar:
-    if labels:
-        choice = option_menu("القائمة الرئيسية", labels, icons=icons, default_index=0)
-    else:
-        st.warning("لم يتم إعداد عناصر الشريط الجانبي في config.json.")
-        choice = None
+    choice = option_menu("القائمة الرئيسية", labels, icons=icons, default_index=0 if labels else None)
 
-pages = {}
-for item in menu_items:
-    label = item.get('label')
-    func_name = item.get('func')
-    if func_name and func_name in globals() and callable(globals()[func_name]):
-        pages[label] = globals()[func_name]
-    else:
-        pages[label] = lambda label=label, fn=func_name: st.warning(f"الصفحة '{label}' غير مُفعّلة. func: {fn}")
+pages = {
+    "🏠 الصفحة الرئيسية": show_home,
+    "👷 العمال": workers_section,
+    "🏢 أصحاب العمل": employers_section,
+    "🕵️ مفتشو العمل": inspectors_section,
+    "📖 الباحثون والمتدربون": researchers_section,
+    "⚙️ الإعدادات": settings_page
+}
 
 if choice:
     pages.get(choice, lambda: st.error("صفحة غير متاحة"))()
@@ -276,6 +236,6 @@ else:
 # ⏰ Footer
 # ==============================
 st.markdown(
-    f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT', f'© {datetime.datetime.now().year} AlyWork Law Pro — جميع الحقوق محفوظة.')}</small></center>",
+    f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT')}</small></center>",
     unsafe_allow_html=True
 )
