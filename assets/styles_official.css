@@ -1,89 +1,452 @@
 /* =======================================
-   🎨 الألوان الرسمية الهادئة للتطبيق
+   🎨 التصميم الرسمي المتميز - منصة قانون العمل الذكية
    ======================================= */
 
 :root {
-  --primary-color: #1E3A8A;       /* أزرق داكن رسمي */
-  --secondary-color: #2563EB;     /* أزرق متوسط */
-  --accent-color: #10B981;        /* أخضر رسمي */
-  --background-color: #F9FAFB;    /* خلفية فاتحة */
-  --card-bg: #FFFFFF;
-  --text-color: #111827;
-  --muted-text: #6B7280;
-  --border-radius: 16px;
-  --shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  /* 🎯 الألوان الأساسية */
+  --primary-50: #EFF6FF;
+  --primary-100: #DBEAFE;
+  --primary-500: #3B82F6;
+  --primary-600: #2563EB;
+  --primary-700: #1D4ED8;
+  --primary-800: #1E40AF;
+  --primary-900: #1E3A8A;
+  
+  /* 🎯 الألوان الثانوية */
+  --success-500: #10B981;
+  --success-600: #059669;
+  --warning-500: #F59E0B;
+  --error-500: #EF4444;
+  
+  /* 🎯 ألوان التصميم */
+  --background-primary: #F8FAFC;
+  --background-secondary: #FFFFFF;
+  --background-elevated: #FFFFFF;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --border-light: #E2E8F0;
+  --border-medium: #CBD5E1;
+  
+  /* 🎯 تأثيرات التصميم */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  
+  /* 🎯 الحركات */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
 }
 
-/* 💠 تنسيق الخلفية العامة */
+/* =======================================
+   🎯 إعدادات الأساس
+   ======================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-  font-family: 'Cairo', sans-serif;
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
 }
 
-/* 🟦 العناوين */
-h1, h2, h3, h4 {
-  color: var(--primary-color);
+/* =======================================
+   🎯 تحسينات Streamlit العامة
+   ======================================= */
+
+/* 🎯 الحاوية الرئيسية */
+.main .block-container {
+  padding: 2rem 1rem;
+  max-width: 1200px;
 }
 
-/* 🟩 البطاقات الرسمية */
-div[data-testid="stMarkdownContainer"] > div {
-  background: var(--card-bg);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  padding: 16px;
+/* 🎯 العناوين */
+h1 {
+  color: var(--primary-900);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--primary-700), var(--primary-900));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* 🔹 الأزرار */
-button[kind="primary"] {
-  background-color: var(--primary-color) !important;
+h2 {
+  color: var(--primary-800);
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 1.5rem 0 1rem 0;
+}
+
+h3 {
+  color: var(--primary-700);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem 0;
+}
+
+h4 {
+  color: var(--primary-600);
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 1rem 0 0.5rem 0;
+}
+
+/* =======================================
+   🎯 المكونات المخصصة
+   ======================================= */
+
+/* 🎯 البطاقات المتميزة */
+.premium-card {
+  background: var(--background-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 2rem;
+  margin: 1rem 0;
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-500), var(--success-500));
+}
+
+.premium-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* 🎯 بطاقات الخدمات */
+.service-card {
+  background: var(--background-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  margin: 0.75rem;
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-normal);
+  text-align: center;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-300);
+}
+
+.service-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 🎯 الأزرار المتميزة */
+.stButton button {
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-700)) !important;
   color: white !important;
-  border-radius: 8px !important;
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 600 !important;
+  transition: all var(--transition-normal) !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
-/* 🟢 الروابط */
-a {
-  color: var(--secondary-color);
-  text-decoration: none;
-}
-a:hover {
-  color: var(--accent-color);
-  text-decoration: underline;
+.stButton button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--shadow-lg) !important;
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-800)) !important;
 }
 
-/* ⚖️ الهيدر */
-header[data-testid="stHeader"] {
-  background: linear-gradient(90deg, #1E3A8A, #2563EB);
-  color: white;
+/* 🎯 أزرار ثانوية */
+.stButton button[kind="secondary"] {
+  background: linear-gradient(135deg, var(--success-500), var(--success-600)) !important;
 }
 
-/* 📊 الجداول */
-.css-1q8dd3e {
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
-  background: #fff;
-}
+/* =======================================
+   🎯 التنقل والقوائم
+   ======================================= */
 
-/* 🧠 المساعد الذكي */
-.chat-message {
-  border-radius: 12px;
-  padding: 10px 15px;
-  margin-bottom: 8px;
-}
-.chat-message.user {
-  background: #E0F2FE;
-  color: #0C4A6E;
-}
-.chat-message.ai {
-  background: #E6F4EA;
-  color: #065F46;
-}
-
-/* 🧭 القائمة الجانبية */
+/* 🎯 الشريط الجانبي المتميز */
 section[data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #1E3A8A, #1E40AF);
-  color: white;
+  background: linear-gradient(180deg, var(--primary-900), var(--primary-800)) !important;
+  border-right: none !important;
 }
-section[data-testid="stSidebar"] .stRadio label {
-  color: white;
+
+section[data-testid="stSidebar"] > div {
+  padding: 2rem 1rem;
+}
+
+section[data-testid="stSidebar"] .stButton button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  margin: 0.5rem 0;
+  width: 100%;
+}
+
+section[data-testid="stSidebar"] .stButton button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateX(4px) !important;
+}
+
+/* 🎯 الهيدر */
+header[data-testid="stHeader"] {
+  background: linear-gradient(90deg, var(--primary-900), var(--primary-700)) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* =======================================
+   🎯 نماذج الإدخال
+   ======================================= */
+
+.stTextInput input, .stTextArea textarea, .stSelectbox select {
+  border: 1px solid var(--border-medium) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.75rem !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.stTextInput input:focus, .stTextArea textarea:focus, .stSelectbox select:focus {
+  border-color: var(--primary-500) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* =======================================
+   🎯 الجداول والعناصر التفاعلية
+   ======================================= */
+
+/* 🎯 الجداول */
+.dataframe {
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm) !important;
+  overflow: hidden !important;
+}
+
+.dataframe thead th {
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600)) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* 🎯 علامات التبويب */
+.stTabs [data-baseweb="tab-list"] {
+  gap: 0.5rem;
+}
+
+.stTabs [data-baseweb="tab"] {
+  background: var(--background-secondary) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.75rem 1.5rem !important;
+  border: 1px solid var(--border-light) !important;
+  transition: all var(--transition-normal) !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+  background: var(--primary-50) !important;
+  border-color: var(--primary-300) !important;
+}
+
+.stTabs [aria-selected="true"] {
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600)) !important;
+  color: white !important;
+  border-color: var(--primary-500) !important;
+}
+
+/* =======================================
+   🎯 نظام المحادثة المتميز
+   ======================================= */
+
+.chat-message {
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin: 1rem 0;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.chat-message::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.chat-message.user {
+  background: linear-gradient(135deg, var(--primary-50), #E0F2FE);
+  border-color: var(--primary-200);
+  margin-left: 2rem;
+}
+
+.chat-message.user::before {
+  background: linear-gradient(180deg, var(--primary-500), var(--primary-700));
+}
+
+.chat-message.ai {
+  background: linear-gradient(135deg, #F0FDF4, #E6F4EA);
+  border-color: var(--success-200);
+  margin-right: 2rem;
+}
+
+.chat-message.ai::before {
+  background: linear-gradient(180deg, var(--success-500), var(--success-600));
+}
+
+/* =======================================
+   🎯 الإحصائيات والبيانات
+   ======================================= */
+
+.metric-card {
+  background: var(--background-elevated);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  text-align: center;
+  border-left: 4px solid var(--primary-500);
+  transition: all var(--transition-normal);
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-700);
+  margin: 0.5rem 0;
+}
+
+.metric-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* =======================================
+   🎯 التكيف مع الأجهزة المختلفة
+   ======================================= */
+
+@media (max-width: 768px) {
+  .main .block-container {
+    padding: 1rem 0.5rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  .premium-card, .service-card {
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .service-card:hover {
+    transform: none;
+  }
+}
+
+/* =======================================
+   🎯 تأثيرات خاصة
+   ======================================= */
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-500), var(--success-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* =======================================
+   🎯 تحسينات أداء التحميل
+   ======================================= */
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* =======================================
+   🎯 تخصيصات إضافية
+   ======================================= */
+
+/* إخفاء العناصر غير المرغوب فيها */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+
+/* تحسين شريط التمرير */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-500);
 }
