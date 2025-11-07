@@ -38,6 +38,7 @@
 AlyWork-Law-Pro/
 ├── app.py                     ← الواجهة الرئيسية للتطبيق (Streamlit)
 ├── helpers/
+│   ├── __init__.py            ← لتجنب ModuleNotFoundError
 │   ├── mini_ai_smart.py       ← المساعد القانوني الذكي (بحث متقدم)
 │   ├── settings_manager.py    ← إدارة الإعدادات العامة
 │   ├── ui_components.py       ← عناصر واجهة جاهزة (بطاقات / رسائل / Headers)
