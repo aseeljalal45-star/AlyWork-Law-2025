@@ -1,0 +1,5 @@
+body { background-color: #f8f9fa; color: #1a1a1a; font-family: 'Arial', sans-serif; }
+h1,h2,h3,h4,h5 { color: #002147; }
+.stButton>button { background-color: #002147; color: #ffffff; border-radius: 5px; }
+.stTextInput>div>input { border: 1px solid #002147; }
+.ag-theme-streamlit { --ag-header-background-color: #002147; --ag-odd-row-background-color: #e9ecef; --ag-even-row-background-color: #ffffff; }
