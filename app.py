@@ -20,13 +20,12 @@ st.set_page_config(
 # =====================================================
 # 🌈 تحميل CSS رسمي
 # =====================================================
-def load_official_css():
-    css_file = "assets/styles_official.css"
+def load_official_css(css_file="assets/styles_official.css"):
     if os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     else:
-        st.info("ℹ️ ملف CSS الرسمي غير موجود: assets/styles_official.css")
+        st.info(f"ℹ️ ملف CSS الرسمي غير موجود: {css_file}")
 
 load_official_css()
 
@@ -42,25 +41,23 @@ def sheet_to_csv_url(sheet_url):
     return sheet_url
 
 SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL"))
-workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
+WORKBOOK_PATH = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
 
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def load_google_sheets(url):
     if not url:
         st.info("ℹ️ لم يتم تحديد رابط Google Sheet بعد.")
         return pd.DataFrame()
-    url = sheet_to_csv_url(url)
     try:
+        url = sheet_to_csv_url(url)
         return pd.read_csv(url)
     except Exception as e:
         st.warning(f"⚠️ خطأ أثناء تحميل Google Sheet: {e}")
         return pd.DataFrame()
 
-data = load_google_sheets(SHEET_URL)
-
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
-def safe_load_excel(path):
-    expected_cols = ['المادة', 'القسم', 'النص', 'مثال']
+def load_excel(path, expected_cols=None):
+    expected_cols = expected_cols or ['المادة', 'القسم', 'النص', 'مثال']
     if not os.path.exists(path):
         st.info(f"ℹ️ ملف Excel غير موجود: {path}. سيتم إنشاء DataFrame افتراضي.")
         return pd.DataFrame(columns=expected_cols)
@@ -76,40 +73,39 @@ def safe_load_excel(path):
         st.warning(f"⚠️ خطأ أثناء قراءة Excel: {e}. سيتم إنشاء DataFrame افتراضي.")
         return pd.DataFrame(columns=expected_cols)
 
-excel_data = safe_load_excel(workbook_path)
+data = load_google_sheets(SHEET_URL)
+excel_data = load_excel(WORKBOOK_PATH)
 
 # =====================================================
 # 🤖 تهيئة المساعد القانوني
 # =====================================================
-if os.path.exists(workbook_path):
-    try:
-        ai = MiniLegalAI(workbook_path)
-        ai.db = excel_data
-        ai.build_tfidf_matrix()
-    except Exception as e:
-        st.warning(f"⚠️ لم يتم تهيئة المساعد القانوني بالكامل: {e}")
-        ai = None
-else:
-    ai = None
+def init_ai():
+    if os.path.exists(WORKBOOK_PATH):
+        try:
+            ai = MiniLegalAI(WORKBOOK_PATH)
+            ai.db = excel_data
+            ai.build_tfidf_matrix()
+            return ai
+        except Exception as e:
+            st.warning(f"⚠️ لم يتم تهيئة المساعد القانوني بالكامل: {e}")
+            return None
+    return None
+
+ai = init_ai()
 
 def show_ai_assistant():
     if not config.get("AI", {}).get("ENABLE", True) or ai is None:
         st.info("🤖 المساعد غير مفعل حالياً.")
         return
-
     section_header("🤖 المساعد القانوني الذكي", "🤖")
     query = st.text_input("💬 اكتب سؤالك القانوني هنا:")
     if query:
         answer, reference, example = ai.advanced_search(query)
-        if "chat_history" not in st.session_state:
-            st.session_state["chat_history"] = []
-        st.session_state["chat_history"].append({"user": query, "ai": answer})
+        st.session_state.setdefault("chat_history", []).append({"user": query, "ai": answer})
         max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
-
         for chat in st.session_state["chat_history"][-max_history:]:
             message_bubble("👤 المستخدم", chat["user"], is_user=True)
             message_bubble("🤖 المساعد", chat["ai"], is_user=False)
-
         if reference:
             st.markdown(f"**📜 نص القانون:** {reference}")
         if example:
@@ -121,8 +117,8 @@ def show_ai_assistant():
 ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
 MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
 
-def get_recommendations_data():
-    return {
+def get_recommendations(role):
+    mapping = {
         "العمال": [
             {"العنوان": "احسب مكافأة نهاية الخدمة", "الوصف": "استخدم الحاسبة لتقدير مستحقاتك.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
             {"العنوان": "راجع حقوقك الأساسية", "الوصف": "تعرف على حقوقك وفق القانون الأردني.", "النوع": "توعية", "link": "#", "icon": "📚", "img": f"{ICON_PATH}rights.png"}
@@ -137,13 +133,13 @@ def get_recommendations_data():
             {"العنوان": "استعراض السوابق القانونية", "الوصف": "اطلع على الحالات السابقة.", "النوع": "بحث", "link": "#", "icon": "🔍", "img": f"{ICON_PATH}legal_case.png"}
         ]
     }
+    return mapping.get(role, [])
 
-def smart_recommender(role_label="العمال", n=None):
-    recommendations = get_recommendations_data().get(role_label, [])
-    if not recommendations:
+def smart_recommender(role="العمال", n=None):
+    recs = get_recommendations(role)
+    if not recs:
         st.info("ℹ️ لا توجد توصيات حالياً لهذه الفئة.")
         return
-
     section_header("💡 اقتراحات ذكية لك", "💡")
     n = n or MAX_CARDS
     cols = st.columns(3)
@@ -155,10 +151,9 @@ def smart_recommender(role_label="العمال", n=None):
         "نموذج": "linear-gradient(135deg, #f97316, #ea580c)",
         "بحث": "linear-gradient(135deg, #22c55e, #16a34a)"
     }
-
-    for idx, rec in enumerate(recommendations[:n]):
+    for idx, rec in enumerate(recs[:n]):
         with cols[idx % len(cols)]:
-            style = type_styles.get(rec['النوع'], "linear-gradient(135deg, #9ca3af, #6b7280)")
+            style = type_styles.get(rec["النوع"], "linear-gradient(135deg, #9ca3af, #6b7280)")
             st.markdown(
                 f"""
                 <div style="background: {style};
@@ -178,9 +173,9 @@ def smart_recommender(role_label="العمال", n=None):
             )
 
 # =====================================================
-# 🏠 دوال الصفحات الفرعية (يجب تعريفها قبل القاموس pages)
+# 🏠 صفحات الفئات
 # =====================================================
-def workers_section(): 
+def workers_section():
     section_header("👷 قسم العمال", "👷")
     show_ai_assistant()
     smart_recommender("العمال")
@@ -196,14 +191,14 @@ def inspectors_section():
     smart_recommender("مفتشو العمل")
 
 def researchers_section():
-    section_header("📖 قسم الباحثين والمتدربين", "📖")
+    section_header("📖 الباحثون والمتدربون", "📖")
     show_ai_assistant()
     smart_recommender("الباحثون والمتدربون")
 
 def settings_page():
     section_header("⚙️ الإعدادات", "⚙️")
     st.write("يمكنك تعديل الإعدادات من هنا.")
-    new_path = st.text_input("📁 مسار ملف Excel:", value=workbook_path)
+    new_path = st.text_input("📁 مسار ملف Excel:", value=WORKBOOK_PATH)
     new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
     if st.button("💾 حفظ"):
         settings.settings["WORKBOOK_PATH"] = new_path
@@ -232,19 +227,12 @@ def show_home():
         with cols[idx]:
             st.markdown(
                 f"""
-                <div style='
-                    background: {cat['color']};
-                    padding: 25px;
-                    border-radius: 20px;
-                    text-align: center;
-                    cursor: pointer;
-                    transition: transform 0.2s;
-                '>
+                <div style='background: {cat['color']}; padding: 25px; border-radius: 20px;
+                            text-align: center; cursor: pointer; transition: transform 0.2s;'>
                     <img src='{cat['img']}' width='60px' style='margin-bottom:15px;'/>
                     <h4 style='color:white; margin-bottom:5px;'>{cat['label']}</h4>
                 </div>
-                """,
-                unsafe_allow_html=True
+                """, unsafe_allow_html=True
             )
             if st.button(f"اختيار {cat['label']}", key=f"btn_{cat['key']}"):
                 st.session_state.current_page = cat["key"]
@@ -262,7 +250,7 @@ pages = {
 }
 
 # =====================================================
-# 🔄 الانتقال للصفحة الحالية أو العودة للصفحة الرئيسية
+# 🔄 الانتقال بين الصفحات
 # =====================================================
 if st.session_state.current_page != "home" and st.button("⬅️ العودة للصفحة الرئيسية"):
     st.session_state.current_page = "home"
@@ -270,9 +258,6 @@ else:
     pages[st.session_state.current_page]()
 
 # =====================================================
-# 🕒 تذييل رسمي
+# 🕒 Footer
 # =====================================================
-st.markdown(
-    f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT')}</small></center>",
-    unsafe_allow_html=True
-)
+st.markdown(f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT')}</small></center>", unsafe_allow_html=True)
