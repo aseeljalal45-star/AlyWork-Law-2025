@@ -466,3 +466,42 @@ pages["data_manager"] = data_manager_tab
 if st.session_state.current_page == "home":
     if st.button("🗄️ إدارة البيانات"):
         st.session_state.current_page = "data_manager"
+# =====================================================
+# 🔍 استعراض قاعدة البيانات المحلية (للتوصيات والذكاء الذكي)
+# =====================================================
+def show_database_tab():
+    section_header("📊 قاعدة البيانات المحلية", "📊")
+
+    # تحميل الورقة الأساسية
+    try:
+        df_db = pd.read_excel(
+            WORKBOOK_PATH,
+            sheet_name="Smart_Rules_Engine_Extended",
+            engine="openpyxl"
+        )
+        st.success(f"✅ تم تحميل {len(df_db)} سجل من الورقة Smart_Rules_Engine_Extended.")
+    except Exception as e:
+        st.error(f"❌ فشل تحميل الورقة: {e}")
+        return
+
+    # بحث وفلترة
+    query = st.text_input("🔎 بحث حر:", placeholder="ابحث في أي عمود...")
+    if query:
+        df_display = df_db[df_db.astype(str).apply(lambda r: r.str.contains(query, case=False, na=False)).any(axis=1)]
+    else:
+        df_display = df_db.copy()
+
+    with st.expander("🎛️ فلترة متقدمة"):
+        col = st.selectbox("اختر عمودًا للفلترة:", ["(لا فلترة)"] + df_db.columns.tolist())
+        if col != "(لا فلترة)":
+            vals = df_db[col].dropna().astype(str).unique().tolist()[:200]
+            selected_vals = st.multiselect("اختر القيم:", vals)
+            if selected_vals:
+                df_display = df_display[df_display[col].astype(str).isin(selected_vals)]
+
+    # عرض النتائج
+    st.dataframe(df_display, use_container_width=True)
+
+    # حفظ ملف Excel بعد التعديل (اختياري)
+    if st.button("🔄 تحديث البيانات من الملف"):
+        st.rerun()
