@@ -33,16 +33,26 @@ def get_recommendations_data():
 # ==============================
 # 💡 عرض البطاقات التفاعلية بأسلوب Grid متحرك
 # ==============================
-def smart_recommender(role_label="العمال", n=6):
-    recommendations = get_recommendations_data().get(role_label, [])
+def smart_recommender(role_label="العمال", n=6, recommendations=None):
+    """
+    عرض توصيات ذكية على شكل بطاقات.
+    :param role_label: اسم القسم أو الدور (مطابق لـ app.py)
+    :param n: الحد الأقصى لعدد البطاقات
+    :param recommendations: بيانات توصيات مخصصة (اختياري)
+    """
+    if recommendations is None:
+        recommendations = get_recommendations_data().get(role_label, [])
+
     if not recommendations:
         st.warning("⚠️ لا توجد توصيات حالياً.")
         return
 
     section_header("💡 اقتراحات ذكية لك", "💡")
-
+    
     # إنشاء Grid ديناميكي (3 أعمدة)
     cols = st.columns(3)
+    
+    # ألوان حسب نوع التوصية
     type_styles = {
         "حاسبة": "linear-gradient(135deg, #FFD700, #FFA500)",
         "توعية": "linear-gradient(135deg, #00BFFF, #1E90FF)",
@@ -57,7 +67,13 @@ def smart_recommender(role_label="العمال", n=6):
 
     for idx, rec in enumerate(recommendations[:n]):
         with cols[idx % len(cols)]:
-            style = type_styles.get(rec['النوع'], "#D3D3D3")
+            img_src = rec.get('img', 'assets/icons/default.png')
+            link = rec.get('link', '#')
+            title = rec.get('العنوان', 'بدون عنوان')
+            desc = rec.get('الوصف', '')
+            icon = rec.get('icon', 'ℹ️')
+            style = type_styles.get(rec.get('النوع', ''), "#D3D3D3")
+            
             html_card = f"""
             <div style="
                 background: {style};
@@ -67,11 +83,13 @@ def smart_recommender(role_label="العمال", n=6):
                 box-shadow: 2px 4px 15px rgba(0,0,0,0.2);
                 transition: transform 0.3s, box-shadow 0.3s;
                 text-align:center;
+                color: white;
+                word-wrap: break-word;
             ">
-                <img src='{rec['img']}' alt='icon' width='50px' style='margin-bottom:10px;'/>
-                <h4>{rec['icon']} {rec['العنوان']}</h4>
-                <p style='font-size:14px; margin:5px 0;'>{rec['الوصف']}</p>
-                <a href='{rec['link']}' target='_blank' style='color:#fff; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
+                <img src='{img_src}' alt='icon' width='50px' style='margin-bottom:10px;'/>
+                <h4>{icon} {title}</h4>
+                <p style='font-size:14px; margin:5px 0;'>{desc}</p>
+                <a href='{link}' target='_blank' style='color:#fff; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
             </div>
             """
             st.markdown(html_card, unsafe_allow_html=True)
