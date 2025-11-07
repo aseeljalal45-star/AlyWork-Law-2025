@@ -1,17 +1,17 @@
+# helpers/recommender.py
 import streamlit as st
 from helpers.ui_components import section_header
 
-# ==============================
-# ⚙️ إعدادات التوصيات
-# ==============================
+# قراءة الإعدادات من session_state
 config = st.session_state.get("config", {})
 ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
 MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
 
-# ==============================
-# 💡 بيانات التوصيات حسب الفئة
-# ==============================
 def get_recommendations_data():
+    """
+    إرجاع البيانات الأساسية للتوصيات حسب الفئة.
+    يمكن توسيعها أو تحميلها من ملف JSON لاحقًا.
+    """
     data = {
         "العمال": [
             {"العنوان": "احسب مكافأة نهاية الخدمة", "الوصف": "استخدم الحاسبة لتقدير مستحقاتك.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
@@ -20,25 +20,25 @@ def get_recommendations_data():
             {"العنوان": "تطبيقات عملية", "الوصف": "أمثلة تطبيقية للمواد القانونية.", "النوع": "تعليمي", "link": "#", "icon": "💡", "img": f"{ICON_PATH}practice.png"}
         ],
         "اصحاب العمل": [
-            {"العنوان": "حساب مستحقات الموظفين", "الوصف": "حاسبة لمستحقات نهاية الخدمة.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}employer_calc.png"},
-            {"العنوان": "اطلع على واجباتك القانونية", "الوصف": "تعرف على التزاماتك تجاه العمال.", "النوع": "توعية", "link": "#", "icon": "📚", "img": f"{ICON_PATH}employer_rights.png"}
+            {"العنوان": "حاسبة تكاليف الموظفين", "الوصف": "تقدير الرواتب والضمان.", "النوع": "مالي", "link": "#", "icon": "💰", "img": f"{ICON_PATH}financial.png"},
+            {"العنوان": "استعراض الالتزامات القانونية", "الوصف": "تعرف على حقوقك وواجباتك.", "النوع": "امتثال", "link": "#", "icon": "⚖️", "img": f"{ICON_PATH}compliance.png"}
         ],
         "مفتشو العمل": [
-            {"العنوان": "نماذج تقارير التفتيش", "الوصف": "نماذج جاهزة للتفتيش القانوني.", "النوع": "نموذج", "link": "#", "icon": "📝", "img": f"{ICON_PATH}inspection_report.png"}
+            {"العنوان": "نماذج تقارير التفتيش", "الوصف": "تقارير جاهزة لتوثيق التفتيش.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}report.png"}
         ],
         "الباحثون والمتدربون": [
-            {"العنوان": "مصادر قانونية", "الوصف": "أبحاث ومراجع للطلاب والمتدربين.", "النوع": "مرجع", "link": "#", "icon": "📖", "img": f"{ICON_PATH}references.png"}
+            {"العنوان": "تحليل التعديلات القانونية", "الوصف": "مراجعة وتفسير التعديلات.", "النوع": "بحث", "link": "#", "icon": "🔍", "img": f"{ICON_PATH}research.png"}
         ]
     }
     return data
 
-# ==============================
-# 🧠 عرض التوصيات الذكية
-# ==============================
 def smart_recommender(role_label="العمال", n=None):
+    """
+    عرض بطاقات التوصيات الذكية حسب فئة المستخدم.
+    """
     recommendations = get_recommendations_data().get(role_label, [])
     if not recommendations:
-        st.warning("⚠️ لا توجد توصيات حالياً.")
+        st.warning("⚠️ لا توجد توصيات حالياً لهذه الفئة.")
         return
 
     section_header("💡 اقتراحات ذكية لك", "💡")
@@ -61,13 +61,12 @@ def smart_recommender(role_label="العمال", n=None):
         with cols[idx % len(cols)]:
             style = type_styles.get(rec['النوع'], "#D3D3D3")
             st.markdown(
-                f"""
-                <div style="background: {style}; border-radius:15px; padding:15px; margin:5px;
-                            box-shadow: 2px 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s, box-shadow 0.3s; text-align:center;">
-                    <img src='{rec['img']}' alt='icon' width='50px' style='margin-bottom:10px;'/>
-                    <h4>{rec['icon']} {rec['العنوان']}</h4>
-                    <p style='font-size:14px; margin:5px 0;'>{rec['الوصف']}</p>
-                    <a href='{rec['link']}' target='_blank' style='color:#fff; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
-                </div>
-                """, unsafe_allow_html=True
+                f"""<div style="background: {style}; border-radius:15px; padding:15px; margin:5px;
+                     box-shadow: 2px 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s, box-shadow 0.3s; text-align:center;">
+                     <img src='{rec['img']}' alt='icon' width='50px' style='margin-bottom:10px;'/>
+                     <h4>{rec['icon']} {rec['العنوان']}</h4>
+                     <p style='font-size:14px; margin:5px 0;'>{rec['الوصف']}</p>
+                     <a href='{rec['link']}' target='_blank' style='color:#fff; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
+                     </div>""",
+                unsafe_allow_html=True
             )
