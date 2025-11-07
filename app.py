@@ -1,4 +1,4 @@
-نعم هنا import streamlit as st
+import streamlit as st
 import os, pandas as pd
 from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
