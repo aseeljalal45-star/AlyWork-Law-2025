@@ -12,35 +12,69 @@ import plotly.express as px
 # ==============================
 # ⚙️ Paths
 # ==============================
-CONFIG_PATH = "config.json"
+CONFIG_PATHS = [
+    "config.json",
+    "./config.json",
+    "./settings/config.json"
+]
 
 # ==============================
-# ⚙️ Load config.json or default
+# ⚙️ Load or create config.json
 # ==============================
 def load_config():
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
-    st.warning("⚠️ لم يتم العثور على config.json، سيتم استخدام إعدادات افتراضية.")
-    return {
-        "APP_NAME": "منصة قانون العمل الأردني الذكية",
-        "THEME": "فاتح",
-        "WORKBOOK_PATH": "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx",
-        "SHEET_URL": "",
-        "CACHE": {"ENABLED": True, "TTL_SECONDS": 600},
-        "UI": {"STYLES_LIGHT": "assets/styles_light.css", "STYLES_DARK": "assets/styles_dark.css"},
-        "AI": {"ENABLE": True, "MAX_HISTORY": 20},
-        "RECOMMENDER": {"MAX_CARDS": 6},
-        "SIDEBAR": {"MENU_ITEMS": [
-            {"label": "🏠 الصفحة الرئيسية", "icon": "house"},
-            {"label": "👷 العمال", "icon": "person"},
-            {"label": "🏢 أصحاب العمل", "icon": "building"},
-            {"label": "🕵️ مفتشو العمل", "icon": "search"},
-            {"label": "📖 الباحثون والمتدربون", "icon": "book"},
-            {"label": "⚙️ الإعدادات", "icon": "gear"}
-        ]},
-        "FOOTER": {"TEXT": f"© {datetime.datetime.now().year} AlyWork Law Pro — جميع الحقوق محفوظة."}
-    }
+    config_file_found = None
+    for path in CONFIG_PATHS:
+        if os.path.exists(path):
+            config_file_found = path
+            break
+
+    if config_file_found:
+        try:
+            with open(config_file_found, "r", encoding="utf-8") as f:
+                config_data = json.load(f)
+            st.success(f"✅ تم تحميل الإعدادات من {config_file_found}")
+        except Exception as e:
+            st.error(f"⚠️ خطأ في قراءة {config_file_found}: {e}")
+            config_data = None
+    else:
+        config_data = None
+
+    if config_data is None:
+        st.warning("⚠️ لم يتم العثور على config.json صالح، سيتم استخدام إعدادات افتراضية.")
+        config_data = {
+            "APP_NAME": "منصة قانون العمل الأردني الذكية",
+            "THEME": "فاتح",
+            "WORKBOOK_PATH": "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx",
+            "SHEET_URL": "",
+            "CACHE": {"ENABLED": True, "TTL_SECONDS": 600},
+            "UI": {"STYLES_LIGHT": "assets/styles_light.css", "STYLES_DARK": "assets/styles_dark.css"},
+            "AI": {"ENABLE": True, "MAX_HISTORY": 20},
+            "RECOMMENDER": {"MAX_CARDS": 6},
+            "SIDEBAR": {"MENU_ITEMS": [
+                {"label": "🏠 الصفحة الرئيسية", "icon": "house"},
+                {"label": "👷 العمال", "icon": "person"},
+                {"label": "🏢 أصحاب العمل", "icon": "building"},
+                {"label": "🕵️ مفتشو العمل", "icon": "search"},
+                {"label": "📖 الباحثون والمتدربون", "icon": "book"},
+                {"label": "⚙️ الإعدادات", "icon": "gear"}
+            ]},
+            "FOOTER": {"TEXT": f"© {datetime.datetime.now().year} AlyWork Law Pro — جميع الحقوق محفوظة."}
+        }
+
+        # إنشاء config.json جديد تلقائيًا
+        save_path = CONFIG_PATHS[0]
+        try:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        except Exception:
+            pass
+        try:
+            with open(save_path, "w", encoding="utf-8") as f:
+                json.dump(config_data, f, ensure_ascii=False, indent=4)
+            st.success(f"✅ تم إنشاء ملف config.json جديد في {save_path}")
+        except Exception as e:
+            st.error(f"⚠️ لم يتم إنشاء config.json: {e}")
+
+    return config_data
 
 # ==============================
 # ⚙️ Initialize settings
