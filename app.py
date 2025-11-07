@@ -117,9 +117,9 @@ def show_ai_assistant():
 ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
 MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
 
-# اللون الموحد المميز
-CARD_COLOR = "#1E3A8A"  # أزرق ملكي غامق
-CARD_TEXT_COLOR = "#ffffff"
+# اللون الموحد المميز (ذهبي)
+CARD_COLOR = "#D4AF37"
+CARD_TEXT_COLOR = "#000000"
 
 def get_recommendations(role):
     mapping = {
@@ -165,7 +165,7 @@ def smart_recommender(role="العمال", n=None):
                     <img src='{rec['img']}' alt='icon' width='60px' style='margin-bottom:12px;'/>
                     <h3 style='margin-bottom:6px;'>{rec['icon']} {rec['العنوان']}</h3>
                     <p style='font-size:15px; opacity:0.9;'>{rec['الوصف']}</p>
-                    <a href='{rec['link']}' target='_blank' style='color:#fff; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
+                    <a href='{rec['link']}' target='_blank' style='color:#000; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
                 </div>
                 """,
                 unsafe_allow_html=True
