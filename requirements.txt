@@ -1,18 +1,7 @@
-# Streamlit core
 streamlit>=1.26.0
-
-# Data handling
 pandas>=2.2.0
 openpyxl>=3.1.2
 xlrd>=2.0.1
-
-# UI & widgets
-streamlit-option-menu>=0.5.2
-streamlit-aggrid>=1.2.0.post1
-
-# Environment & settings
+streamlit-option-menu==0.4.0
 python-dotenv>=1.0.0
 watchdog>=3.0.0
-
-# Logging & utilities
-rich>=14.2.0
