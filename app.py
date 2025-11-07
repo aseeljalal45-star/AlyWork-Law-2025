@@ -44,7 +44,7 @@ def sheet_to_csv_url(sheet_url):
             return f"https://docs.google.com/spreadsheets/d/{m.group(1)}/export?format=csv"
     return sheet_url
 
-SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL", ""))
+SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL"))
 
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def load_google_sheets(url):
@@ -63,7 +63,7 @@ data = load_google_sheets(SHEET_URL)
 # =====================================================
 # 📘 تحميل ملف Excel للذكاء القانوني
 # =====================================================
-workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH", "AlyWork_Law_Pro_v2025.xlsx"))
+workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
 
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def safe_load_excel(path):
@@ -75,7 +75,6 @@ def safe_load_excel(path):
         df = pd.read_excel(path, engine='openpyxl')
         for col in expected_cols:
             if col not in df.columns:
-                # إضافة العمود مفقود تلقائيًا
                 df[col] = ""
         df = df[expected_cols]  # ترتيب الأعمدة بشكل ثابت
         df.fillna("", inplace=True)
@@ -133,7 +132,6 @@ ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
 MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
 
 def get_recommendations_data():
-    # ... نفس الداتا كما في كودك الأصلي
     data = {
         "العمال": [
             {"العنوان": "احسب مكافأة نهاية الخدمة", "الوصف": "استخدم الحاسبة لتقدير مستحقاتك.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
@@ -200,7 +198,7 @@ def smart_recommender(role_label="العمال", n=None):
 # 🏠 الصفحات الرئيسية
 # =====================================================
 def show_home():
-    st.title(f"⚖️ {config.get('APP_NAME', 'منصة قانون العمل الأردني الذكية')}")
+    st.title(f"⚖️ {config.get('APP_NAME')}")
     st.markdown("منصة ذكية لتبسيط وفهم <b>قانون العمل الأردني</b>.", unsafe_allow_html=True)
     st.info("💡 هذه المنصة لأغراض التوعية القانونية فقط.")
     show_ai_assistant()
@@ -281,6 +279,6 @@ else:
 # 🕒 تذييل رسمي
 # =====================================================
 st.markdown(
-    f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT', 'AlyWork Law Pro © 2025 — جميع الحقوق محفوظة 🇯🇴')}</small></center>",
+    f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT')}</small></center>",
     unsafe_allow_html=True
 )
