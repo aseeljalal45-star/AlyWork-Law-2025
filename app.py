@@ -1,9 +1,11 @@
 import streamlit as st
 import os
 import pandas as pd
-import plotly.express as px
+from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
-from helpers.ui_components import section_header, info_card
+from helpers.ui_components import section_header, message_bubble, info_card
+import plotly.express as px
+from datetime import datetime
 
 # =====================================================
 # ⚙️ الإعدادات العامة
@@ -12,115 +14,103 @@ settings = SettingsManager()
 config = st.session_state.get("config", settings.settings)
 
 st.set_page_config(
-    page_title=config.get("APP_NAME", "منصة العمال الذكية"),
-    page_icon="👷",
+    page_title=config.get("APP_NAME", "منصة قانون العمل الأردني الذكية"),
+    page_icon="⚖️",
     layout="wide"
 )
 
 # =====================================================
-# 🎨 تحميل CSS احترافي
+# 🎨 تحميل CSS الرسمي
 # =====================================================
-def load_css(css_file="assets/styles_official.css"):
+def load_official_css(css_file="assets/styles_official.css"):
     if os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-load_css()
+load_official_css()
 
 # =====================================================
-# 📊 تحميل البيانات وحفظها
+# 📊 تحميل البيانات
 # =====================================================
+def sheet_to_csv_url(sheet_url):
+    import re
+    if "docs.google.com/spreadsheets" in sheet_url and "export?format=csv" not in sheet_url:
+        m = re.search(r"/d/([a-zA-Z0-9-_]+)", sheet_url)
+        if m:
+            return f"https://docs.google.com/spreadsheets/d/{m.group(1)}/export?format=csv"
+    return sheet_url
+
+SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL"))
 WORKBOOK_PATH = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
 
+@st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
+def load_google_sheets(url):
+    if not url:
+        st.info("ℹ️ لم يتم تحديد رابط Google Sheet بعد.")
+        return pd.DataFrame()
+    try:
+        url = sheet_to_csv_url(url)
+        return pd.read_csv(url)
+    except Exception as e:
+        st.warning(f"⚠️ خطأ أثناء تحميل Google Sheet: {e}")
+        return pd.DataFrame()
+
+@st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def load_excel(path, expected_cols=None):
-    expected_cols = expected_cols or ["الفئة","الحاسبة","النتيجة","تفاصيل"]
+    expected_cols = expected_cols or ['المادة', 'القسم', 'النص', 'مثال']
     if not os.path.exists(path):
         return pd.DataFrame(columns=expected_cols)
     try:
-        df = pd.read_excel(path, engine="openpyxl")
+        df = pd.read_excel(path, engine='openpyxl')
         for col in expected_cols:
             if col not in df.columns:
                 df[col] = ""
         df.fillna("", inplace=True)
         return df
-    except:
+    except Exception as e:
+        st.warning(f"⚠️ خطأ أثناء قراءة Excel: {e}")
         return pd.DataFrame(columns=expected_cols)
 
-data_excel = load_excel(WORKBOOK_PATH)
-
-def save_excel(df):
-    df.to_excel(WORKBOOK_PATH, index=False, engine="openpyxl")
+data = load_google_sheets(SHEET_URL)
+excel_data = load_excel(WORKBOOK_PATH)
 
 # =====================================================
-# 🧮 الحاسبات القانونية حسب الفئات
+# 🤖 تهيئة المساعد القانوني
 # =====================================================
-def wages_calculators():
-    st.subheader("💰 الأجور والمكافآت")
-    salary = st.number_input("الراتب الأساسي (بالدينار الأردني)", min_value=0.0)
-    overtime_hours = st.number_input("ساعات العمل الإضافية", min_value=0)
-    overtime_rate = st.number_input("سعر الساعة الإضافية", min_value=0.0)
-    allowances = st.number_input("بدلات (نقل، سكن، غذاء)", min_value=0.0)
-    deductions = st.number_input("الخصومات", min_value=0.0)
+def init_ai():
+    try:
+        ai = MiniLegalAI(WORKBOOK_PATH)
+        ai.db = excel_data
+        ai.build_tfidf_matrix()
+        return ai
+    except Exception as e:
+        st.warning(f"⚠️ لم يتم تهيئة المساعد القانوني بالكامل: {e}")
+        return None
 
-    if st.button("حساب الراتب الشهري الإجمالي"):
-        total = salary + (overtime_hours*overtime_rate) + allowances - deductions
-        st.success(f"💵 الراتب الشهري الإجمالي: {total} د.أ")
-        # حفظ
-        new_row = {"الفئة":"الأجور والمكافآت", "الحاسبة":"الراتب الشهري", "النتيجة":total, "تفاصيل":f"الراتب {salary}، ساعات إضافية {overtime_hours}"}
-        global data_excel
-        data_excel = pd.concat([data_excel, pd.DataFrame([new_row])], ignore_index=True)
-        save_excel(data_excel)
+if "ai_instance" not in st.session_state:
+    st.session_state["ai_instance"] = init_ai()
+ai = st.session_state["ai_instance"]
 
-def leaves_calculators():
-    st.subheader("🌴 الإجازات والاستحقاقات")
-    years_worked = st.number_input("عدد سنوات الخدمة", min_value=0)
-    annual_leave_days = st.number_input("أيام الإجازة السنوية المستحقة", min_value=0)
-    sick_leave_days = st.number_input("أيام الإجازة المرضية", min_value=0)
-    maternity_leave_days = st.number_input("أيام إجازة الحمل والولادة", min_value=0)
-
-    if st.button("حساب إجمالي الإجازات"):
-        total = annual_leave_days + sick_leave_days + maternity_leave_days
-        st.success(f"📅 إجمالي الإجازات المستحقة: {total} يوم")
-        new_row = {"الفئة":"الإجازات والاستحقاقات", "الحاسبة":"إجمالي الإجازات", "النتيجة":total, "تفاصيل":f"سنوات الخدمة {years_worked}"}
-        global data_excel
-        data_excel = pd.concat([data_excel, pd.DataFrame([new_row])], ignore_index=True)
-        save_excel(data_excel)
-
-def end_of_service_calculators():
-    st.subheader("🏆 مكافأة نهاية الخدمة والتعويضات")
-    salary = st.number_input("الراتب الأساسي للحساب", min_value=0.0, key="eos_salary")
-    years_worked = st.number_input("عدد سنوات الخدمة", min_value=0, key="eos_years")
-    if st.button("حساب مكافأة نهاية الخدمة"):
-        severance = salary * years_worked
-        st.success(f"💰 مكافأة نهاية الخدمة: {severance} د.أ")
-        new_row = {"الفئة":"مكافأة نهاية الخدمة", "الحاسبة":"مكافأة نهاية الخدمة", "النتيجة":severance, "تفاصيل":f"راتب {salary}، سنوات {years_worked}"}
-        global data_excel
-        data_excel = pd.concat([data_excel, pd.DataFrame([new_row])], ignore_index=True)
-        save_excel(data_excel)
-
-def special_cases_calculators():
-    st.subheader("⚡ الدوام الجزئي وتغييرات الوظيفة")
-    hours_worked = st.number_input("عدد ساعات الدوام الجزئي", min_value=0)
-    rate_per_hour = st.number_input("الأجر لكل ساعة", min_value=0.0)
-    if st.button("حساب أجر الدوام الجزئي"):
-        total = hours_worked * rate_per_hour
-        st.success(f"💵 أجر الدوام الجزئي: {total} د.أ")
-        new_row = {"الفئة":"الدوام الجزئي", "الحاسبة":"الدوام الجزئي", "النتيجة":total, "تفاصيل":f"ساعات {hours_worked}, أجر {rate_per_hour}"}
-        global data_excel
-        data_excel = pd.concat([data_excel, pd.DataFrame([new_row])], ignore_index=True)
-        save_excel(data_excel)
-
+# =====================================================
+# 🧮 الحاسبات القانونية
+# =====================================================
 def calculators_tab():
-    st.title("🧮 الحاسبات القانونية")
-    categories = ["الأجور والمكافآت", "الإجازات والاستحقاقات", "مكافأة نهاية الخدمة", "الدوام الجزئي"]
-    choice = st.radio("اختر الفئة:", categories, horizontal=True)
-    if choice == "الأجور والمكافآت":
-        wages_calculators()
-    elif choice == "الإجازات والاستحقاقات":
-        leaves_calculators()
-    elif choice == "مكافأة نهاية الخدمة":
-        end_of_service_calculators()
-    elif choice == "الدوام الجزئي":
-        special_cases_calculators()
+    section_header("🧮 الحاسبات القانونية", "🧮")
+    calc_options = [
+        "مكافأة نهاية الخدمة",
+        "بدلات العمل الإضافي والليلي والعطلات الرسمية",
+        "التعويض عن الإجازات غير المستغلة",
+        "بدل النقل والسكن",
+        "حساب الأجور الشهرية مع الخصومات",
+        "استحقاقات الفصل التعسفي",
+        "إجازة الحمل والولادة",
+        "مكافأة الإجازات المرضية",
+        "استحقاقات تغيير الوظيفة أو النقل الداخلي",
+        "حاسبة الدوام الجزئي",
+        "تعويض إصابات العمل"
+    ]
+    choice = st.selectbox("اختر الحاسبة:", calc_options)
+    st.success(f"💡 تم اختيار الحاسبة: **{choice}**")
+    # لاحقًا يمكن إضافة الحاسبة التفاعلية لكل خيار
 
 # =====================================================
 # 📚 حقوق العمال والتزاماتهم
@@ -129,44 +119,167 @@ def rights_tab():
     section_header("📚 حقوق العمال والتزاماتهم", "📚")
     st.markdown("""
     <style>
-    .card {background: linear-gradient(135deg,#FFD700,#D4AF37); padding:20px; border-radius:20px; margin-bottom:15px;}
-    .card-title {font-size:20px; font-weight:bold; margin-bottom:10px;}
+    .rights-card {
+        background: linear-gradient(135deg, #FFD700, #D4AF37);
+        color: #000;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .rights-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 25px rgba(0,0,0,0.25);
+    }
+    .rights-title {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    ul {
+        margin-top: 5px;
+        padding-left: 20px;
+    }
     </style>
     """, unsafe_allow_html=True)
-    info_card("⚖️ حقوق العامل", ["مكافأة نهاية الخدمة", "الأجر الشهري وبدل العمل الإضافي", "بدل النقل والسكن", "الإجازات السنوية والمرضية"])
-    info_card("👩‍🍼 حقوق المرأة العاملة", ["إجازة الحمل والولادة", "الحق في الرضاعة", "عدم الفصل أثناء الحمل"])
-    info_card("📋 التزامات العامل", ["الالتزام بساعات الدوام", "المحافظة على أسرار المنشأة", "إشعار صاحب العمل عند الغياب"])
-    info_card("🏢 التزامات صاحب العمل", ["دفع الأجور في موعدها", "توفير بيئة عمل آمنة", "منح الإجازات القانونية", "تسجيل العامل في الضمان الاجتماعي"])
 
-# =====================================================
-# 📝 محاكي الشكوى
-# =====================================================
-def complaint_simulator_tab():
-    section_header("📝 محاكي الشكوى", "📝")
-    st.info("🧩 هذه الأداة تتيح لك محاكاة تقديم شكوى عمالية إلكترونيًا (قيد التطوير).")
-
-# =====================================================
-# 🏛️ أماكن تقديم الشكاوى والجهات المختصة
-# =====================================================
-def complaints_places_tab():
-    section_header("🏛️ أماكن تقديم الشكاوى والجهات المختصة", "🏛️")
-    entities = [
-        {"الجهة":"وزارة العمل","العنوان":"عمان، الأردن","الهاتف":"06-1234567","البريد":"info@mol.gov.jo","الموقع":"http://www.mol.gov.jo"},
-        {"الجهة":"التفتيش العمالي","العنوان":"عمان، الأردن","الهاتف":"06-7654321","البريد":"inspection@mol.gov.jo","الموقع":"http://www.mol.gov.jo/inspection"}
-    ]
-    for e in entities:
-        st.markdown(f"""
-        <div style="background:#f0f0f0;padding:15px;border-radius:15px;margin-bottom:10px;">
-        <b>{e['الجهة']}</b><br>
-        العنوان: {e['العنوان']}<br>
-        الهاتف: {e['الهاتف']}<br>
-        البريد: {e['البريد']}<br>
-        الموقع: <a href="{e['الموقع']}" target="_blank">{e['الموقع']}</a>
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div class="rights-card">
+            <div class="rights-title">⚖️ حقوق العامل:</div>
+            <ul>
+                <li>مكافأة نهاية الخدمة</li>
+                <li>الأجر الشهري وبدل العمل الإضافي</li>
+                <li>بدل النقل والسكن</li>
+                <li>الإجازات السنوية والمرضية</li>
+                <li>إجازة الزواج أو الوفاة</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="rights-card">
+            <div class="rights-title">👩‍🍼 حقوق المرأة العاملة:</div>
+            <ul>
+                <li>إجازة الحمل والولادة</li>
+                <li>الحق في الرضاعة</li>
+                <li>عدم الفصل أثناء الحمل</li>
+                <li>بيئة عمل آمنة ومناسبة</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="rights-card">
+            <div class="rights-title">📋 التزامات العامل:</div>
+            <ul>
+                <li>الالتزام بساعات الدوام</li>
+                <li>المحافظة على أسرار المنشأة</li>
+                <li>تنفيذ المهام الموكلة بدقة</li>
+                <li>إشعار صاحب العمل عند الغياب</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="rights-card">
+            <div class="rights-title">🏢 التزامات صاحب العمل:</div>
+            <ul>
+                <li>دفع الأجور في موعدها</li>
+                <li>توفير بيئة عمل آمنة</li>
+                <li>منح الإجازات القانونية</li>
+                <li>تسجيل العامل في الضمان الاجتماعي</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
 
 # =====================================================
-# 👷 صفحة العمال الرئيسية
+# 📝 محاكي الشكوى الذكي
+# =====================================================
+def complaint_simulator_tab():
+    section_header("📝 محاكي الشكوى", "📝")
+    st.info("🧩 هذه الأداة تساعدك على معرفة انتهاكات حقوقك والتوصية بالإجراءات المناسبة.")
+    
+    # ===== بيانات العامل =====
+    st.subheader("📌 بيانات العامل")
+    الاسم = st.text_input("اسم العامل (اختياري)")
+    سنوات_العمل = st.number_input("عدد سنوات العمل:", min_value=0, step=1)
+    الراتب = st.number_input("الراتب الشهري (بالدينار الأردني):", min_value=0)
+    
+    # ===== نوع الانتهاك =====
+    st.subheader("⚠️ نوع الانتهاك")
+    نوع_الانتهاك = st.selectbox("اختر نوع الانتهاك:", [
+        "عدم دفع الأجر/المستحقات",
+        "فصل تعسفي",
+        "العمل الإضافي غير المدفوع",
+        "عدم منح الإجازات القانونية",
+        "ظروف عمل خطرة أو غير آمنة",
+        "انتهاكات أخرى"
+    ])
+    
+    # ===== تفاصيل إضافية =====
+    st.subheader("📝 تفاصيل إضافية")
+    وصف_الحالة = st.text_area("صف باختصار ما حدث:", "")
+
+    # ===== زر تحليل الحالة =====
+    if st.button("🔍 تحليل الحالة"):
+        st.info("⏳ جاري تحليل الانتهاك وتحديد الإجراءات الموصى بها...")
+        
+        توصية = ""
+        if نوع_الانتهاك == "عدم دفع الأجر/المستحقات":
+            توصية = "📌 يمكنك تقديم شكوى رسمية لدى مديرية العمل ومطالبة بدفع مستحقاتك كاملة."
+        elif نوع_الانتهاك == "فصل تعسفي":
+            توصية = "📌 يمكنك تقديم شكوى فصل تعسفي ومطالبة بالتعويض المالي وفق قانون العمل الأردني."
+        elif نوع_الانتهاك == "العمل الإضافي غير المدفوع":
+            توصية = "📌 يمكنك توثيق ساعات العمل الإضافية ومطالبة صاحب العمل بالدفع."
+        elif نوع_الانتهاك == "عدم منح الإجازات القانونية":
+            توصية = "📌 يمكنك تقديم شكوى رسمية لدى مديرية العمل للحصول على إجازاتك المستحقة."
+        elif نوع_الانتهاك == "ظروف عمل خطرة أو غير آمنة":
+            توصية = "📌 يمكنك رفع شكوى لدى الجهات التفتيشية للحصول على بيئة عمل آمنة."
+        else:
+            توصية = "📌 قم بتقديم شكوى مفصلة لدى مديرية العمل لبحث حالتك بدقة."
+
+        st.subheader("📄 التقرير القانوني")
+        st.markdown(f"""
+        - **العامل:** {الاسم or "غير محدد"}
+        - **سنوات العمل:** {سنوات_العمل}
+        - **الراتب:** {الراتب} دينار
+        - **نوع الانتهاك:** {نوع_الانتهاك}
+        - **وصف الحالة:** {وصف_الحالة or 'لا يوجد وصف'}
+        - **التوصية:** {توصية}
+        """)
+        st.success("✅ التحليل تم بنجاح")
+
+# =====================================================
+# 🏛️ الجهات المختصة حسب المحافظات
+# =====================================================
+def complaints_places_tab():
+    section_header("🏛️ أماكن تقديم الشكاوى والجهات المختصة", "🏛️")
+    محافظة = st.selectbox("اختر المحافظة:", [
+        "عمان", "إربد", "الزرقاء", "البلقاء", "الكرك", "معان",
+        "الطفيلة", "المفرق", "مادبا", "جرش", "عجلون", "العقبة"
+    ])
+    الجهات = {
+        "عمان": {"الجهة":"مديرية العمل – عمان","العنوان":"عمان، شارع عيسى الناوري 11","الهاتف":"06‑5802666","البريد":"info@mol.gov.jo","الموقع":"http://www.mol.gov.jo"},
+        "إربد": {"الجهة":"مديرية العمل – إربد","العنوان":"إربد، الأردن","الهاتف":"06‑xxxxxxx","البريد":"irbid@mol.gov.jo","الموقع":"http://www.mol.gov.jo/irbid"},
+        # … باقي المحافظات
+    }
+    info = الجهات.get(محافظة)
+    if info:
+        st.markdown(f"""
+        <div style="background:#f0f0f0;padding:15px;border-radius:15px;margin-bottom:10px;">
+        <b>{info['الجهة']}</b><br>
+        العنوان: {info['العنوان']}<br>
+        الهاتف: {info['الهاتف']}<br>
+        البريد: {info['البريد']}<br>
+        الموقع: <a href="{info['الموقع']}" target="_blank">{info['الموقع']}</a>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.warning("⚠️ لا توجد بيانات متوفّرة لهذه المحافظة بعد.")
+
+# =====================================================
+# 👷 صفحة العمال
 # =====================================================
 def workers_section():
     tabs = ["🧮 الحاسبات", "📚 حقوق العمال", "📝 محاكي الشكوى", "🏛️ الجهات المختصة"]
@@ -183,26 +296,35 @@ def workers_section():
 # =====================================================
 # 🏠 الصفحة الرئيسية
 # =====================================================
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "home"
+
 def show_home():
-    st.markdown(f"<h1 style='text-align:center'>👷 {config.get('APP_NAME')}</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center'>أداة ذكية لحساب الحقوق العمالية في الأردن</p>", unsafe_allow_html=True)
-    if st.button("➡️ اذهب إلى قسم العمال"):
+    CARD_GRADIENT = "linear-gradient(135deg, #FFD700, #D4AF37)"
+    CARD_TEXT_COLOR = "#000000"
+    st.markdown(f"""
+    <div style="text-align:center; padding:20px; background: {CARD_GRADIENT};
+                border-radius:15px; color:{CARD_TEXT_COLOR}; margin-bottom:20px;">
+        <h1>⚖️ {config.get('APP_NAME')}</h1>
+        <p>الوصول السريع إلى أقسام المنصة الذكية</p>
+    </div>
+    """, unsafe_allow_html=True)
+    if st.button("👷 قسم العمال"):
         st.session_state.current_page = "workers"
 
 # =====================================================
 # 🧭 نظام التنقل
 # =====================================================
-if "current_page" not in st.session_state:
-    st.session_state.current_page = "home"
-
 pages = {
     "home": show_home,
     "workers": workers_section,
 }
-
-pages[st.session_state.current_page]()
+if st.session_state.current_page != "home" and st.button("⬅️ العودة"):
+    st.session_state.current_page = "home"
+else:
+    pages[st.session_state.current_page]()
 
 # =====================================================
 # ⚖️ Footer
 # =====================================================
-st.markdown(f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT','© جميع الحقوق محفوظة')}</small></center>", unsafe_allow_html=True)
+st.markdown(f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT')}</small></center>", unsafe_allow_html=True)
