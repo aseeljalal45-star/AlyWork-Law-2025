@@ -4,7 +4,6 @@ import os, datetime, json, pandas as pd
 from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
 from helpers.ui_components import message_bubble, section_header, info_card
-from helpers.recommender import smart_recommender
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 import plotly.express as px
@@ -12,7 +11,7 @@ import plotly.express as px
 # ==============================
 # ⚙️ Initialize Settings
 # ==============================
-settings = SettingsManager()
+settings = SettingsManager()  # تحميل الإعدادات أو إنشاء config.json
 config = st.session_state["config"]
 
 # ==============================
@@ -34,6 +33,7 @@ def load_css(theme=None):
     if css_file and os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 load_css(settings.get("THEME"))
 
 # ==============================
@@ -147,7 +147,12 @@ def show_statistics(df):
         st.plotly_chart(fig, use_container_width=True)
 
 # ==============================
-# 🏠 Pages Functions
+# 💡 Smart Recommender
+# ==============================
+from helpers.recommender import smart_recommender  # النسخة الجديدة
+
+# ==============================
+# 🏠 Pages
 # ==============================
 def show_home():
     st.title(f"⚖️ {config.get('APP_NAME')}")
@@ -158,41 +163,17 @@ def show_home():
     show_ai_assistant()
     smart_recommender("العمال", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
-def workers_section():
-    section_header("👷 قسم العمال", "👷")
-    show_ai_assistant()
-    smart_recommender("العمال")
-
-def employers_section():
-    section_header("🏢 قسم أصحاب العمل", "🏢")
-    show_ai_assistant()
-    smart_recommender("اصحاب العمل")
-
-def inspectors_section():
-    section_header("🕵️ قسم المفتشين", "🕵️")
-    show_ai_assistant()
-    smart_recommender("مفتشو العمل")
-
-def researchers_section():
-    section_header("📖 قسم الباحثون والمتدربون", "📖")
-    show_ai_assistant()
-    smart_recommender("الباحثون والمتدربون")
-
-def settings_page():
-    section_header("⚙️ الإعدادات", "⚙️")
-    st.write("يمكن تعديل الإعدادات من هنا")
+def workers_section(): section_header("👷 قسم العمال", "👷"); show_ai_assistant(); smart_recommender("العمال")
+def employers_section(): section_header("🏢 قسم أصحاب العمل", "🏢"); show_ai_assistant(); smart_recommender("اصحاب العمل")
+def inspectors_section(): section_header("🕵️ قسم المفتشين", "🕵️"); show_ai_assistant(); smart_recommender("مفتشو العمل")
+def researchers_section(): section_header("📖 قسم الباحثين والمتدربين", "📖"); show_ai_assistant(); smart_recommender("الباحثون والمتدربون")
+def settings_page(): section_header("⚙️ الإعدادات", "⚙️"); st.write("يمكن تعديل الإعدادات من هنا")
 
 # ==============================
 # ⚙️ Sidebar
 # ==============================
-menu_items_labels = [
-    "🏠 الصفحة الرئيسية",
-    "👷 قسم العمال",
-    "🏢 قسم أصحاب العمل",
-    "🕵️ قسم المفتشين",
-    "📖 قسم الباحثون والمتدربون",
-    "⚙️ الإعدادات"
-]
+menu_items_labels = ["🏠 الصفحة الرئيسية", "👷 العمال", "🏢 أصحاب العمل",
+                     "🕵️ مفتشو العمل", "📖 الباحثون والمتدربون", "⚙️ الإعدادات"]
 menu_items_icons  = ["house", "people", "briefcase", "search", "book", "gear"]
 
 with st.sidebar:
@@ -205,10 +186,10 @@ with st.sidebar:
 
 pages = {
     "🏠 الصفحة الرئيسية": show_home,
-    "👷 قسم العمال": workers_section,
-    "🏢 قسم أصحاب العمل": employers_section,
-    "🕵️ قسم المفتشين": inspectors_section,
-    "📖 قسم الباحثون والمتدربون": researchers_section,
+    "👷 العمال": workers_section,
+    "🏢 أصحاب العمل": employers_section,
+    "🕵️ مفتشو العمل": inspectors_section,
+    "📖 الباحثون والمتدربون": researchers_section,
     "⚙️ الإعدادات": settings_page
 }
 
