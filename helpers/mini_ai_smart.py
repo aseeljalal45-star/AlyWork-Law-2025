@@ -28,8 +28,9 @@ class MiniLegalAI:
     # ==============================
     # تحميل قاعدة البيانات
     # ==============================
-    @st.cache_data(show_spinner=False)
+    @st.cache_data(show_spinner=False, allow_output_mutation=True)
     def load_database(self):
+        """تحميل ملف قاعدة البيانات القانونية."""
         if not os.path.exists(self.workbook_path):
             st.warning(f"⚠️ ملف قاعدة البيانات غير موجود: {self.workbook_path}")
             return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
@@ -54,8 +55,9 @@ class MiniLegalAI:
     # ==============================
     # بناء مصفوفة TF-IDF
     # ==============================
-    @st.cache_data(show_spinner=False)
+    @st.cache_data(show_spinner=False, allow_output_mutation=True)
     def build_tfidf_matrix(self):
+        """بناء مصفوفة TF-IDF للنصوص القانونية."""
         if self.db.empty:
             return
         text_col = next((c for c in self.db.columns if "نص" in c), None)
@@ -70,6 +72,7 @@ class MiniLegalAI:
     # البحث الذكي
     # ==============================
     def advanced_search(self, query, top_n=1):
+        """البحث عن النصوص الأكثر تطابقًا مع الاستعلام."""
         if not self.ai_enabled:
             return "🤖 المساعد الذكي معطل.", "", ""
 
@@ -103,6 +106,7 @@ class MiniLegalAI:
     # إعادة تحميل القاعدة
     # ==============================
     def reload(self, new_path=None):
+        """إعادة تحميل قاعدة البيانات بعد تغيير الملف أو التحديث."""
         if new_path:
             self.workbook_path = new_path
         self.db = self.load_database()
