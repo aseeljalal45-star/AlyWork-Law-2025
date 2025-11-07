@@ -1,52 +1,45 @@
 import pandas as pd
 import os, re
-import streamlit as st
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import streamlit as st
 
 class MiniLegalAI:
     def __init__(self, workbook_path=None):
         """تهيئة المساعد الذكي وربط قاعدة البيانات القانونية."""
+        # التحقق من تمكين AI
         config = st.session_state.get("config", {})
         self.ai_enabled = config.get("AI", {}).get("ENABLE", True)
         if not self.ai_enabled:
             st.warning("🤖 المساعد الذكي معطل من إعدادات النظام.")
             return
 
-        self.workbook_path = workbook_path or config.get(
-            "WORKBOOK_PATH", "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx"
-        )
-        self.memory_path = config.get("AI", {}).get("MEMORY_PATH", "ai_memory.json")
-        self.logs_path = config.get("AI", {}).get("LOGS_PATH", "AI_Analysis_Logs.csv")
-        self.max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
-
-        # تحميل قاعدة البيانات
-        self.db = self.load_database()
-        
-        # بناء TF-IDF ككائن مورد (resource)
-        self.vectorizer, self.tfidf_matrix = self.build_tfidf_matrix()
+        self.workbook_path = workbook_path or config.get("WORKBOOK_PATH", "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx")
+        self.vectorizer = None
+        self.tfidf_matrix = None
+        self.db = pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])  # افتراضي
 
     # ==============================
-    # تحميل قاعدة البيانات
+    # تحميل قاعدة البيانات بدون مشاكل caching
     # ==============================
-    @st.cache_data(show_spinner=False)
-    def load_database(self):
-        if not os.path.exists(self.workbook_path):
-            st.warning(f"⚠️ ملف قاعدة البيانات غير موجود: {self.workbook_path}")
+    def load_database_from_excel(self, path=None):
+        path = path or self.workbook_path
+        if not os.path.exists(path):
+            st.warning(f"⚠️ ملف قاعدة البيانات غير موجود: {path}")
             return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
         try:
-            with st.spinner("⏳ جاري تحميل قاعدة البيانات القانونية..."):
-                df = pd.read_excel(self.workbook_path, engine='openpyxl')
-                df.fillna("", inplace=True)
-                return df
+            df = pd.read_excel(path, engine='openpyxl')
+            df.fillna("", inplace=True)
+            self.db = df
         except Exception as e:
             st.error(f"⚠️ خطأ عند تحميل قاعدة البيانات: {e}")
-            return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
+            self.db = pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
 
     # ==============================
     # تنظيف النصوص
     # ==============================
-    def preprocess_text(self, text):
+    @staticmethod
+    def preprocess_text(text):
         text = str(text).strip()
         text = re.sub(r"[^\w\s]", " ", text)
         text = re.sub(r"\s+", " ", text)
@@ -55,18 +48,16 @@ class MiniLegalAI:
     # ==============================
     # بناء مصفوفة TF-IDF
     # ==============================
-    @st.cache_resource(show_spinner=False)
     def build_tfidf_matrix(self):
         if self.db.empty:
-            return None, None
+            return
         text_col = next((c for c in self.db.columns if "نص" in c), None)
         if not text_col:
             st.error("⚠️ لم يتم العثور على عمود يحتوي على نصوص قانونية في الملف.")
-            return None, None
+            return
         corpus = self.db[text_col].apply(self.preprocess_text).tolist()
-        vectorizer = TfidfVectorizer()
-        tfidf_matrix = vectorizer.fit_transform(corpus)
-        return vectorizer, tfidf_matrix
+        self.vectorizer = TfidfVectorizer()
+        self.tfidf_matrix = self.vectorizer.fit_transform(corpus)
 
     # ==============================
     # البحث الذكي
@@ -74,7 +65,6 @@ class MiniLegalAI:
     def advanced_search(self, query, top_n=1):
         if not self.ai_enabled:
             return "🤖 المساعد الذكي معطل.", "", ""
-
         if self.db.empty or self.tfidf_matrix is None:
             return "⚠️ قاعدة البيانات فارغة.", "", ""
 
@@ -86,20 +76,13 @@ class MiniLegalAI:
         if similarities[top_indices[0]] == 0:
             return "⚠️ لم يتم العثور على تطابق مباشر في قاعدة البيانات.", "", ""
 
-        results = []
-        for i in top_indices:
-            row = self.db.iloc[i]
-            score = round(similarities[i] * 100, 2)
-            results.append({
-                "النص": row.get("النص", ""),
-                "المادة": row.get("المادة", ""),
-                "القسم": row.get("القسم", ""),
-                "مثال": row.get("مثال", ""),
-                "التطابق": f"{score}%"
-            })
-
-        best = results[0]
-        return best["النص"], f"المادة {best['المادة']} - القسم: {best['القسم']} (دقة {best['التطابق']})", best["مثال"]
+        best_row = self.db.iloc[top_indices[0]]
+        score = round(similarities[top_indices[0]] * 100, 2)
+        return (
+            best_row.get("النص", ""),
+            f"المادة {best_row.get('المادة', '')} - القسم: {best_row.get('القسم', '')} (دقة {score}%)",
+            best_row.get("مثال", "")
+        )
 
     # ==============================
     # إعادة تحميل القاعدة
@@ -107,6 +90,6 @@ class MiniLegalAI:
     def reload(self, new_path=None):
         if new_path:
             self.workbook_path = new_path
-        self.db = self.load_database()
-        self.vectorizer, self.tfidf_matrix = self.build_tfidf_matrix()
+        self.load_database_from_excel()
+        self.build_tfidf_matrix()
         st.success("✅ تم تحديث قاعدة البيانات بنجاح.")
