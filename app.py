@@ -27,6 +27,7 @@ def load_official_css():
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     else:
         st.info("ℹ️ ملف CSS الرسمي غير موجود: assets/styles_official.css")
+
 load_official_css()
 
 # =====================================================
@@ -177,7 +178,41 @@ def smart_recommender(role_label="العمال", n=None):
             )
 
 # =====================================================
-# 🏠 الصفحة الرئيسية الحديثة مع بطاقات الفئات
+# 🏠 دوال الصفحات الفرعية (يجب تعريفها قبل القاموس pages)
+# =====================================================
+def workers_section(): 
+    section_header("👷 قسم العمال", "👷")
+    show_ai_assistant()
+    smart_recommender("العمال")
+
+def employers_section():
+    section_header("🏢 قسم أصحاب العمل", "🏢")
+    show_ai_assistant()
+    smart_recommender("اصحاب العمل")
+
+def inspectors_section():
+    section_header("🕵️ قسم المفتشين", "🕵️")
+    show_ai_assistant()
+    smart_recommender("مفتشو العمل")
+
+def researchers_section():
+    section_header("📖 قسم الباحثين والمتدربين", "📖")
+    show_ai_assistant()
+    smart_recommender("الباحثون والمتدربون")
+
+def settings_page():
+    section_header("⚙️ الإعدادات", "⚙️")
+    st.write("يمكنك تعديل الإعدادات من هنا.")
+    new_path = st.text_input("📁 مسار ملف Excel:", value=workbook_path)
+    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
+    if st.button("💾 حفظ"):
+        settings.settings["WORKBOOK_PATH"] = new_path
+        settings.settings["SHEET_URL"] = new_sheet
+        settings.save_settings()
+        st.success("✅ تم حفظ الإعدادات بنجاح!")
+
+# =====================================================
+# 🏠 الصفحة الرئيسية
 # =====================================================
 if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
@@ -185,7 +220,6 @@ if "current_page" not in st.session_state:
 def show_home():
     st.title(f"⚖️ {config.get('APP_NAME')}")
     st.markdown("<h4 style='color:gray;'>اختر فئتك للانتقال إلى القسم المناسب:</h4>", unsafe_allow_html=True)
-
     categories = [
         {"label": "👷 العمال", "key": "workers", "color":"#3b82f6", "img": f"{ICON_PATH}workers.png"},
         {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#10b981", "img": f"{ICON_PATH}employers.png"},
@@ -193,7 +227,6 @@ def show_home():
         {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#6366f1", "img": f"{ICON_PATH}researchers.png"},
         {"label": "⚙️ الإعدادات", "key": "settings", "color":"#9333ea", "img": f"{ICON_PATH}settings.png"}
     ]
-
     cols = st.columns(len(categories))
     for idx, cat in enumerate(categories):
         with cols[idx]:
@@ -216,7 +249,9 @@ def show_home():
             if st.button(f"اختيار {cat['label']}", key=f"btn_{cat['key']}"):
                 st.session_state.current_page = cat["key"]
 
-# الانتقال للصفحة الحالية
+# =====================================================
+# 🏠 قاموس الصفحات
+# =====================================================
 pages = {
     "home": show_home,
     "workers": workers_section,
@@ -226,7 +261,9 @@ pages = {
     "settings": settings_page
 }
 
-# زر العودة للصفحة الرئيسية
+# =====================================================
+# 🔄 الانتقال للصفحة الحالية أو العودة للصفحة الرئيسية
+# =====================================================
 if st.session_state.current_page != "home" and st.button("⬅️ العودة للصفحة الرئيسية"):
     st.session_state.current_page = "home"
 else:
