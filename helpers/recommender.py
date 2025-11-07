@@ -31,7 +31,7 @@ def get_recommendations_data():
     return data
 
 def smart_recommender(role_label="العمال", n=None):
-    """عرض التوصيات الذكية في واجهة أنيقة"""
+    """عرض التوصيات الذكية في واجهة رسمية وهادئة"""
     recommendations = get_recommendations_data().get(role_label, [])
     
     if not recommendations:
@@ -43,17 +43,19 @@ def smart_recommender(role_label="العمال", n=None):
     n = n or MAX_CARDS
     cols = st.columns(3)
 
-    # أنماط الألوان الرسمية للتصنيفات
+    # =====================================
+    # 🎨 الألوان الرسمية للبطاقات حسب النوع
+    # =====================================
     type_styles = {
-        "حاسبة": "linear-gradient(135deg, #3b82f6, #1d4ed8)",
-        "توعية": "linear-gradient(135deg, #10b981, #059669)",
-        "قانوني": "linear-gradient(135deg, #6366f1, #4338ca)",
-        "تعليمي": "linear-gradient(135deg, #f59e0b, #d97706)",
-        "امتثال": "linear-gradient(135deg, #9333ea, #7e22ce)",
-        "مالي": "linear-gradient(135deg, #ec4899, #db2777)",
-        "مرجع": "linear-gradient(135deg, #14b8a6, #0d9488)",
-        "نموذج": "linear-gradient(135deg, #f97316, #ea580c)",
-        "بحث": "linear-gradient(135deg, #22c55e, #16a34a)"
+        "حاسبة": "linear-gradient(135deg, #1E3A8A, #2563EB)",      # أزرق داكن رسمي
+        "توعية": "linear-gradient(135deg, #2563EB, #3B82F6)",      # أزرق متوسط
+        "قانوني": "linear-gradient(135deg, #10B981, #06B6D4)",     # أخضر رسمي
+        "تعليمي": "linear-gradient(135deg, #065F46, #10B981)",     # أخضر داكن
+        "امتثال": "linear-gradient(135deg, #1E40AF, #2563EB)",
+        "مالي": "linear-gradient(135deg, #10B981, #34D399)",
+        "مرجع": "linear-gradient(135deg, #3B82F6, #60A5FA)",
+        "نموذج": "linear-gradient(135deg, #2563EB, #1D4ED8)",
+        "بحث": "linear-gradient(135deg, #1E3A8A, #3B82F6)"
     }
 
     for idx, rec in enumerate(recommendations[:n]):
@@ -62,16 +64,16 @@ def smart_recommender(role_label="العمال", n=None):
             st.markdown(
                 f"""
                 <div style="background: {style};
-                            border-radius:15px;
-                            padding:18px;
-                            margin:8px;
-                            box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+                            border-radius:16px;
+                            padding:20px;
+                            margin:10px;
+                            box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
                             text-align:center;
                             color:white;">
                     <img src='{rec['img']}' alt='icon' width='50px' style='margin-bottom:10px;'/>
                     <h4 style='margin-bottom:5px;'>{rec['icon']} {rec['العنوان']}</h4>
                     <p style='font-size:14px; opacity:0.9;'>{rec['الوصف']}</p>
-                    <a href='{rec['link']}' target='_blank' style='color:#fff; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
+                    <a href='{rec['link']}' target='_blank' style='color:#F9FAFB; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
                 </div>
                 """,
                 unsafe_allow_html=True
