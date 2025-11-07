@@ -8,13 +8,18 @@ class SettingsManager:
     def __init__(self, path="helpers/config.json"):
         self.path = path
         self.settings = self.load_settings()
-        st.session_state["config"] = self.settings
+        # تهيئة session_state إذا لم يكن موجود
+        if "config" not in st.session_state:
+            st.session_state["config"] = self.settings
 
     def load_settings(self):
         if os.path.exists(self.path):
             try:
                 with open(self.path, "r", encoding="utf-8") as f:
                     settings = json.load(f)
+                # إذا كان رابط Google Sheet فارغ، ضع الرابط الافتراضي
+                if not settings.get("SHEET_URL"):
+                    settings["SHEET_URL"] = "https://docs.google.com/spreadsheets/d/1aCnqHzxWh8RlIgCleHByoCPHMzI1i5fCjrpizcTxGVc/export?format=csv"
                 return settings
             except json.JSONDecodeError as e:
                 st.warning(f"⚠️ خطأ في ملف الإعدادات: {e}. سيتم إعادة إنشائه افتراضيًا.")
@@ -32,7 +37,7 @@ class SettingsManager:
             "LANG": "ar",
             "THEME": "فاتح",
             "WORKBOOK_PATH": "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx",
-            "SHEET_URL": "",
+            "SHEET_URL": "https://docs.google.com/spreadsheets/d/1aCnqHzxWh8RlIgCleHByoCPHMzI1i5fCjrpizcTxGVc/export?format=csv",
             "CACHE": {"ENABLED": True, "TTL_SECONDS": 600},
             "UI": {"STYLES_LIGHT": "assets/styles_light.css", "STYLES_DARK": "assets/styles_dark.css", "ICON_PATH": "assets/icons/"},
             "AI": {"ENABLE": True, "MEMORY_PATH": "ai_memory.json", "LOGS_PATH": "AI_Analysis_Logs.csv", "MAX_HISTORY": 20},
@@ -77,6 +82,7 @@ class SettingsManager:
         self.settings = self.default_settings()
         self.save_settings()
 
+
 # ==============================
 # ⚙️ Excel Safe Loader
 # ==============================
@@ -86,6 +92,11 @@ def safe_load_excel(path):
         return pd.DataFrame(columns=['المادة','القسم','النص','مثال'])
     try:
         df = pd.read_excel(path, engine='openpyxl')
+        expected_cols = ['المادة','القسم','النص','مثال']
+        for col in expected_cols:
+            if col not in df.columns:
+                st.warning(f"⚠️ العمود '{col}' غير موجود في ملف Excel. سيتم إضافته فارغًا.")
+                df[col] = ""
         df.fillna("", inplace=True)
         return df
     except Exception as e:
