@@ -144,12 +144,12 @@ def smart_recommender(role="العمال", n=None):
     n = n or MAX_CARDS
     cols = st.columns(3)
     type_styles = {
-        "حاسبة": "linear-gradient(135deg, #3b82f6, #1d4ed8)",
-        "توعية": "linear-gradient(135deg, #10b981, #059669)",
-        "قانوني": "linear-gradient(135deg, #6366f1, #4338ca)",
-        "تعليمي": "linear-gradient(135deg, #f59e0b, #d97706)",
-        "نموذج": "linear-gradient(135deg, #f97316, #ea580c)",
-        "بحث": "linear-gradient(135deg, #22c55e, #16a34a)"
+        "حاسبة": "linear-gradient(135deg, #4da6ff, #1e90ff)",
+        "توعية": "linear-gradient(135deg, #66cc99, #339966)",
+        "قانوني": "linear-gradient(135deg, #7f7fff, #5555ff)",
+        "تعليمي": "linear-gradient(135deg, #40c0c0, #008080)",
+        "نموذج": "linear-gradient(135deg, #a0d6b4, #66aa88)",
+        "بحث": "linear-gradient(135deg, #9ec1f7, #6699cc)"
     }
     for idx, rec in enumerate(recs[:n]):
         with cols[idx % len(cols)]:
@@ -216,11 +216,11 @@ def show_home():
     st.title(f"⚖️ {config.get('APP_NAME')}")
     st.markdown("<h4 style='color:gray;'>اختر فئتك للانتقال إلى القسم المناسب:</h4>", unsafe_allow_html=True)
     categories = [
-        {"label": "👷 العمال", "key": "workers", "color":"#3b82f6", "img": f"{ICON_PATH}workers.png"},
-        {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#10b981", "img": f"{ICON_PATH}employers.png"},
-        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "color":"#f59e0b", "img": f"{ICON_PATH}inspectors.png"},
-        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#6366f1", "img": f"{ICON_PATH}researchers.png"},
-        {"label": "⚙️ الإعدادات", "key": "settings", "color":"#9333ea", "img": f"{ICON_PATH}settings.png"}
+        {"label": "👷 العمال", "key": "workers", "color":"#4da6ff", "img": f"{ICON_PATH}workers.png"},
+        {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#66cc99", "img": f"{ICON_PATH}employers.png"},
+        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "color":"#40c0c0", "img": f"{ICON_PATH}inspectors.png"},
+        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#7f7fff", "img": f"{ICON_PATH}researchers.png"},
+        {"label": "⚙️ الإعدادات", "key": "settings", "color":"#b19cd9", "img": f"{ICON_PATH}settings.png"}
     ]
     cols = st.columns(len(categories))
     for idx, cat in enumerate(categories):
