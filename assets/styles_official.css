@@ -1,5 +1,89 @@
-body { background-color: #f8f9fa; color: #1a1a1a; font-family: 'Arial', sans-serif; }
-h1,h2,h3,h4,h5 { color: #002147; }
-.stButton>button { background-color: #002147; color: #ffffff; border-radius: 5px; }
-.stTextInput>div>input { border: 1px solid #002147; }
-.ag-theme-streamlit { --ag-header-background-color: #002147; --ag-odd-row-background-color: #e9ecef; --ag-even-row-background-color: #ffffff; }
+/* =======================================
+   🎨 الألوان الرسمية الهادئة للتطبيق
+   ======================================= */
+
+:root {
+  --primary-color: #1E3A8A;       /* أزرق داكن رسمي */
+  --secondary-color: #2563EB;     /* أزرق متوسط */
+  --accent-color: #10B981;        /* أخضر رسمي */
+  --background-color: #F9FAFB;    /* خلفية فاتحة */
+  --card-bg: #FFFFFF;
+  --text-color: #111827;
+  --muted-text: #6B7280;
+  --border-radius: 16px;
+  --shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 💠 تنسيق الخلفية العامة */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: 'Cairo', sans-serif;
+}
+
+/* 🟦 العناوين */
+h1, h2, h3, h4 {
+  color: var(--primary-color);
+}
+
+/* 🟩 البطاقات الرسمية */
+div[data-testid="stMarkdownContainer"] > div {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+/* 🔹 الأزرار */
+button[kind="primary"] {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+  border-radius: 8px !important;
+}
+
+/* 🟢 الروابط */
+a {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+/* ⚖️ الهيدر */
+header[data-testid="stHeader"] {
+  background: linear-gradient(90deg, #1E3A8A, #2563EB);
+  color: white;
+}
+
+/* 📊 الجداول */
+.css-1q8dd3e {
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  background: #fff;
+}
+
+/* 🧠 المساعد الذكي */
+.chat-message {
+  border-radius: 12px;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+}
+.chat-message.user {
+  background: #E0F2FE;
+  color: #0C4A6E;
+}
+.chat-message.ai {
+  background: #E6F4EA;
+  color: #065F46;
+}
+
+/* 🧭 القائمة الجانبية */
+section[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, #1E3A8A, #1E40AF);
+  color: white;
+}
+section[data-testid="stSidebar"] .stRadio label {
+  color: white;
+}
