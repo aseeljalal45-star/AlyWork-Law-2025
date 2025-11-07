@@ -170,7 +170,46 @@ def smart_recommender(role="العمال", n=None):
             )
 
 # =====================================================
-# 🏢 أصحاب العمل
+# 👷 قسم العمال
+# =====================================================
+def workers_section():
+    section_header("👷 قسم العمال", "👷")
+    show_ai_assistant("workers")
+    smart_recommender("العمال")
+    
+    st.subheader("🧮 حاسبة مكافأة نهاية الخدمة")
+    years = st.number_input("عدد سنوات الخدمة:", min_value=0, step=1, key="workers_years")
+    last_salary = st.number_input("آخر راتب شهري:", min_value=0.0, step=10.0, format="%.2f", key="workers_salary")
+    if st.button("احسب المكافأة", key="workers_calc_bonus"):
+        bonus = 0
+        if years <= 5:
+            bonus = 0.5 * last_salary * years
+        else:
+            bonus = 0.5 * last_salary * 5 + last_salary * (years - 5)
+        st.success(f"💰 مكافأة نهاية الخدمة التقديرية: {bonus:,.2f} دينار")
+    
+    st.subheader("📚 حقوقك الأساسية كعامل")
+    rights_list = [
+        "✅ الحق في أجر عادل ومنتظم",
+        "✅ الحق في إجازة سنوية مدفوعة",
+        "✅ الحق في مكافأة نهاية الخدمة",
+        "✅ الحق في بيئة عمل آمنة",
+        "✅ الحق في ساعات عمل محددة وفترات راحة"
+    ]
+    for r in rights_list:
+        st.markdown(f"- {r}")
+    
+    st.subheader("📊 توزيع العمال حسب الأقسام")
+    if not excel_data.empty and "القسم" in excel_data.columns:
+        counts = excel_data['القسم'].value_counts().reset_index()
+        counts.columns = ["القسم", "عدد العمال"]
+        fig = px.bar(counts, x="القسم", y="عدد العمال", color="القسم", text="عدد العمال")
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("ℹ️ بيانات الأقسام غير متوفرة لعرض الرسم البياني.")
+
+# =====================================================
+# باقي الأقسام (كما سبق)
 # =====================================================
 def employers_section():
     section_header("🏢 قسم أصحاب العمل", "🏢")
@@ -188,9 +227,6 @@ def employers_section():
             st.image(tpl["file"], width=60)
             st.markdown(f"**{tpl['title']}**\n\n{tpl['desc']}")
 
-# =====================================================
-# 🕵️ مفتشو العمل
-# =====================================================
 def inspectors_section():
     section_header("🕵️ قسم مفتشو العمل", "🕵️")
     show_ai_assistant("inspectors")
@@ -207,9 +243,6 @@ def inspectors_section():
             st.image(tpl["file"], width=60)
             st.markdown(f"**{tpl['title']}**\n\n{tpl['desc']}")
 
-# =====================================================
-# 📖 الباحثون والمتدربون
-# =====================================================
 def researchers_section():
     section_header("📖 الباحثون والمتدربون", "📖")
     show_ai_assistant("researchers")
@@ -224,6 +257,16 @@ def researchers_section():
         with cols[idx % 2]:
             st.image(rpt["file"], width=50)
             st.markdown(f"**{rpt['title']}**\n\n{rpt['desc']}")
+
+def settings_page():
+    section_header("⚙️ الإعدادات", "⚙️")
+    new_path = st.text_input("📁 مسار ملف Excel:", value=WORKBOOK_PATH)
+    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
+    if st.button("💾 حفظ"):
+        settings.settings["WORKBOOK_PATH"] = new_path
+        settings.settings["SHEET_URL"] = new_sheet
+        settings.save_settings()
+        st.success("✅ تم حفظ الإعدادات بنجاح!")
 
 # =====================================================
 # 🏠 الصفحة الرئيسية
@@ -266,24 +309,11 @@ def show_home():
                 st.session_state.current_page = cat["key"]
 
 # =====================================================
-# ⚙️ الإعدادات
-# =====================================================
-def settings_page():
-    section_header("⚙️ الإعدادات", "⚙️")
-    new_path = st.text_input("📁 مسار ملف Excel:", value=WORKBOOK_PATH)
-    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
-    if st.button("💾 حفظ"):
-        settings.settings["WORKBOOK_PATH"] = new_path
-        settings.settings["SHEET_URL"] = new_sheet
-        settings.save_settings()
-        st.success("✅ تم حفظ الإعدادات بنجاح!")
-
-# =====================================================
 # 🏠 قاموس الصفحات
 # =====================================================
 pages = {
     "home": show_home,
-    "workers": lambda: st.info("👷 صفحة العمال سيتم تطويرها لاحقاً."),
+    "workers": workers_section,
     "employers": employers_section,
     "inspectors": inspectors_section,
     "researchers": researchers_section,
