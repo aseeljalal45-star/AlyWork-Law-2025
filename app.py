@@ -7,7 +7,7 @@ from helpers.ui_components import section_header, message_bubble, info_card
 import plotly.express as px
 
 # =====================================================
-# ⚙️ إعدادات عامة
+# ⚙️ الإعدادات العامة
 # =====================================================
 settings = SettingsManager()
 config = st.session_state.get("config", settings.settings)
@@ -19,19 +19,16 @@ st.set_page_config(
 )
 
 # =====================================================
-# 🌈 تحميل CSS رسمي
+# 🎨 تحميل CSS الرسمي
 # =====================================================
 def load_official_css(css_file="assets/styles_official.css"):
     if os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        st.info(f"ℹ️ ملف CSS الرسمي غير موجود: {css_file}")
-
 load_official_css()
 
 # =====================================================
-# 🧮 تحميل Google Sheet و Excel
+# 📊 تحميل البيانات
 # =====================================================
 def sheet_to_csv_url(sheet_url):
     import re
@@ -60,18 +57,16 @@ def load_google_sheets(url):
 def load_excel(path, expected_cols=None):
     expected_cols = expected_cols or ['المادة', 'القسم', 'النص', 'مثال']
     if not os.path.exists(path):
-        st.info(f"ℹ️ ملف Excel غير موجود: {path}. سيتم إنشاء DataFrame افتراضي.")
         return pd.DataFrame(columns=expected_cols)
     try:
         df = pd.read_excel(path, engine='openpyxl')
         for col in expected_cols:
             if col not in df.columns:
                 df[col] = ""
-        df = df[expected_cols]
         df.fillna("", inplace=True)
         return df
     except Exception as e:
-        st.warning(f"⚠️ خطأ أثناء قراءة Excel: {e}. سيتم إنشاء DataFrame افتراضي.")
+        st.warning(f"⚠️ خطأ أثناء قراءة Excel: {e}")
         return pd.DataFrame(columns=expected_cols)
 
 data = load_google_sheets(SHEET_URL)
@@ -81,48 +76,22 @@ excel_data = load_excel(WORKBOOK_PATH)
 # 🤖 تهيئة المساعد القانوني
 # =====================================================
 def init_ai():
-    if os.path.exists(WORKBOOK_PATH):
-        try:
-            ai = MiniLegalAI(WORKBOOK_PATH)
-            ai.db = excel_data
-            ai.build_tfidf_matrix()
-            return ai
-        except Exception as e:
-            st.warning(f"⚠️ لم يتم تهيئة المساعد القانوني بالكامل: {e}")
-            return None
-    return None
+    try:
+        ai = MiniLegalAI(WORKBOOK_PATH)
+        ai.db = excel_data
+        ai.build_tfidf_matrix()
+        return ai
+    except Exception as e:
+        st.warning(f"⚠️ لم يتم تهيئة المساعد القانوني بالكامل: {e}")
+        return None
 
 if "ai_instance" not in st.session_state:
     st.session_state["ai_instance"] = init_ai()
-
 ai = st.session_state["ai_instance"]
 
 # =====================================================
-# 🤖 عرض المساعد القانوني
+# 🧮 تبويب الحاسبات
 # =====================================================
-def show_ai_assistant():
-    if ai is None:
-        st.info("🤖 المساعد القانوني غير مفعل حالياً.")
-        return
-    section_header("🤖 المساعد القانوني الذكي", "🤖")
-    query = st.text_input("💬 اكتب سؤالك القانوني هنا:")
-    if query:
-        answer, reference, example = ai.advanced_search(query)
-        st.session_state.setdefault("chat_history", []).append({"user": query, "ai": answer})
-        max_history = 20
-        for chat in st.session_state["chat_history"][-max_history:]:
-            message_bubble("👤 المستخدم", chat["user"], is_user=True)
-            message_bubble("🤖 المساعد", chat["ai"], is_user=False)
-        if reference:
-            st.markdown(f"**📜 نص القانون:** {reference}")
-        if example:
-            st.markdown(f"**💡 مثال تطبيقي:** {example}")
-
-# =====================================================
-# 🏠 صفحات الفئات
-# =====================================================
-
-# --- صفحة العمال ---
 def calculators_tab():
     section_header("🧮 الحاسبات القانونية", "🧮")
     calc_options = [
@@ -135,36 +104,105 @@ def calculators_tab():
         "إجازة الحمل والولادة",
         "مكافأة الإجازات المرضية",
         "استحقاقات تغيير الوظيفة أو النقل الداخلي",
-        "حساب استحقاقات نهاية الخدمة للدوام الجزئي",
-        "حاسبة التعويض عن الحوادث أو إصابات العمل"
+        "حاسبة الدوام الجزئي",
+        "تعويض إصابات العمل"
     ]
     choice = st.selectbox("اختر الحاسبة:", calc_options)
-    st.markdown(f"💡 **تم اختيار الحاسبة:** {choice}")
+    st.success(f"💡 تم اختيار الحاسبة: **{choice}**")
 
+# =====================================================
+# 📚 تبويب اعرف حقوقك والتزاماتك (بتصميم ذهبي)
+# =====================================================
 def rights_tab():
     section_header("📚 اعرف حقوقك والتزاماتك", "📚")
     st.markdown("""
-    ### حقوقك:
-    - ⚖️ مكافأة نهاية الخدمة.
-    - ⚖️ أجر العمل الإضافي والعطلات.
-    - ⚖️ بدل النقل والسكن.
-    - ⚖️ الإجازات السنوية والمرضية.
-    - ⚖️ إجازة الحمل والولادة.
-    
-    ### التزاماتك:
-    - 📌 الالتزام بالدوام والقوانين الداخلية.
-    - 📌 إشعار صاحب العمل عند الغياب.
-    - 📌 الحفاظ على أسرار المنشأة.
-    - 📌 تنفيذ المهام بدقة ومسؤولية.
-    """)
+    <style>
+    .rights-card {
+        background: linear-gradient(135deg, #FFD700, #D4AF37);
+        color: #000;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .rights-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 25px rgba(0,0,0,0.25);
+    }
+    .rights-title {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    ul {
+        margin-top: 5px;
+        padding-left: 20px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div class="rights-card">
+            <div class="rights-title">⚖️ حقوق العامل:</div>
+            <ul>
+                <li>مكافأة نهاية الخدمة</li>
+                <li>الأجر الشهري وبدل العمل الإضافي</li>
+                <li>بدل النقل والسكن</li>
+                <li>الإجازات السنوية والمرضية</li>
+                <li>إجازة الزواج أو الوفاة</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="rights-card">
+            <div class="rights-title">👩‍🍼 حقوق المرأة العاملة:</div>
+            <ul>
+                <li>إجازة الحمل والولادة</li>
+                <li>الحق في الرضاعة</li>
+                <li>عدم الفصل أثناء الحمل</li>
+                <li>بيئة عمل آمنة ومناسبة</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="rights-card">
+            <div class="rights-title">📋 التزامات العامل:</div>
+            <ul>
+                <li>الالتزام بساعات الدوام</li>
+                <li>المحافظة على أسرار المنشأة</li>
+                <li>تنفيذ المهام الموكلة بدقة</li>
+                <li>إشعار صاحب العمل عند الغياب</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="rights-card">
+            <div class="rights-title">🏢 التزامات صاحب العمل:</div>
+            <ul>
+                <li>دفع الأجور في موعدها</li>
+                <li>توفير بيئة عمل آمنة</li>
+                <li>منح الإجازات القانونية</li>
+                <li>تسجيل العامل في الضمان الاجتماعي</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+# =====================================================
+# 📝 تبويب محاكي الشكوى
+# =====================================================
 def complaint_simulator_tab():
     section_header("📝 محاكي الشكوى", "📝")
     st.info("🧩 هذه الأداة تتيح لك محاكاة تقديم شكوى عمالية إلكترونيًا (قيد التطوير).")
 
+# =====================================================
+# 👷 صفحة العمال
+# =====================================================
 def workers_section():
     section_header("👷 قسم العمال", "👷")
-    show_ai_assistant()
     tabs = ["🧮 الحاسبات", "📚 اعرف حقوقك", "📝 محاكي الشكوى"]
     selected_tab = st.radio("اختر التبويب:", tabs, horizontal=True)
     if selected_tab == "🧮 الحاسبات":
@@ -174,21 +212,23 @@ def workers_section():
     elif selected_tab == "📝 محاكي الشكوى":
         complaint_simulator_tab()
 
+# =====================================================
+# 🏠 باقي الصفحات
+# =====================================================
 def employers_section():
-    section_header("🏢 قسم أصحاب العمل", "🏢")
-    show_ai_assistant()
+    section_header("🏢 أصحاب العمل", "🏢")
+    st.info("📊 أدوات وأدلة لأصحاب العمل (قيد التوسع).")
 
 def inspectors_section():
-    section_header("🕵️ قسم المفتشين", "🕵️")
-    show_ai_assistant()
+    section_header("🕵️ المفتشون", "🕵️")
+    st.info("🔍 أدوات التفتيش والتحقق قيد التطوير.")
 
 def researchers_section():
     section_header("📖 الباحثون والمتدربون", "📖")
-    show_ai_assistant()
+    st.info("📚 مواد تدريبية ومراجع قانونية.")
 
 def settings_page():
     section_header("⚙️ الإعدادات", "⚙️")
-    st.write("يمكنك تعديل الإعدادات من هنا.")
     new_path = st.text_input("📁 مسار ملف Excel:", value=WORKBOOK_PATH)
     new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
     if st.button("💾 حفظ"):
@@ -207,42 +247,28 @@ def show_home():
     CARD_GRADIENT = "linear-gradient(135deg, #FFD700, #D4AF37)"
     CARD_TEXT_COLOR = "#000000"
     ICON_PATH = "assets/icons/"
-
     st.markdown(f"""
     <div style="text-align:center; padding:20px; background: {CARD_GRADIENT};
                 border-radius:15px; color:{CARD_TEXT_COLOR}; margin-bottom:20px;">
-        <h1 style="margin:0; font-size:40px;">⚖️ {config.get('APP_NAME')}</h1>
-        <p style="font-size:18px; margin-top:5px;">الوصول السريع إلى أقسام المنصة الذكية</p>
+        <h1>⚖️ {config.get('APP_NAME')}</h1>
+        <p>الوصول السريع إلى أقسام المنصة الذكية</p>
     </div>
     """, unsafe_allow_html=True)
-
     categories = [
         {"label": "👷 العمال", "key": "workers", "icon": "workers.png"},
         {"label": "🏢 أصحاب العمل", "key": "employers", "icon": "employers.png"},
-        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "icon": "inspectors.png"},
+        {"label": "🕵️ المفتشون", "key": "inspectors", "icon": "inspectors.png"},
         {"label": "📖 الباحثون والمتدربون", "key": "researchers", "icon": "researchers.png"},
         {"label": "⚙️ الإعدادات", "key": "settings", "icon": "settings.png"}
     ]
-
     cols = st.columns(3)
     for idx, cat in enumerate(categories):
         with cols[idx % 3]:
-            st.markdown(f"""
-                <div style="background: {CARD_GRADIENT};
-                            padding: 25px; border-radius: 25px;
-                            text-align: center; cursor: pointer;
-                            transition: transform 0.3s, box-shadow 0.3s;
-                            box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
-                            margin-bottom:20px;">
-                    <img src='{ICON_PATH}{cat['icon']}' width='70px' style='margin-bottom:15px;'/>
-                    <h3 style='color:{CARD_TEXT_COLOR}; margin-bottom:5px;'>{cat['label']}</h3>
-                </div>
-            """, unsafe_allow_html=True)
-            if st.button(f"اختيار {cat['label']}", key=f"btn_{cat['key']}"):
+            if st.button(cat["label"], key=f"btn_{cat['key']}"):
                 st.session_state.current_page = cat["key"]
 
 # =====================================================
-# 🏠 قاموس الصفحات
+# 🧭 نظام التنقل
 # =====================================================
 pages = {
     "home": show_home,
@@ -252,16 +278,12 @@ pages = {
     "researchers": researchers_section,
     "settings": settings_page
 }
-
-# =====================================================
-# 🔄 الانتقال بين الصفحات
-# =====================================================
-if st.session_state.current_page != "home" and st.button("⬅️ العودة للصفحة الرئيسية"):
+if st.session_state.current_page != "home" and st.button("⬅️ العودة"):
     st.session_state.current_page = "home"
 else:
     pages[st.session_state.current_page]()
 
 # =====================================================
-# 🕒 Footer
+# ⚖️ Footer
 # =====================================================
 st.markdown(f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT')}</small></center>", unsafe_allow_html=True)
