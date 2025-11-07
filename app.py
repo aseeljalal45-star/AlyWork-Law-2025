@@ -321,3 +321,148 @@ else:
 # ⚖️ Footer
 # =====================================================
 st.markdown(f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT')}</small></center>", unsafe_allow_html=True)
+# === إضافة: إدارة البيانات (عرض، بحث/فلتر، إضافة صف، حفظ) ===
+import io
+from openpyxl import load_workbook
+from copy import deepcopy
+
+# --- دوال مساعدة للحفظ والتحميل من/إلى excel ---
+def list_sheets_in_workbook(path):
+    if not path or not os.path.exists(path):
+        return []
+    try:
+        wb = load_workbook(path, read_only=True)
+        return wb.sheetnames
+    except Exception:
+        return []
+
+def save_dataframe_to_excel(path, df, sheet_name="Sheet1"):
+    """
+    يستبدل الورقة sheet_name في الملف path بمحتوى df.
+    إذا لم يكن الملف موجودًا، ينشئ ملفًا جديدًا.
+    """
+    try:
+        if os.path.exists(path):
+            # نحتاج إلى كتابة في ملف موجود: نستخدم openpyxl للقراءة ثم استبدال الورقة
+            with pd.ExcelWriter(path, engine="openpyxl", mode="a", if_sheet_exists="replace") as writer:
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+        else:
+            # إنشاؤه لأول مرة
+            with pd.ExcelWriter(path, engine="openpyxl") as writer:
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+# --- واجهة إدارة البيانات ---
+def data_manager_tab():
+    section_header("📂 إدارة البيانات", "📂")
+
+    st.markdown("**مصدر البيانات:** اختر الورقة (Sheet) للعمل عليها. إذا أردت الكتابة إلى Google Sheet استخدم رابط التصدير بصيغة CSV في إعدادات `SHEET_URL`.")
+    # قائمة الأوراق من ملف Excel المحلي (WORKBOOK_PATH)
+    sheets = list_sheets_in_workbook(WORKBOOK_PATH)
+    sheets = ["(لا يوجد ملف Excel محلي)"] + sheets if not sheets else sheets
+
+    sheet_choice = st.selectbox("اختر الورقة:", sheets, index=0 if len(sheets)>0 else 0)
+
+    # تحميل البيانات - إن كان Google Sheet مفعل، نعطي الخيار للتحميل منه أو من Excel
+    source_option = st.radio("المصدر:", ["Excel محلي", "Google Sheet (SHEET_URL)"]) if SHEET_URL else st.write("مصدر: Excel محلي") or "Excel محلي"
+
+    df = pd.DataFrame()
+    if source_option == "Google Sheet (SHEET_URL)" and SHEET_URL:
+        df = load_google_sheets(SHEET_URL)
+    else:
+        # تحميل الورقة المحددة من الملف المحلي
+        if sheet_choice and sheet_choice != "(لا يوجد ملف Excel محلي)":
+            try:
+                df = pd.read_excel(WORKBOOK_PATH, sheet_name=sheet_choice, engine='openpyxl')
+            except Exception as e:
+                st.warning(f"⚠️ لم يتم تحميل الورقة: {e}")
+                df = pd.DataFrame()
+
+    if df.empty:
+        st.info("لا توجد بيانات في هذه الورقة أو لم يتم تحميلها بعد.")
+        # عرض زر لإنشاء هيكل افتراضي إن رغبت
+    else:
+        # --- بحث سريع ---
+        query = st.text_input("🔎 بحث حر (يبحث في كل الأعمدة):")
+        if query:
+            mask = df.astype(str).apply(lambda row: row.str.contains(query, case=False, na=False)).any(axis=1)
+            df_display = df[mask].copy()
+            st.markdown(f"**النتائج:** {len(df_display)} صفوف تطابق '{query}'")
+        else:
+            df_display = df.copy()
+
+        # --- فلتر حسب عمود واحد (اختياري) ---
+        with st.expander("🔧 فلتر حسب عمود/قيمة (اختياري)"):
+            col_to_filter = st.selectbox("اختر عمودًا للفلترة:", ["(لا فلترة)"] + df.columns.tolist())
+            if col_to_filter and col_to_filter != "(لا فلترة)":
+                unique_vals = df[col_to_filter].dropna().astype(str).unique().tolist()[:200]
+                chosen_vals = st.multiselect("اختر قيمة/قيم للعرض:", unique_vals)
+                if chosen_vals:
+                    df_display = df_display[df_display[col_to_filter].astype(str).isin(chosen_vals)]
+
+        # --- عرض الجدول (مع خيار التنزيل) ---
+        st.dataframe(df_display, use_container_width=True)
+        csv_bytes = df_display.to_csv(index=False).encode('utf-8')
+        st.download_button("⬇️ تحميل نتائج كـ CSV", data=csv_bytes, file_name=f"{sheet_choice}_export.csv", mime="text/csv")
+
+    # --- نموذج إضافة صف جديد (يتكيف مع أعمدة الورقة) ---
+    st.markdown("---")
+    st.subheader("➕ إضافة صف جديد")
+    if df.empty:
+        st.info("لا يمكن إنشاء نموذج إدخال لأن الورقة فارغة أو لم تُحمّل. اختر ورقة تحتوي أعمدة.")
+    else:
+        with st.form("add_row_form", clear_on_submit=True):
+            new_row = {}
+            cols = df.columns.tolist()
+            # نقسم الحقول إلى عمودين للعرض بشكل مرتب
+            left, right = st.columns(2)
+            for i, col in enumerate(cols):
+                target = left if i % 2 == 0 else right
+                with target:
+                    # اختيار نوع الحقل بناءً على dtype تقريبي
+                    if pd.api.types.is_numeric_dtype(df[col]):
+                        val = st.number_input(label=col, key=f"new_{col}", value=0.0)
+                    else:
+                        val = st.text_input(label=col, key=f"new_{col}_text")
+                    new_row[col] = val
+            submitted = st.form_submit_button("💾 أضف السطر واحفظ")
+            if submitted:
+                try:
+                    df_new = df.copy()
+                    # تحويل القيم النصية الفارغة إلى "" بدل NaN
+                    df_new = df_new.fillna("")
+                    # append row (نضمن توافق الأعمدة)
+                    df_new = pd.concat([df_new, pd.DataFrame([new_row])], ignore_index=True)
+                    # حفظ إلى ملف Excel المحلي (استبدال الورقة)
+                    ok, err = save_dataframe_to_excel(WORKBOOK_PATH, df_new, sheet_name=sheet_choice)
+                    if ok:
+                        st.success("✅ تم إضافة السطر بنجاح وحفظ الملف المحلي.")
+                        # نفّذ إعادة تحميل: نلغي الكاش
+                        try:
+                            load_excel.clear()
+                            load_google_sheets.clear()
+                        except Exception:
+                            pass
+                    else:
+                        st.error(f"❌ فشل حفظ الملف: {err}")
+                except Exception as e:
+                    st.error(f"❌ حدث خطأ أثناء الإضافة: {e}")
+
+    # --- خيار عرض/تحميل ملف Excel كامل ---
+    st.markdown("---")
+    if os.path.exists(WORKBOOK_PATH):
+        with open(WORKBOOK_PATH, "rb") as f:
+            st.download_button("⬇️ تحميل الملف الكامل (Excel)", data=f, file_name=os.path.basename(WORKBOOK_PATH), mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    else:
+        st.info("ملف Excel المحلي غير موجود حالياً. تأكد من إعداد WORKBOOK_PATH في الإعدادات.")
+# === نهاية إضافة إدارة البيانات ===
+
+# ثم أضف "data_manager_tab" إلى صفحات التنقّل
+pages["data_manager"] = data_manager_tab
+
+# وأضف زر الوصول إليه في الواجهة الرئيسة (مثال: أسفل البطاقات)
+if st.session_state.current_page == "home":
+    if st.button("🗄️ إدارة البيانات"):
+        st.session_state.current_page = "data_manager"
