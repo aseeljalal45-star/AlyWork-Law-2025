@@ -9,7 +9,7 @@ import plotly.express as px
 # ⚙️ إعدادات عامة
 # =====================================================
 settings = SettingsManager()
-config = st.session_state["config"]
+config = st.session_state.get("config", settings.settings)
 
 st.set_page_config(
     page_title=config.get("APP_NAME", "منصة قانون العمل الأردني الذكية"),
@@ -116,8 +116,6 @@ def show_ai_assistant():
 # =====================================================
 ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
 MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
-
-# التدرج الذهبي للبطاقات والنص
 CARD_GRADIENT = "linear-gradient(135deg, #FFD700, #D4AF37)"
 CARD_TEXT_COLOR = "#000000"
 
@@ -206,7 +204,7 @@ def settings_page():
         st.success("✅ تم حفظ الإعدادات بنجاح!")
 
 # =====================================================
-# 🏠 الصفحة الرئيسية جديدة احترافية
+# 🏠 الصفحة الرئيسية
 # =====================================================
 if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
