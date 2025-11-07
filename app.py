@@ -10,79 +10,10 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 import plotly.express as px
 
 # ==============================
-# ⚙️ Paths
+# ⚙️ Initialize Settings
 # ==============================
-CONFIG_PATHS = [
-    "config.json",
-    "./config.json",
-    "./settings/config.json"
-]
-
-# ==============================
-# ⚙️ Load or create config.json
-# ==============================
-def load_config():
-    config_file_found = None
-    for path in CONFIG_PATHS:
-        if os.path.exists(path):
-            config_file_found = path
-            break
-
-    if config_file_found:
-        try:
-            with open(config_file_found, "r", encoding="utf-8") as f:
-                config_data = json.load(f)
-            st.success(f"✅ تم تحميل الإعدادات من {config_file_found}")
-        except Exception as e:
-            st.error(f"⚠️ خطأ في قراءة {config_file_found}: {e}")
-            config_data = None
-    else:
-        config_data = None
-
-    if config_data is None:
-        st.warning("⚠️ لم يتم العثور على config.json صالح، سيتم استخدام إعدادات افتراضية.")
-        config_data = {
-            "APP_NAME": "منصة قانون العمل الأردني الذكية",
-            "THEME": "فاتح",
-            "WORKBOOK_PATH": "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx",
-            "SHEET_URL": "",
-            "CACHE": {"ENABLED": True, "TTL_SECONDS": 600},
-            "UI": {"STYLES_LIGHT": "assets/styles_light.css", "STYLES_DARK": "assets/styles_dark.css"},
-            "AI": {"ENABLE": True, "MAX_HISTORY": 20},
-            "RECOMMENDER": {"MAX_CARDS": 6},
-            "SIDEBAR": {"MENU_ITEMS": [
-                {"label": "🏠 الصفحة الرئيسية", "icon": "house"},
-                {"label": "👷 العمال", "icon": "person"},
-                {"label": "🏢 أصحاب العمل", "icon": "building"},
-                {"label": "🕵️ مفتشو العمل", "icon": "search"},
-                {"label": "📖 الباحثون والمتدربون", "icon": "book"},
-                {"label": "⚙️ الإعدادات", "icon": "gear"}
-            ]},
-            "FOOTER": {"TEXT": f"© {datetime.datetime.now().year} AlyWork Law Pro — جميع الحقوق محفوظة."}
-        }
-
-        # إنشاء config.json جديد تلقائيًا
-        save_path = CONFIG_PATHS[0]
-        try:
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        except Exception:
-            pass
-        try:
-            with open(save_path, "w", encoding="utf-8") as f:
-                json.dump(config_data, f, ensure_ascii=False, indent=4)
-            st.success(f"✅ تم إنشاء ملف config.json جديد في {save_path}")
-        except Exception as e:
-            st.error(f"⚠️ لم يتم إنشاء config.json: {e}")
-
-    return config_data
-
-# ==============================
-# ⚙️ Initialize settings
-# ==============================
-if "config" not in st.session_state:
-    st.session_state["config"] = load_config()
+settings = SettingsManager()  # يقوم تلقائيًا بتحميل أو إنشاء config.json
 config = st.session_state["config"]
-settings = SettingsManager()
 
 # ==============================
 # ⚙️ Page config
@@ -138,19 +69,19 @@ data = load_google_sheets(SHEET_URL)
 workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
 
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
-def load_workbook(path):
+def safe_load_excel(path):
     if not os.path.exists(path):
-        st.warning(f"⚠️ ملف Excel غير موجود: {path}")
+        st.warning(f"⚠️ ملف Excel غير موجود: {path}. سيتم إنشاء DataFrame افتراضي.")
         return pd.DataFrame(columns=['المادة','القسم','النص','مثال'])
     try:
         df = pd.read_excel(path, engine='openpyxl')
         df.fillna("", inplace=True)
         return df
     except Exception as e:
-        st.error(f"⚠️ لم يتم تحميل Excel (ملف تالف أو غير صالح): {e}")
+        st.error(f"⚠️ ملف Excel تالف أو غير صالح: {e}. سيتم إنشاء DataFrame افتراضي.")
         return pd.DataFrame(columns=['المادة','القسم','النص','مثال'])
 
-excel_data = load_workbook(workbook_path)
+excel_data = safe_load_excel(workbook_path)
 
 if os.path.exists(workbook_path):
     try:
@@ -216,7 +147,7 @@ def show_statistics(df):
         st.plotly_chart(fig, use_container_width=True)
 
 # ==============================
-# 🏠 Pages placeholders
+# 🏠 Pages
 # ==============================
 def show_home():
     st.title(f"⚖️ {config.get('APP_NAME')}")
@@ -227,11 +158,11 @@ def show_home():
     show_ai_assistant()
     smart_recommender("العمال", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
-def workers_section(): st.write("👷 قسم العمال")
-def employers_section(): st.write("🏢 قسم أصحاب العمل")
-def inspectors_section(): st.write("🕵️ قسم المفتشين")
-def researchers_section(): st.write("📖 قسم الباحثين والمتدربين")
-def settings_page(): st.write("⚙️ صفحة الإعدادات")
+def workers_section(): section_header("👷 قسم العمال", "👷"); show_ai_assistant(); smart_recommender("العمال")
+def employers_section(): section_header("🏢 قسم أصحاب العمل", "🏢"); show_ai_assistant(); smart_recommender("اصحاب العمل")
+def inspectors_section(): section_header("🕵️ قسم المفتشين", "🕵️"); show_ai_assistant(); smart_recommender("مفتشو العمل")
+def researchers_section(): section_header("📖 قسم الباحثين والمتدربين", "📖"); show_ai_assistant(); smart_recommender("الباحثون والمتدربون")
+def settings_page(): section_header("⚙️ الإعدادات", "⚙️"); st.write("يمكن تعديل الإعدادات من هنا")
 
 # ==============================
 # ⚙️ Sidebar
