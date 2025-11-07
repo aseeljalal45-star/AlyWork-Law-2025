@@ -1,28 +1,18 @@
-# ==============================
-# AlyWork Law Pro – Requirements for Streamlit Cloud
-# ==============================
+# Streamlit core
+streamlit>=1.26.0
 
-# واجهة المستخدم
-streamlit>=1.25.0
-
-# قوائم واختيارات تفاعلية
-streamlit-option-menu>=0.5.3
-
-# جداول تفاعلية
-st-aggrid>=1.15.0
-
-# معالجة البيانات
-pandas>=2.0.0
-numpy>=1.26.0
-openpyxl>=3.1.0
+# Data handling
+pandas>=2.2.0
+openpyxl>=3.1.2
 xlrd>=2.0.1
 
-# التحليل الذكي
-scikit-learn>=1.3.0
+# UI & widgets
+streamlit-option-menu>=0.5.2
+streamlit-aggrid>=1.2.0.post1
 
-# الرسوم البيانية
-plotly>=5.20.0
-
-# إعدادات وبيئة
-python-dotenv>=1.1.0
+# Environment & settings
+python-dotenv>=1.0.0
 watchdog>=3.0.0
+
+# Logging & utilities
+rich>=14.2.0
