@@ -8,21 +8,19 @@ class SettingsManager:
     def __init__(self, path="helpers/config.json"):
         self.path = path
         self.settings = self.load_settings()
-        # تهيئة session_state إذا لم يكن موجود
-        if "config" not in st.session_state:
-            st.session_state["config"] = self.settings
+        st.session_state["config"] = self.settings  # تحميل مباشر إلى session state
 
     def load_settings(self):
         if os.path.exists(self.path):
             try:
                 with open(self.path, "r", encoding="utf-8") as f:
                     settings = json.load(f)
-                # إذا كان رابط Google Sheet فارغ، ضع الرابط الافتراضي الحقيقي
+                # التأكد من وجود Google Sheet
                 if not settings.get("SHEET_URL"):
-                    settings["SHEET_URL"] = "https://docs.google.com/spreadsheets/d/1aCnqHzxWh8RlIgCleHByoCPHMzI1i5fCjrpizcTxGVc/export?format=csv"
+                    settings["SHEET_URL"] = self.default_settings()["SHEET_URL"]
                 return settings
             except json.JSONDecodeError as e:
-                st.warning(f"⚠️ خطأ في ملف الإعدادات: {e}. سيتم إعادة إنشائه افتراضيًا.")
+                st.warning(f"⚠️ خطأ في ملف الإعدادات: {e}. سيتم إنشاء إعدادات افتراضية.")
                 self.save_default_settings()
                 return self.default_settings()
         else:
@@ -84,7 +82,7 @@ class SettingsManager:
 
 
 # ==============================
-# ⚙️ Excel Safe Loader
+# ⚙️ تحميل Excel بأمان
 # ==============================
 def safe_load_excel(path):
     if not os.path.exists(path):
@@ -92,8 +90,7 @@ def safe_load_excel(path):
         return pd.DataFrame(columns=['المادة','القسم','النص','مثال'])
     try:
         df = pd.read_excel(path, engine='openpyxl')
-        expected_cols = ['المادة','القسم','النص','مثال']
-        for col in expected_cols:
+        for col in ['المادة','القسم','النص','مثال']:
             if col not in df.columns:
                 st.warning(f"⚠️ العمود '{col}' غير موجود في ملف Excel. سيتم إضافته فارغًا.")
                 df[col] = ""
