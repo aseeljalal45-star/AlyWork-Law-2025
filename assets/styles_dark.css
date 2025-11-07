@@ -1,71 +1,60 @@
-/* ==================== */
-/* AlyWork Law Pro - Dark Theme */
-/* ==================== */
-
-/* الخلفية العامة */
+/* === النمط الغامق الرسمي === */
 body {
-    background-color: #0B1E3F;
-    color: #FFFFFF;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #f1f1f1;
+    font-family: "Cairo", sans-serif;
 }
 
-/* العناوين */
-h1, h2, h3, h4 {
-    color: #90CAF9;
-    font-weight: bold;
+/* ===== البطاقات العامة ===== */
+.card {
+    background-color: #1e1e1e;
+    border: 1px solid #2b2b2b;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    padding: 1rem 1.2rem;
+    margin: 0.8rem 0;
 }
 
-/* النصوص العادية */
-p, span, li {
-    color: #E0E0E0;
+.card-title {
+    color: #66b2ff;
+    font-weight: 700;
 }
 
-/* البطاقات */
-.stCard {
-    background-color: #1565C0;
+.card-text {
+    color: #d0d0d0;
+}
+
+/* ===== فئات البطاقات ===== */
+.card.legal {
+    border-left: 6px solid #66b2ff;
+}
+.card.educational {
+    border-left: 6px solid #9ca3af;
+}
+.card.professional {
+    border-left: 6px solid #22c55e;
+}
+.card.warning {
+    border-left: 6px solid #facc15;
+}
+
+/* ===== الأزرار ===== */
+button, .stButton>button {
+    background-color: #1a73e8;
+    color: #fff;
     border-radius: 10px;
-    padding: 10px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-    margin-bottom: 10px;
+    border: none;
+    padding: 0.5rem 1rem;
 }
 
-/* الأزرار */
-.stButton>button {
-    background-color: #1976D2;
-    color: white;
-    border-radius: 5px;
-    padding: 5px 15px;
-    font-weight: bold;
-    transition: all 0.2s ease-in-out;
+button:hover, .stButton>button:hover {
+    background-color: #155ab6;
 }
 
-.stButton>button:hover {
-    background-color: #0D47A1;
-}
-
-/* تنبيهات */
-.stAlert {
-    border-radius: 5px;
-    padding: 8px;
-}
-
-/* روابط */
-a {
-    color: #90CAF9;
-    text-decoration: none;
-}
-a:hover {
-    text-decoration: underline;
-}
-
-/* إدخالات النصوص */
-input, textarea {
-    border-radius: 5px;
-    border: 1px solid #555555;
-    padding: 5px;
-}
-
-/* شريط التقدم */
-.stProgress > div > div {
-    background-color: #1976D2 !important;
+/* ===== فقاعات المحادثة ===== */
+.message-bubble {
+    background-color: #2a2a2a;
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    margin: 0.6rem 0;
 }
