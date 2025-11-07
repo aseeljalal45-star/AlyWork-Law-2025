@@ -94,7 +94,6 @@ ai = st.session_state["ai_instance"]
 # =====================================================
 def calculators_tab():
     section_header("🧮 الحاسبات القانونية", "🧮")
-    
     calcs = [
         {"title": "مكافأة نهاية الخدمة", "desc": "حساب مكافأة نهاية الخدمة حسب سنوات العمل والأجر."},
         {"title": "بدلات العمل الإضافي والليلي والعطلات", "desc": "حساب مستحقات العمل الإضافي."},
@@ -108,14 +107,13 @@ def calculators_tab():
         {"title": "حاسبة الدوام الجزئي", "desc": "حساب الأجر للدوام الجزئي."},
         {"title": "تعويض إصابات العمل", "desc": "حساب التعويضات المترتبة على إصابات العمل."}
     ]
-    
     cols = st.columns(3)
     for i, calc in enumerate(calcs):
         with cols[i % 3]:
             st.markdown(f"""
-            <div style="background:#E8F6F3; padding:25px; border-radius:20px; margin-bottom:20px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
-                <h4 style="color:#117A65;">{calc['title']}</h4>
-                <p style="color:#1C2833;">{calc['desc']}</p>
+            <div style="background:#D6EAF8; padding:20px; border-radius:20px; margin-bottom:20px; text-align:center;">
+                <h4>{calc['title']}</h4>
+                <p>{calc['desc']}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -124,21 +122,21 @@ def calculators_tab():
 # =====================================================
 def rights_tab():
     section_header("📚 حقوق العمال والتزاماتهم", "📚")
-    
     categories = [
         {"title": "⚖️ حقوق العمال", "items": ["الأجر والمكافآت","الإجازات السنوية والمرضية","ظروف العمل وسلامته","الحماية من الفصل التعسفي"]},
         {"title": "👩‍🍼 حقوق المرأة العاملة", "items": ["إجازة الحمل والولادة","حق الرضاعة","عدم الفصل أثناء الحمل","بيئة عمل آمنة ومناسبة"]},
         {"title": "📋 التزامات العامل", "items": ["الالتزام بساعات العمل","أداء المهام بدقة","المحافظة على أسرار المنشأة","إشعار صاحب العمل عند الغياب"]},
         {"title": "🏢 التزامات صاحب العمل", "items": ["دفع الأجور في موعدها","توفير بيئة عمل آمنة","منح الإجازات القانونية","تسجيل العامل في الضمان الاجتماعي"]}
     ]
-    
     cols = st.columns(2)
     for idx, cat in enumerate(categories):
         with cols[idx % 2]:
             st.markdown(f"""
-            <div style="background:#D6EAF8; padding:20px; border-radius:20px; margin-bottom:20px; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
-                <h4 style="color:#154360;">{cat['title']}</h4>
-                <ul style="color:#1B2631;">{''.join([f"<li>{item}</li>" for item in cat['items']])}</ul>
+            <div style="background:#A9CCE3; padding:20px; border-radius:20px; margin-bottom:20px;">
+                <h4>{cat['title']}</h4>
+                <ul>
+                    {''.join([f"<li>{item}</li>" for item in cat['items']])}
+                </ul>
             </div>
             """, unsafe_allow_html=True)
 
@@ -149,13 +147,11 @@ def complaint_simulator_tab():
     section_header("📝 محاكي الشكوى", "📝")
     st.info("🧩 هذه الأداة تساعدك على معرفة انتهاكات حقوقك والتوصية بالإجراءات المناسبة.")
     
-    # بيانات العامل
     st.subheader("📌 بيانات العامل")
     الاسم = st.text_input("اسم العامل (اختياري)")
     سنوات_العمل = st.number_input("عدد سنوات العمل:", min_value=0, step=1)
     الراتب = st.number_input("الراتب الشهري (بالدينار الأردني):", min_value=0)
     
-    # نوع الانتهاك
     st.subheader("⚠️ نوع الانتهاك")
     نوع_الانتهاك = st.selectbox("اختر نوع الانتهاك:", [
         "عدم دفع الأجر/المستحقات",
@@ -166,7 +162,6 @@ def complaint_simulator_tab():
         "انتهاكات أخرى"
     ])
     
-    # تفاصيل إضافية
     st.subheader("📝 تفاصيل إضافية")
     وصف_الحالة = st.text_area("صف باختصار ما حدث:", "")
 
@@ -177,7 +172,7 @@ def complaint_simulator_tab():
             توصية = "📌 تقديم شكوى لدى مديرية العمل لمطالبة بدفع المستحقات."
         elif نوع_الانتهاك == "فصل تعسفي":
             توصية = "📌 تقديم شكوى فصل تعسفي ومطالبة التعويض وفق القانون."
-        elif نوع_الانتهاك == "العمل الإضافي غير المدفوع":
+        elif نوع الانتهاك == "العمل الإضافي غير المدفوع":
             توصية = "📌 توثيق ساعات العمل الإضافية ومطالبة الدفع."
         elif نوع_الانتهاك == "عدم منح الإجازات القانونية":
             توصية = "📌 تقديم شكوى لدى مديرية العمل للحصول على الإجازات."
@@ -188,15 +183,13 @@ def complaint_simulator_tab():
 
         st.subheader("📄 التقرير القانوني")
         st.markdown(f"""
-        <div style="background:#FDFEFE; padding:20px; border-radius:20px; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
-        - <b>العامل:</b> {الاسم or "غير محدد"}<br>
-        - <b>سنوات العمل:</b> {سنوات_العمل}<br>
-        - <b>الراتب:</b> {الراتب} دينار<br>
-        - <b>نوع الانتهاك:</b> {نوع_الانتهاك}<br>
-        - <b>وصف الحالة:</b> {وصف_الحالة or 'لا يوجد وصف'}<br>
-        - <b>التوصية:</b> {توصية}
-        </div>
-        """, unsafe_allow_html=True)
+        - **العامل:** {الاسم or "غير محدد"}
+        - **سنوات العمل:** {سنوات_العمل}
+        - **الراتب:** {الراتب} دينار
+        - **نوع الانتهاك:** {نوع_الانتهاك}
+        - **وصف الحالة:** {وصف_الحالة or 'لا يوجد وصف'}
+        - **التوصية:** {توصية}
+        """)
         st.success("✅ التحليل تم بنجاح")
 
 # =====================================================
@@ -215,7 +208,7 @@ def complaints_places_tab():
     info = الجهات.get(محافظة)
     if info:
         st.markdown(f"""
-        <div style="background:#E8F8F5;padding:15px;border-radius:15px;margin-bottom:10px; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+        <div style="background:#D6EAF8;padding:15px;border-radius:15px;margin-bottom:10px;">
         <b>{info['الجهة']}</b><br>
         العنوان: {info['العنوان']}<br>
         الهاتف: {info['الهاتف']}<br>
@@ -227,41 +220,65 @@ def complaints_places_tab():
         st.warning("⚠️ لا توجد بيانات متوفّرة لهذه المحافظة بعد.")
 
 # =====================================================
-# 👷 صفحة العمال
+# 👷 صفحة العمال — واجهة الأقسام فقط
 # =====================================================
 def workers_section():
-    selected_tab = st.session_state.get("workers_tab", None)
-    
-    if selected_tab is None:
-        # عرض الأقسام فقط
+    if "workers_page" not in st.session_state:
+        st.session_state["workers_page"] = "main"
+
+    if st.session_state["workers_page"] == "main":
         st.markdown("### 👷 أقسام صفحة العمال")
+        TAB_BG = "#E6F2F8"
+        TAB_HOVER_BG = "#D0E7F2"
+        TAB_ICON_SIZE = "40px"
+        st.markdown(f"""
+        <style>
+        .tab-card {{
+            background-color: {TAB_BG};
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.2s, background-color 0.2s;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000;
+            font-size: 16px;
+        }}
+        .tab-card:hover {{
+            transform: translateY(-5px);
+            background-color: {TAB_HOVER_BG};
+        }}
+        .tab-icon {{
+            font-size: {TAB_ICON_SIZE};
+            margin-bottom: 10px;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+
         tabs = [
-            {"label": "🧮", "name": "🧮 الحاسبات"},
-            {"label": "📚", "name": "📚 حقوق العمال"},
-            {"label": "📝", "name": "📝 محاكي الشكوى"},
-            {"label": "🏛️", "name": "🏛️ الجهات المختصة"},
+            {"label": "🧮", "name": "calculators"},
+            {"label": "📚", "name": "rights"},
+            {"label": "📝", "name": "complaints"},
+            {"label": "🏛️", "name": "places"},
         ]
-        TAB_BG = "#F0F8FF"
-        TAB_HOVER_BG = "#D6EAF8"
-        TAB_TEXT_COLOR = "#1C2833"
-        TAB_ICON_SIZE = "50px"
         cols = st.columns(len(tabs))
         for i, tab in enumerate(tabs):
             with cols[i]:
-                if st.button(f'<div style="background:{TAB_BG}; border-radius:25px; padding:30px 20px; text-align:center; font-weight:600; color:{TAB_TEXT_COLOR}; font-size:18px; box-shadow:0 4px 8px rgba(0,0,0,0.1); cursor:pointer;">{tab["label"]}<br>{tab["name"]}</div>', key=tab["name"], use_container_width=True):
-                    st.session_state["workers_tab"] = tab["name"]
-    else:
-        # عرض الصفحة الفرعية المختارة
-        if selected_tab == "🧮 الحاسبات":
-            calculators_tab()
-        elif selected_tab == "📚 حقوق العمال":
-            rights_tab()
-        elif selected_tab == "📝 محاكي الشكوى":
-            complaint_simulator_tab()
-        elif selected_tab == "🏛️ الجهات المختصة":
-            complaints_places_tab()
-        if st.button("⬅️ العودة للأقسام"):
-            st.session_state["workers_tab"] = None
+                if st.button(f'<div class="tab-card"><div class="tab-icon">{tab["label"]}</div>{tab["label"]}</div>',
+                             key=tab["name"], use_container_width=True):
+                    st.session_state["workers_page"] = tab["name"]
+        return
+
+    st.button("⬅️ العودة لأقسام العمال", on_click=lambda: st.session_state.update({"workers_page":"main"}))
+    page_map = {
+        "calculators": calculators_tab,
+        "rights": rights_tab,
+        "complaints": complaint_simulator_tab,
+        "places": complaints_places_tab
+    }
+    page_func = page_map.get(st.session_state["workers_page"])
+    if page_func:
+        page_func()
 
 # =====================================================
 # 🏠 الصفحة الرئيسية
@@ -283,8 +300,7 @@ def show_home():
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("👷 اذهب إلى صفحة العمال"):
-        st.session_state.current_page = "workers"
+    st.button("👷 الانتقال إلى صفحة العمال", on_click=lambda: st.session_state.update({"current_page":"workers"}))
 
 # =====================================================
 # 🧭 نظام التنقل
@@ -293,7 +309,7 @@ pages = {
     "home": show_home,
     "workers": workers_section,
 }
-pages[st.session_state.current_page]()
+pages.get(st.session_state.current_page, show_home)()
 
 # =====================================================
 # ⚖️ Footer
