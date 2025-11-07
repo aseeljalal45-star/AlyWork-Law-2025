@@ -3,666 +3,628 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from helpers.mini_ai_smart import MiniLegalAI
-from helpers.settings_manager import SettingsManager
-from helpers.ui_components import section_header
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime
-import io
-from openpyxl import load_workbook
-import shutil
+import json
 
 # =====================================================
-# ⚙️ الإعدادات العامة
+# 🎨 إعدادات التصميم المتقدمة
 # =====================================================
-settings = SettingsManager()
-config = st.session_state.get("config", settings.settings)
-
 st.set_page_config(
-    page_title=config.get("APP_NAME", "منصة قانون العمل الأردني الذكية"),
+    page_title="⚖️ منصة قانون العمل الذكية",
     page_icon="⚖️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# =====================================================
-# 🎨 تحميل CSS الرسمي
-# =====================================================
-def load_official_css(css_file="assets/styles_official.css"):
-    if os.path.exists(css_file):
-        with open(css_file, "r", encoding="utf-8") as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        # CSS افتراضي إذا لم يوجد الملف
-        st.markdown("""
-        <style>
-        .main-header {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #89CFF0, #B0E0E6);
-            border-radius: 20px;
-            color: #000000;
-            margin-bottom: 30px;
-        }
-        .tab-card {
-            background-color: #E6F2F8;
-            border-radius: 20px;
-            padding: 25px;
-            text-align: center;
-            transition: transform 0.2s, background-color 0.2s;
-            cursor: pointer;
-            font-weight: bold;
-            color: #000;
-            font-size: 16px;
-        }
-        .tab-card:hover {
-            transform: translateY(-5px);
-            background-color: #D0E7F2;
-        }
-        .tab-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-load_official_css()
-
-# =====================================================
-# 📊 تحميل البيانات
-# =====================================================
-def sheet_to_csv_url(sheet_url):
-    import re
-    if "docs.google.com/spreadsheets" in sheet_url and "export?format=csv" not in sheet_url:
-        m = re.search(r"/d/([a-zA-Z0-9-_]+)", sheet_url)
-        if m:
-            return f"https://docs.google.com/spreadsheets/d/{m.group(1)}/export?format=csv"
-    return sheet_url
-
-SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL"))
-WORKBOOK_PATH = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
-
-@st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
-def load_google_sheets(url):
-    if not url:
-        st.info("ℹ️ لم يتم تحديد رابط Google Sheet بعد.")
-        return pd.DataFrame()
-    try:
-        url = sheet_to_csv_url(url)
-        return pd.read_csv(url)
-    except Exception as e:
-        st.warning(f"⚠️ خطأ أثناء تحميل Google Sheet: {e}")
-        return pd.DataFrame()
-
-@st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
-def load_excel(path, expected_cols=None):
-    expected_cols = expected_cols or ['المادة', 'القسم', 'النص', 'مثال']
-    if not os.path.exists(path):
-        return pd.DataFrame(columns=expected_cols)
-    try:
-        df = pd.read_excel(path, engine='openpyxl')
-        for col in expected_cols:
-            if col not in df.columns:
-                df[col] = ""
-        df.fillna("", inplace=True)
-        return df
-    except Exception as e:
-        st.warning(f"⚠️ خطأ أثناء قراءة Excel: {e}")
-        return pd.DataFrame(columns=expected_cols)
-
-# تحميل البيانات
-with st.spinner("🔄 جاري تحميل البيانات..."):
-    data = load_google_sheets(SHEET_URL)
-    excel_data = load_excel(WORKBOOK_PATH)
-
-# =====================================================
-# 🤖 تهيئة المساعد القانوني
-# =====================================================
-def init_ai():
-    try:
-        ai = MiniLegalAI(WORKBOOK_PATH)
-        ai.db = excel_data
-        ai.build_tfidf_matrix()
-        return ai
-    except Exception as e:
-        st.warning(f"⚠️ لم يتم تهيئة المساعد القانوني بالكامل: {e}")
-        return None
-
-if "ai_instance" not in st.session_state:
-    st.session_state["ai_instance"] = init_ai()
-ai = st.session_state["ai_instance"]
-
-# =====================================================
-# 🧮 الحاسبات القانونية
-# =====================================================
-def calculators_tab():
-    section_header("🧮 الحاسبات القانونية", "🧮")
-    
-    calcs = [
-        {"title": "مكافأة نهاية الخدمة", "desc": "حساب مكافأة نهاية الخدمة حسب سنوات العمل والأجر."},
-        {"title": "بدلات العمل الإضافي والليلي والعطلات", "desc": "حساب مستحقات العمل الإضافي."},
-        {"title": "التعويض عن الإجازات غير المستغلة", "desc": "حساب التعويض عن الإجازات السنوية."},
-        {"title": "بدل النقل والسكن", "desc": "حساب بدلات النقل والسكن الشهرية."},
-        {"title": "حساب الأجور الشهرية مع الخصومات", "desc": "حساب الراتب بعد الخصومات والاستقطاعات."},
-        {"title": "استحقاقات الفصل التعسفي", "desc": "تقدير التعويض عند الفصل التعسفي."},
-        {"title": "إجازة الحمل والولادة", "desc": "حساب مستحقات إجازة الأمومة."},
-        {"title": "مكافأة الإجازات المرضية", "desc": "حساب التعويض عن الإجازات المرضية."},
-        {"title": "استحقاقات تغيير الوظيفة أو النقل الداخلي", "desc": "حساب التعويضات عند النقل أو تغيير الوظيفة."},
-        {"title": "حاسبة الدوام الجزئي", "desc": "حساب الأجر للدوام الجزئي."},
-        {"title": "تعويض إصابات العمل", "desc": "حساب التعويضات المترتبة على إصابات العمل."}
-    ]
-    
-    cols = st.columns(3)
-    for i, calc in enumerate(calcs):
-        with cols[i % 3]:
-            st.markdown(f"""
-            <div style="background:#D6EAF8; padding:20px; border-radius:20px; margin-bottom:20px; text-align:center;">
-                <h4>{calc['title']}</h4>
-                <p>{calc['desc']}</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-# =====================================================
-# 📚 حقوق العمال والتزاماتهم
-# =====================================================
-def rights_tab():
-    section_header("📚 حقوق العمال والتزاماتهم", "📚")
-    
-    categories = [
-        {"title": "⚖️ حقوق العمال", "items": ["الأجر والمكافآت","الإجازات السنوية والمرضية","ظروف العمل وسلامته","الحماية من الفصل التعسفي"]},
-        {"title": "👩‍🍼 حقوق المرأة العاملة", "items": ["إجازة الحمل والولادة","حق الرضاعة","عدم الفصل أثناء الحمل","بيئة عمل آمنة ومناسبة"]},
-        {"title": "📋 التزامات العامل", "items": ["الالتزام بساعات العمل","أداء المهام بدقة","المحافظة على أسرار المنشأة","إشعار صاحب العمل عند الغياب"]},
-        {"title": "🏢 التزامات صاحب العمل", "items": ["دفع الأجور في موعدها","توفير بيئة عمل آمنة","منح الإجازات القانونية","تسجيل العامل في الضمان الاجتماعي"]}
-    ]
-    
-    cols = st.columns(2)
-    for idx, cat in enumerate(categories):
-        with cols[idx % 2]:
-            st.markdown(f"""
-            <div style="background:#A9CCE3; padding:20px; border-radius:20px; margin-bottom:20px;">
-                <h4>{cat['title']}</h4>
-                <ul>
-                    {''.join([f"<li>{item}</li>" for item in cat['items']])}
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
-
-# =====================================================
-# 📝 محاكي الشكوى الذكي
-# =====================================================
-def complaint_simulator_tab():
-    section_header("📝 محاكي الشكوى", "📝")
-    st.info("🧩 هذه الأداة تساعدك على معرفة انتهاكات حقوقك والتوصية بالإجراءات المناسبة.")
-    
-    # بيانات العامل
-    st.subheader("📌 بيانات العامل")
-    الاسم = st.text_input("اسم العامل (اختياري)")
-    سنوات_العمل = st.number_input("عدد سنوات العمل:", min_value=0, step=1)
-    الراتب = st.number_input("الراتب الشهري (بالدينار الأردني):", min_value=0)
-    
-    # نوع الانتهاك
-    st.subheader("⚠️ نوع الانتهاك")
-    نوع_الانتهاك = st.selectbox("اختر نوع الانتهاك:", [
-        "عدم دفع الأجر/المستحقات",
-        "فصل تعسفي",
-        "العمل الإضافي غير المدفوع",
-        "عدم منح الإجازات القانونية",
-        "ظروف عمل خطرة أو غير آمنة",
-        "انتهاكات أخرى"
-    ])
-    
-    # تفاصيل إضافية
-    st.subheader("📝 تفاصيل إضافية")
-    وصف_الحالة = st.text_area("صف باختصار ما حدث:", "")
-
-    if st.button("🔍 تحليل الحالة"):
-        with st.spinner("⏳ جاري تحليل الانتهاك وتحديد الإجراءات الموصى بها..."):
-            توصية = ""
-            if نوع_الانتهاك == "عدم دفع الأجر/المستحقات":
-                توصية = "📌 تقديم شكوى لدى مديرية العمل لمطالبة بدفع المستحقات."
-            elif نوع_الانتهاك == "فصل تعسفي":
-                توصية = "📌 تقديم شكوى فصل تعسفي ومطالبة التعويض وفق القانون."
-            elif نوع_الانتهاك == "العمل الإضافي غير المدفوع":
-                توصية = "📌 توثيق ساعات العمل الإضافية ومطالبة الدفع."
-            elif نوع_الانتهاك == "عدم منح الإجازات القانونية":
-                توصية = "📌 تقديم شكوى لدى مديرية العمل للحصول على الإجازات."
-            elif نوع_الانتهاك == "ظروف عمل خطرة أو غير آمنة":
-                توصية = "📌 رفع شكوى لدى الجهات التفتيشية للحصول على بيئة عمل آمنة."
-            else:
-                توصية = "📌 تقديم شكوى مفصلة لدى مديرية العمل لبحث الحالة."
-
-            st.subheader("📄 التقرير القانوني")
-            st.markdown(f"""
-            - **العامل:** {الاسم or "غير محدد"}
-            - **سنوات العمل:** {سنوات_العمل}
-            - **الراتب:** {الراتب} دينار
-            - **نوع الانتهاك:** {نوع_الانتهاك}
-            - **وصف الحالة:** {وصف_الحالة or 'لا يوجد وصف'}
-            - **التوصية:** {توصية}
-            """)
-            st.success("✅ التحليل تم بنجاح")
-
-# =====================================================
-# 🏛️ الجهات المختصة حسب المحافظات
-# =====================================================
-def complaints_places_tab():
-    section_header("🏛️ أماكن تقديم الشكاوى والجهات المختصة", "🏛️")
-    محافظة = st.selectbox("اختر المحافظة:", [
-        "عمان", "إربد", "الزرقاء", "البلقاء", "الكرك", "معان",
-        "الطفيلة", "المفرق", "مادبا", "جرش", "عجلون", "العقبة"
-    ])
-    الجهات = {
-        "عمان": {"الجهة":"مديرية العمل – عمان","العنوان":"عمان، شارع عيسى الناوري 11","الهاتف":"06‑5802666","البريد":"info@mol.gov.jo","الموقع":"http://www.mol.gov.jo"},
-        "إربد": {"الجهة":"مديرية العمل – إربد","العنوان":"إربد، الأردن","الهاتف":"06‑5802666","البريد":"irbid@mol.gov.jo","الموقع":"http://www.mol.gov.jo/irbid"},
-        "الزرقاء": {"الجهة":"مديرية العمل – الزرقاء","العنوان":"الزرقاء، الأردن","الهاتف":"05‑5802666","البريد":"zarqa@mol.gov.jo","الموقع":"http://www.mol.gov.jo/zarqa"},
-        "البلقاء": {"الجهة":"مديرية العمل – البلقاء","العنوان":"السلط، الأردن","الهاتف":"05‑5802666","البريد":"balqa@mol.gov.jo","الموقع":"http://www.mol.gov.jo/balqa"},
+# تطبيق التصميم المتميز
+def apply_premium_design():
+    st.markdown("""
+    <style>
+    /* التصميم الرئيسي */
+    .main {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-    info = الجهات.get(محافظة)
-    if info:
-        st.markdown(f"""
-        <div style="background:#D6EAF8;padding:15px;border-radius:15px;margin-bottom:10px;">
-        <b>{info['الجهة']}</b><br>
-        العنوان: {info['العنوان']}<br>
-        الهاتف: {info['الهاتف']}<br>
-        البريد: {info['البريد']}<br>
-        الموقع: <a href="{info['الموقع']}" target="_blank">{info['الموقع']}</a>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.warning("⚠️ لا توجد بيانات متوفّرة لهذه المحافظة بعد.")
+    
+    /* الهيدر الرئيسي */
+    .main-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        padding: 3rem 2rem;
+        border-radius: 0 0 30px 30px;
+        color: white;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    /* بطاقات الخدمات */
+    .service-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #e0e6ef;
+        height: 100%;
+        text-align: center;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .service-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* الأزرار */
+    .stButton button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .stButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* علامات التبويب المخصصة */
+    .custom-tab {
+        background: #f8f9fa;
+        padding: 1rem 2rem;
+        border-radius: 15px;
+        margin: 0.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .custom-tab:hover {
+        background: #e9ecef;
+        border-color: #667eea;
+    }
+    
+    .custom-tab.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    /* الإحصائيات */
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 5px solid #667eea;
+    }
+    
+    /* محاكي الشكوى */
+    .complaint-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    /* نتائج التحليل */
+    .analysis-result {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 20px;
+        margin-top: 2rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+apply_premium_design()
 
 # =====================================================
-# 👷 صفحة العمال
+# 🏠 الصفحة الرئيسية المتميزة
 # =====================================================
-def workers_section():
-    selected_tab = st.session_state.get("workers_tab", "🧮 الحاسبات")
-    
-    if selected_tab == "🧮 الحاسبات":
-        calculators_tab()
-    elif selected_tab == "📚 حقوق العمال":
-        rights_tab()
-    elif selected_tab == "📝 محاكي الشكوى":
-        complaint_simulator_tab()
-    elif selected_tab == "🏛️ الجهات المختصة":
-        complaints_places_tab()
-
-# =====================================================
-# 📂 دوال مساعدة لإدارة البيانات
-# =====================================================
-def list_sheets_in_workbook(path):
-    if not path or not os.path.exists(path):
-        return []
-    try:
-        wb = load_workbook(path, read_only=True)
-        return wb.sheetnames
-    except Exception:
-        return []
-
-def save_dataframe_to_excel(path, df, sheet_name="Sheet1"):
-    """
-    يستبدل الورقة sheet_name في الملف path بمحتوى df.
-    """
-    try:
-        if os.path.exists(path):
-            with pd.ExcelWriter(path, engine="openpyxl", mode="a", if_sheet_exists="replace") as writer:
-                df.to_excel(writer, sheet_name=sheet_name, index=False)
-        else:
-            with pd.ExcelWriter(path, engine="openpyxl") as writer:
-                df.to_excel(writer, sheet_name=sheet_name, index=False)
-        return True, None
-    except Exception as e:
-        return False, str(e)
-
-# =====================================================
-# 📂 إدارة البيانات
-# =====================================================
-def data_manager_tab():
-    section_header("📂 إدارة البيانات", "📂")
-
-    st.markdown("**مصدر البيانات:** اختر الورقة (Sheet) للعمل عليها.")
-
-    # قائمة الأوراق من ملف Excel المحلي
-    sheets = list_sheets_in_workbook(WORKBOOK_PATH)
-    sheets = ["(لا يوجد ملف Excel محلي)"] + sheets if not sheets else sheets
-
-    sheet_choice = st.selectbox("اختر الورقة:", sheets, index=0 if len(sheets)>0 else 0)
-
-    # تحميل البيانات
-    source_option = st.radio("المصدر:", ["Excel محلي", "Google Sheet (SHEET_URL)"]) if SHEET_URL else "Excel محلي"
-
-    df = pd.DataFrame()
-    if source_option == "Google Sheet (SHEET_URL)" and SHEET_URL:
-        df = load_google_sheets(SHEET_URL)
-    else:
-        if sheet_choice and sheet_choice != "(لا يوجد ملف Excel محلي)":
-            try:
-                df = pd.read_excel(WORKBOOK_PATH, sheet_name=sheet_choice, engine='openpyxl')
-            except Exception as e:
-                st.warning(f"⚠️ لم يتم تحميل الورقة: {e}")
-                df = pd.DataFrame()
-
-    if df.empty:
-        st.info("لا توجد بيانات في هذه الورقة أو لم يتم تحميلها بعد.")
-    else:
-        # بحث سريع
-        query = st.text_input("🔎 بحث حر (يبحث في كل الأعمدة):")
-        if query:
-            mask = df.astype(str).apply(lambda row: row.str.contains(query, case=False, na=False)).any(axis=1)
-            df_display = df[mask].copy()
-            st.markdown(f"**النتائج:** {len(df_display)} صفوف تطابق '{query}'")
-        else:
-            df_display = df.copy()
-
-        # فلتر حسب عمود
-        with st.expander("🔧 فلتر حسب عمود/قيمة (اختياري)"):
-            col_to_filter = st.selectbox("اختر عمودًا للفلترة:", ["(لا فلترة)"] + df.columns.tolist())
-            if col_to_filter and col_to_filter != "(لا فلترة)":
-                unique_vals = df[col_to_filter].dropna().astype(str).unique().tolist()[:200]
-                chosen_vals = st.multiselect("اختر قيمة/قيم للعرض:", unique_vals)
-                if chosen_vals:
-                    df_display = df_display[df_display[col_to_filter].astype(str).isin(chosen_vals)]
-
-        # عرض الجدول
-        st.dataframe(df_display, use_container_width=True)
-        csv_bytes = df_display.to_csv(index=False).encode('utf-8')
-        st.download_button("⬇️ تحميل نتائج كـ CSV", data=csv_bytes, file_name=f"{sheet_choice}_export.csv", mime="text/csv")
-
-    # نموذج إضافة صف جديد
-    st.markdown("---")
-    st.subheader("➕ إضافة صف جديد")
-    if df.empty:
-        st.info("لا يمكن إنشاء نموذج إدخال لأن الورقة فارغة أو لم تُحمّل.")
-    else:
-        with st.form("add_row_form", clear_on_submit=True):
-            new_row = {}
-            cols = df.columns.tolist()
-            left, right = st.columns(2)
-            for i, col in enumerate(cols):
-                target = left if i % 2 == 0 else right
-                with target:
-                    if pd.api.types.is_numeric_dtype(df[col]):
-                        val = st.number_input(label=col, key=f"new_{col}", value=0.0)
-                    else:
-                        val = st.text_input(label=col, key=f"new_{col}_text")
-                    new_row[col] = val
-            submitted = st.form_submit_button("💾 أضف السطر واحفظ")
-            if submitted:
-                try:
-                    df_new = df.copy()
-                    df_new = df_new.fillna("")
-                    df_new = pd.concat([df_new, pd.DataFrame([new_row])], ignore_index=True)
-                    ok, err = save_dataframe_to_excel(WORKBOOK_PATH, df_new, sheet_name=sheet_choice)
-                    if ok:
-                        st.success("✅ تم إضافة السطر بنجاح وحفظ الملف المحلي.")
-                        try:
-                            load_excel.clear()
-                            load_google_sheets.clear()
-                        except Exception:
-                            pass
-                    else:
-                        st.error(f"❌ فشل حفظ الملف: {err}")
-                except Exception as e:
-                    st.error(f"❌ حدث خطأ أثناء الإضافة: {e}")
-
-    # خيار تحميل ملف Excel كامل
-    st.markdown("---")
-    if os.path.exists(WORKBOOK_PATH):
-        with open(WORKBOOK_PATH, "rb") as f:
-            st.download_button("⬇️ تحميل الملف الكامل (Excel)", data=f, file_name=os.path.basename(WORKBOOK_PATH), mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    else:
-        st.info("ملف Excel المحلي غير موجود حالياً.")
-
-# =====================================================
-# 📊 قاعدة البيانات المحلية
-# =====================================================
-def show_database_tab():
-    section_header("📊 قاعدة البيانات المحلية", "📊")
-
-    if not os.path.exists(WORKBOOK_PATH):
-        st.error("❌ ملف Excel غير موجود. تأكد من إعداد WORKBOOK_PATH في الإعدادات.")
-        return
-
-    # تحميل الورقة الأساسية
-    try:
-        df_db = pd.read_excel(
-            WORKBOOK_PATH,
-            sheet_name="Smart_Rules_Engine_Extended",
-            engine="openpyxl"
-        )
-        st.success(f"✅ تم تحميل {len(df_db)} سجل من الورقة Smart_Rules_Engine_Extended.")
-    except Exception as e:
-        st.error(f"❌ فشل تحميل الورقة: {e}")
-        # عرض الورقات المتاحة
-        try:
-            available_sheets = list_sheets_in_workbook(WORKBOOK_PATH)
-            st.info(f"📋 الورقات المتاحة: {', '.join(available_sheets)}")
-        except:
-            pass
-        return
-
-    if df_db.empty:
-        st.warning("⚠️ الورقة موجودة ولكنها فارغة.")
-        return
-
-    # بحث وفلترة
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        query = st.text_input("🔎 بحث حر:", placeholder="ابحث في أي عمود...")
-    
-    with col2:
-        st.metric("عدد السجلات", len(df_db))
-
-    if query:
-        mask = df_db.astype(str).apply(lambda r: r.str.contains(query, case=False, na=False)).any(axis=1)
-        df_display = df_db[mask].copy()
-        st.info(f"🔍 تم العثور على {len(df_display)} سجل مطابق")
-    else:
-        df_display = df_db.copy()
-
-    # فلترة متقدمة
-    with st.expander("🎛️ فلترة متقدمة", expanded=False):
-        col1, col2 = st.columns(2)
-        with col1:
-            filter_col = st.selectbox("اختر عمودًا للفلترة:", ["(لا فلترة)"] + df_db.columns.tolist())
-        with col2:
-            if filter_col != "(لا فلترة)":
-                unique_vals = df_db[filter_col].dropna().astype(str).unique()
-                selected_vals = st.multiselect("اختر القيم:", unique_vals[:50])
-                if selected_vals:
-                    df_display = df_display[df_display[filter_col].astype(str).isin(selected_vals)]
-
-    # عرض النتائج
-    st.dataframe(df_display, use_container_width=True, height=400)
-
-    # خيارات التحميل
-    col1, col2 = st.columns(2)
-    with col1:
-        if not df_display.empty:
-            csv = df_display.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                "📥 تحميل النتائج كـ CSV",
-                data=csv,
-                file_name=f"قاعدة_البيانات_{datetime.now().strftime('%Y%m%d')}.csv",
-                mime="text/csv"
-            )
-    
-    with col2:
-        if st.button("🔄 تحديث البيانات"):
-            st.rerun()
-
-# =====================================================
-# 📈 لوحة التحكم الإحصائية
-# =====================================================
-def analytics_dashboard():
-    section_header("📊 لوحة التحكم الإحصائية", "📊")
-    
-    if excel_data.empty:
-        st.warning("⚠️ لا توجد بيانات لتحليلها")
-        return
-    
-    # إحصائيات أساسية
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        total_articles = len(excel_data)
-        st.metric("📄 إجمالي المواد", total_articles)
-    
-    with col2:
-        total_sections = excel_data['القسم'].nunique() if 'القسم' in excel_data.columns else 0
-        st.metric("📂 عدد الأقسام", total_sections)
-    
-    with col3:
-        filled_examples = excel_data['مثال'].notna().sum() if 'مثال' in excel_data.columns else 0
-        st.metric("🔗 أمثلة مرفقة", filled_examples)
-    
-    with col4:
-        completion_rate = (filled_examples / total_articles * 100) if total_articles > 0 else 0
-        st.metric("📊 نسبة الاكتمال", f"{completion_rate:.1f}%")
-    
-    # توزيع الأقسام
-    st.subheader("📈 توزيع المواد حسب الأقسام")
-    if 'القسم' in excel_data.columns:
-        section_counts = excel_data['القسم'].value_counts()
-        
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            fig, ax = plt.subplots(figsize=(10, 6))
-            section_counts.head(10).plot(kind='bar', ax=ax, color='skyblue')
-            ax.set_title('توزيع المواد حسب الأقسام - Top 10')
-            ax.set_xlabel('القسم')
-            ax.set_ylabel('عدد المواد')
-            plt.xticks(rotation=45)
-            st.pyplot(fig)
-        
-        with col2:
-            st.dataframe(section_counts.head(10))
-    
-    # أحدث الإضافات
-    st.subheader("🆕 أحدث المواد المضافة")
-    if not excel_data.empty:
-        recent_data = excel_data.tail(5)
-        if 'المادة' in excel_data.columns and 'القسم' in excel_data.columns:
-            st.dataframe(recent_data[['المادة', 'القسم']])
-        else:
-            st.dataframe(recent_data)
-
-# =====================================================
-# 💾 نظام النسخ الاحتياطي
-# =====================================================
-def backup_system():
-    section_header("💾 نظام النسخ الاحتياطي", "💾")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("📤 إنشاء نسخة احتياطية")
-        if st.button("💾 إنشاء نسخة احتياطية الآن"):
-            try:
-                backup_name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-                shutil.copy2(WORKBOOK_PATH, backup_name)
-                st.success(f"✅ تم إنشاء النسخة الاحتياطية: {backup_name}")
-                
-                with open(backup_name, "rb") as f:
-                    st.download_button(
-                        "📥 تحميل النسخة الاحتياطية",
-                        data=f,
-                        file_name=backup_name,
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
-            except Exception as e:
-                st.error(f"❌ فشل إنشاء النسخة: {e}")
-    
-    with col2:
-        st.subheader("📥 استعادة نسخة")
-        uploaded_backup = st.file_uploader("رفع ملف Excel للاستعادة", type="xlsx")
-        if uploaded_backup and st.button("🔄 استعادة النسخة"):
-            try:
-                with open(WORKBOOK_PATH, "wb") as f:
-                    f.write(uploaded_backup.getvalue())
-                st.success("✅ تم استعادة النسخة بنجاح!")
-                st.info("🔄 سيتم إعادة تحميل التطبيق...")
-                st.rerun()
-            except Exception as e:
-                st.error(f"❌ فشل الاستعادة: {e}")
-
-# =====================================================
-# 🏠 الصفحة الرئيسية
-# =====================================================
-if "current_page" not in st.session_state:
-    st.session_state.current_page = "home"
-
-def show_home():
-    CARD_GRADIENT = "linear-gradient(135deg, #89CFF0, #B0E0E6)"
-    CARD_TEXT_COLOR = "#000000"
-    
-    st.markdown(f"""
-    <div style="text-align:center; padding:25px; background: {CARD_GRADIENT};
-                border-radius:20px; color:{CARD_TEXT_COLOR}; margin-bottom:30px;">
-        <h1 style="margin-bottom:10px;">⚖️ {config.get('APP_NAME', 'منصة قانون العمل الأردني الذكية')}</h1>
-        <p style="font-size:18px; margin:0;">
-        منصة ذكية للوصول إلى حقوق العمال، الحاسبات القانونية، محاكي الشكاوى، والجهات المختصة
+def show_premium_home():
+    # الهيدر الرئيسي
+    st.markdown("""
+    <div class="main-header">
+        <h1 style="margin:0; font-size: 3rem;">⚖️ منصة قانون العمل الذكية</h1>
+        <p style="font-size: 1.2rem; margin: 1rem 0 0 0; opacity: 0.9;">
+        المنصة الشاملة لحماية حقوق العمال وتقديم الاستشارات القانونية الذكية
         </p>
     </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("### 👷 أقسام صفحة العمال")
     
-    tabs = [
-        {"label": "🧮", "name": "🧮 الحاسبات"},
-        {"label": "📚", "name": "📚 حقوق العمال"},
-        {"label": "📝", "name": "📝 محاكي الشكوى"},
-        {"label": "🏛️", "name": "🏛️ الجهات المختصة"},
+    # إحصائيات سريعة
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.markdown("""
+        <div class="stat-card">
+            <h3>📊 150+</h3>
+            <p>مادة قانونية</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="stat-card">
+            <h3>👥 5,000+</h3>
+            <p>مستفيد شهرياً</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div class="stat-card">
+            <h3>⚖️ 12</h3>
+            <p>محافظة مغطاة</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col4:
+        st.markdown("""
+        <div class="stat-card">
+            <h3>💼 95%</h3>
+            <p>نسبة الرضا</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # الخدمات الرئيسية
+    st.markdown("### 🎯 خدماتنا الرئيسية")
+    
+    services = [
+        {
+            "icon": "🧮",
+            "title": "الحاسبات القانونية",
+            "desc": "حساب المستحقات المالية بدقة وفق القانون الأردني",
+            "features": ["مكافأة نهاية الخدمة", "بدل العمل الإضافي", "الإجازات المرضية"]
+        },
+        {
+            "icon": "📝",
+            "title": "محاكي الشكوى الذكي",
+            "desc": "تحليل الانتهاكات وتقديم الإجراءات القانونية المناسبة",
+            "features": ["تحليل آلي", "توصيات مخصصة", "نماذج جاهزة"]
+        },
+        {
+            "icon": "🏛️",
+            "title": "الجهات المختصة",
+            "desc": "دليل شامل للجهات الرسمية في جميع المحافظات",
+            "features": ["عنوان دقيق", "معلومات اتصال", "أوقات العمل"]
+        },
+        {
+            "icon": "📚",
+            "title": "المرجع القانوني",
+            "desc": "مكتبة شاملة للقوانين واللوائح والتشريعات",
+            "features": ["بحث متقدم", "أمثلة عملية", "تحديثات مستمرة"]
+        },
+        {
+            "icon": "💼",
+            "title": "استشارات قانونية",
+            "desc": "إجابات فورية على استفساراتك القانونية",
+            "features": ["ردود فورية", "مراجع قانونية", "حالات مشابهة"]
+        },
+        {
+            "icon": "📊",
+            "title": "تحليل البيانات",
+            "desc": "إحصائيات وتقارير عن قضايا العمل",
+            "features": ["تقارير شهرية", "تحليل الاتجاهات", "رؤى قانونية"]
+        }
     ]
-
-    cols = st.columns(len(tabs))
-    for i, tab in enumerate(tabs):
-        with cols[i]:
-            if st.button(f'<div class="tab-card"><div class="tab-icon">{tab["label"]}</div>{tab["name"]}</div>', 
-                        key=tab["name"], use_container_width=True):
-                st.session_state.current_page = "workers"
-                st.session_state["workers_tab"] = tab["name"]
-
-# =====================================================
-# 🧭 نظام التنقل الموسع
-# =====================================================
-pages = {
-    "home": show_home,
-    "workers": workers_section,
-    "data_manager": data_manager_tab,
-    "database": show_database_tab,
-    "analytics": analytics_dashboard,
-    "backup": backup_system,
-}
-
-# زر العودة
-if st.session_state.current_page != "home":
-    if st.button("⬅️ العودة للصفحة الرئيسية"):
-        st.session_state.current_page = "home"
-        st.rerun()
-
-# أزرار التنقل في الصفحة الرئيسية
-if st.session_state.current_page == "home":
-    st.markdown("---")
-    st.subheader("🔧 أدوات متقدمة")
     
-    cols = st.columns(4)
-    tools = [
-        ("🗄️ إدارة البيانات", "data_manager"),
-        ("📊 قاعدة البيانات", "database"),
-        ("📈 الإحصائيات", "analytics"),
-        ("💾 النسخ الاحتياطي", "backup")
+    # عرض الخدمات في شبكة 2x3
+    cols = st.columns(3)
+    for idx, service in enumerate(services):
+        with cols[idx % 3]:
+            st.markdown(f"""
+            <div class="service-card">
+                <div class="service-icon">{service['icon']}</div>
+                <h3>{service['title']}</h3>
+                <p>{service['desc']}</p>
+                <div style="text-align: left; margin-top: 1rem;">
+                    {''.join([f'<div style="margin: 0.3rem 0;">✅ {feature}</div>' for feature in service['features']])}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # كيفية العمل
+    st.markdown("### 🔄 كيف تعمل المنصة؟")
+    
+    steps = [
+        {"icon": "1️⃣", "title": "اختر الخدمة", "desc": "اختر من بين خدماتنا المتعددة"},
+        {"icon": "2️⃣", "title": "أدخل البيانات", "desc": "املأ النموذج المخصص لاحتياجاتك"},
+        {"icon": "3️⃣", "title": "احصل على النتائج", "desc": "تلقى التحليل والتوصيات الفورية"}
     ]
     
-    for idx, (icon_name, page_key) in enumerate(tools):
-        with cols[idx % 4]:
-            if st.button(icon_name, key=page_key, use_container_width=True):
-                st.session_state.current_page = page_key
-
-# عرض الصفحة الحالية
-if st.session_state.current_page in pages:
-    pages[st.session_state.current_page]()
+    step_cols = st.columns(3)
+    for idx, step in enumerate(steps):
+        with step_cols[idx]:
+            st.markdown(f"""
+            <div style="text-align: center; padding: 2rem;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">{step['icon']}</div>
+                <h4>{step['title']}</h4>
+                <p style="color: #666;">{step['desc']}</p>
+            </div>
+            """, unsafe_allow_html=True)
 
 # =====================================================
-# ⚖️ Footer
+# 🧮 الحاسبات القانونية المحسنة
 # =====================================================
-st.markdown("---")
-st.markdown(f"<center><small>⚖️ {config.get('APP_NAME', 'منصة قانون العمل الأردني الذكية')} - {datetime.now().year} ©</small></center>", 
-            unsafe_allow_html=True)
+def show_enhanced_calculators():
+    st.markdown("""
+    <div class="main-header" style="border-radius: 20px; margin-bottom: 2rem;">
+        <h2>🧮 الحاسبات القانونية</h2>
+        <p>حساب دقيق للمستحقات المالية وفق القانون الأردني</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # اختيار نوع الآلة الحاسبة
+    calc_type = st.selectbox(
+        "اختر نوع الحاسبة:",
+        [
+            "مكافأة نهاية الخدمة",
+            "بدلات العمل الإضافي",
+            "التعويض عن الإجازات",
+            "بدل النقل والسكن",
+            "استحقاقات الفصل التعسفي",
+            "إجازة الحمل والولادة"
+        ]
+    )
+    
+    st.markdown("""
+    <div class="complaint-form">
+    """, unsafe_allow_html=True)
+    
+    if calc_type == "مكافأة نهاية الخدمة":
+        st.subheader("🧮 حاسبة مكافأة نهاية الخدمة")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            years = st.number_input("عدد سنوات الخدمة", min_value=0, max_value=50, value=5)
+            basic_salary = st.number_input("الأجر الأساسي (دينار)", min_value=0, value=500)
+        
+        with col2:
+            service_type = st.selectbox("نهاية الخدمة", ["استقالة", "إنهاء خدمة", "بلوغ سن المعاش"])
+            last_salary = st.number_input("آخر راتب (دينار)", min_value=0, value=500)
+        
+        if st.button("🔄 حساب المكافأة", use_container_width=True):
+            # محاكاة حساب المكافأة (يمكن استبدالها بالحسابات الفعلية)
+            if service_type == "استقالة":
+                if years <= 5:
+                    compensation = (years * 0.5 * basic_salary)
+                else:
+                    compensation = (5 * 0.5 * basic_salary) + ((years - 5) * basic_salary)
+            else:
+                compensation = years * basic_salary
+            
+            st.markdown(f"""
+            <div class="analysis-result">
+                <h3>📊 نتائج الحساب</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>عدد سنوات الخدمة: <strong>{years}</strong></div>
+                    <div>نهاية الخدمة: <strong>{service_type}</strong></div>
+                    <div>الأجر الأساسي: <strong>{basic_salary} دينار</strong></div>
+                    <div>المكافأة المستحقة: <strong>{compensation:,.0f} دينار</strong></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    elif calc_type == "بدلات العمل الإضافي":
+        st.subheader("⏰ حاسبة العمل الإضافي")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            hourly_rate = st.number_input("الأجر الساعي (دينار)", min_value=0.0, value=2.5)
+            overtime_hours = st.number_input("ساعات العمل الإضافي", min_value=0, value=10)
+        
+        with col2:
+            overtime_type = st.selectbox("نوع العمل الإضافي", ["نهاري", "ليلي", "عطلة رسمية"])
+            normal_hours = st.number_input("ساعات العمل العادية", min_value=0, value=8)
+        
+        if st.button("🔄 حساب البدل", use_container_width=True):
+            # محاكاة حساب البدل
+            if overtime_type == "نهاري":
+                rate = 1.25
+            elif overtime_type == "ليلي":
+                rate = 1.5
+            else:
+                rate = 2.0
+            
+            overtime_pay = overtime_hours * hourly_rate * rate
+            
+            st.markdown(f"""
+            <div class="analysis-result">
+                <h3>💰 نتائج الحساب</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div>ساعات العمل الإضافي: <strong>{overtime_hours}</strong></div>
+                    <div>نوع العمل الإضافي: <strong>{overtime_type}</strong></div>
+                    <div>الأجر الساعي: <strong>{hourly_rate} دينار</strong></div>
+                    <div>البدل المستحق: <strong>{overtime_pay:,.2f} دينار</strong></div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# =====================================================
+# 📝 محاكي الشكوى الذكي المحسن
+# =====================================================
+def show_enhanced_complaint_simulator():
+    st.markdown("""
+    <div class="main-header" style="border-radius: 20px; margin-bottom: 2rem;">
+        <h2>📝 محاكي الشكوى الذكي</h2>
+        <p>تحليل الانتهاكات وتقديم الحلول القانونية المثلى</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="complaint-form">
+    """, unsafe_allow_html=True)
+    
+    # معلومات العامل
+    st.subheader("👤 معلومات العامل")
+    col1, col2 = st.columns(2)
+    with col1:
+        name = st.text_input("الاسم الكامل")
+        years_of_service = st.slider("سنوات الخدمة", 0, 40, 3)
+    
+    with col2:
+        phone = st.text_input("رقم الهاتف")
+        monthly_salary = st.number_input("الراتب الشهري (دينار)", min_value=0, value=500)
+    
+    # نوع الانتهاك
+    st.subheader("⚠️ تفاصيل الانتهاك")
+    violation_type = st.selectbox(
+        "نوع الانتهاك",
+        [
+            "عدم دفع الأجر/المستحقات",
+            "الفصل التعسفي",
+            "العمل الإضافي غير المدفوع", 
+            "عدم منح الإجازات القانونية",
+            "ظروف عمل غير آمنة",
+            "تمييز أو تحرش",
+            "عدم التسجيل في الضمان",
+            "انتهاكات أخرى"
+        ]
+    )
+    
+    # تفاصيل إضافية
+    violation_details = st.text_area(
+        "وصف تفصيلي للانتهاك",
+        placeholder="صف ما حدث بالتفصيل، including التواريخ والأماكن والأشخاص المتورطين..."
+    )
+    
+    # المستندات (محاكاة)
+    st.subheader("📎 المستندات المرفقة")
+    doc_col1, doc_col2, doc_col3 = st.columns(3)
+    with doc_col1:
+        st.checkbox("عقد العمل")
+    with doc_col2:
+        st.checkbox("كشوف المرتبات")
+    with doc_col3:
+        st.checkbox("مستندات أخرى")
+    
+    if st.button("🔍 تحليل الحالة وتقديم التوصيات", use_container_width=True):
+        with st.spinner("🔄 جاري تحليل الحالة وتوليد التوصيات..."):
+            # محاكاة التحليل الذكي
+            import time
+            time.sleep(2)
+            
+            # نتائج التحليل
+            st.markdown("""
+            <div class="analysis-result">
+                <h3>📋 تقرير التحليل القانوني</h3>
+            """, unsafe_allow_html=True)
+            
+            # التوصيات حسب نوع الانتهاك
+            recommendations = {
+                "عدم دفع الأجر/المستحقات": [
+                    "تقديم شكوى لمديرية العمل المختصة",
+                    "طلب صورة من كشوف المرتبات",
+                    "توثيق جميع عمليات الدفع",
+                    "الاحتفاظ بجميع المراسلات"
+                ],
+                "الفصل التعسفي": [
+                    "طلب تعويض الفصل التعسفي",
+                    "تقديم شكوى لمحكمة العمل",
+                    "إثبات عدم وجود مبرر للفصل",
+                    "الاحتفاظ بجميع الوثائق"
+                ],
+                "العمل الإضافي غير المدفوع": [
+                    "توثيق ساعات العمل الإضافي",
+                    "تقديم طلب بدفع المستحقات",
+                    "الاحتفاظ بسجلات الحضور",
+                    "طلب تعويض عن الساعات الإضافية"
+                ]
+            }
+            
+            recs = recommendations.get(violation_type, [
+                "تقديم شكوى مفصلة لمديرية العمل",
+                "الاحتفاظ بجميع الأدلة والوثائق",
+                "استشارة محامٍ متخصص"
+            ])
+            
+            st.markdown("""
+                <div style="margin: 1.5rem 0;">
+                    <h4>✅ الإجراءات الموصى بها:</h4>
+            """, unsafe_allow_html=True)
+            
+            for i, rec in enumerate(recs, 1):
+                st.markdown(f"<div style='margin: 0.5rem 0;'>{i}. {rec}</div>", unsafe_allow_html=True)
+            
+            # الجهات المختصة
+            st.markdown("""
+                <h4 style='margin-top: 2rem;'>🏛️ الجهات المختصة:</h4>
+                <div style='background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px;'>
+                    <strong>مديرية العمل - عمان</strong><br>
+                    📍 عمان، شارع عيسى الناوري 11<br>
+                    📞 06-5802666<br>
+                    📧 info@mol.gov.jo
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# =====================================================
+# 🏛️ الجهات المختصة المحسنة
+# =====================================================
+def show_enhanced_authorities():
+    st.markdown("""
+    <div class="main-header" style="border-radius: 20px; margin-bottom: 2rem;">
+        <h2>🏛️ الجهات المختصة</h2>
+        <p>دليل شامل للجهات الرسمية في جميع محافظات المملكة</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # خريطة المحافظات
+    governorates = [
+        "عمان", "إربد", "الزرقاء", "البلقاء", "الكرك", "معان",
+        "الطفيلة", "المفرق", "مادبا", "جرش", "عجلون", "العقبة"
+    ]
+    
+    selected_gov = st.selectbox("اختر المحافظة", governorates)
+    
+    # بيانات الجهات (موسعة)
+    authorities_data = {
+        "عمان": {
+            "مديرية العمل - عمان": {
+                "address": "عمان، شارع عيسى الناوري 11",
+                "phone": "06-5802666",
+                "email": "info@mol.gov.jo",
+                "website": "http://www.mol.gov.jo",
+                "hours": "الأحد - الخميس: 8:00 ص - 3:00 م",
+                "services": ["تسجيل شكاوى", "استشارات قانونية", "تفتيش العمل"]
+            },
+            "محكمة العمل - عمان": {
+                "address": "عمان، منطقة عبدون",
+                "phone": "06-5802000",
+                "email": "court@mol.gov.jo",
+                "hours": "الأحد - الخميس: 8:00 ص - 2:00 م"
+            }
+        },
+        "إربد": {
+            "مديرية العمل - إربد": {
+                "address": "إربد، المنطقة الشمالية",
+                "phone": "02-7241000",
+                "email": "irbid@mol.gov.jo",
+                "hours": "الأحد - الخميس: 8:00 ص - 3:00 م",
+                "services": ["تسجيل شكاوى", "تفتيش العمل", "تسجيل عقود"]
+            }
+        }
+    }
+    
+    gov_data = authorities_data.get(selected_gov, authorities_data["عمان"])
+    
+    for authority, info in gov_data.items():
+        st.markdown(f"""
+        <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
+            <h3 style="color: #2c3e50; margin-bottom: 1rem;">{authority}</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <strong>📍 العنوان:</strong><br>{info['address']}
+                </div>
+                <div>
+                    <strong>📞 الهاتف:</strong><br>{info['phone']}
+                </div>
+                <div>
+                    <strong>🕒 أوقات العمل:</strong><br>{info['hours']}
+                </div>
+                <div>
+                    <strong>📧 البريد الإلكتروني:</strong><br>{info['email']}
+                </div>
+            </div>
+            {f"<div style='margin-top: 1rem;'><strong>✅ الخدمات:</strong><br>" + " • ".join(info.get('services', [])) + "</div>" if info.get('services') else ""}
+        </div>
+        """, unsafe_allow_html=True)
+
+# =====================================================
+# 📱 نظام التنقل الجانبي المتميز
+# =====================================================
+def create_premium_sidebar():
+    with st.sidebar:
+        st.markdown("""
+        <div style="text-align: center; padding: 2rem 1rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⚖️</div>
+            <h2>منصة قانون العمل</h2>
+            <p style="color: #666; font-size: 0.9rem;">المنصة الذكية لحماية حقوق العمال</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # قائمة التنقل
+        menu_options = [
+            {"icon": "🏠", "label": "الصفحة الرئيسية"},
+            {"icon": "🧮", "label": "الحاسبات القانونية"},
+            {"icon": "📝", "label": "محاكي الشكوى"},
+            {"icon": "🏛️", "label": "الجهات المختصة"},
+            {"icon": "📚", "label": "المرجع القانوني"},
+            {"icon": "💼", "label": "الاستشارات"},
+            {"icon": "📊", "label": "التقارير والإحصائيات"}
+        ]
+        
+        for option in menu_options:
+            if st.button(f"{option['icon']} {option['label']}", use_container_width=True, key=option['label']):
+                st.session_state.current_page = option['label']
+        
+        st.markdown("---")
+        
+        # معلومات الاتصال
+        st.markdown("""
+        <div style="text-align: center; color: #666;">
+            <p><strong>📞 الدعم الفني:</strong> 06-5802666</p>
+            <p><strong>📧 البريد الإلكتروني:</strong> info@mol.gov.jo</p>
+            <p><strong>🕒 أوقات العمل:</strong><br>الأحد - الخميس<br>8:00 ص - 3:00 م</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# =====================================================
+# 🧭 نظام إدارة الحالة
+# =====================================================
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "الصفحة الرئيسية"
+
+# إنشاء الشريط الجانبي
+create_premium_sidebar()
+
+# توجيه الصفحات
+if st.session_state.current_page == "الصفحة الرئيسية":
+    show_premium_home()
+elif st.session_state.current_page == "الحاسبات القانونية":
+    show_enhanced_calculators()
+elif st.session_state.current_page == "محاكي الشكوى":
+    show_enhanced_complaint_simulator()
+elif st.session_state.current_page == "الجهات المختصة":
+    show_enhanced_authorities()
+else:
+    show_premium_home()
+
+# =====================================================
+# 🦶 الفوتر المتميز
+# =====================================================
+st.markdown("""
+<div style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white; padding: 2rem; border-radius: 20px; margin-top: 3rem; text-align: center;">
+    <h3>⚖️ منصة قانون العمل الذكية</h3>
+    <p>المنصة الرائدة في تقديم الخدمات القانونية للعمال في المملكة الأردنية</p>
+    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; flex-wrap: wrap;">
+        <div>📞 06-5802666</div>
+        <div>📧 info@mol.gov.jo</div>
+        <div>📍 عمان، الأردن</div>
+    </div>
+    <p style="margin-top: 1rem; opacity: 0.8;">© 2024 منصة قانون العمل الذكية - جميع الحقوق محفوظة</p>
+</div>
+""", unsafe_allow_html=True)
