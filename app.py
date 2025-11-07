@@ -30,7 +30,7 @@ def load_config():
         "CACHE": {"ENABLED": True, "TTL_SECONDS": 600},
         "UI": {"STYLES_LIGHT": "assets/styles_light.css", "STYLES_DARK": "assets/styles_dark.css"},
         "AI": {"ENABLE": True, "MAX_HISTORY": 20},
-        "RECOMMENDER": {"MAX_CARDS": 6, "ROLES": ["العمال", "اصحاب العمل", "مفتشو العمل", "الباحثون والمتدربون"]},
+        "RECOMMENDER": {"MAX_CARDS": 6},
         "SIDEBAR": {"MENU_ITEMS": []},
         "FOOTER": {"TEXT": f"© {datetime.datetime.now().year} AlyWork Law Pro — جميع الحقوق محفوظة."}
     }
@@ -94,8 +94,22 @@ data = load_google_sheets(SHEET_URL)
 # 🤖 Initialize MiniLegalAI
 # ==============================
 workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
+
+@st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
+def load_workbook(path):
+    if not os.path.exists(path):
+        st.warning(f"⚠️ ملف Excel غير موجود: {path}")
+        return pd.DataFrame(columns=['المادة','القسم','النص','مثال'])
+    df = pd.read_excel(path, engine='openpyxl')
+    df.fillna("", inplace=True)
+    return df
+
+excel_data = load_workbook(workbook_path)
+
 if os.path.exists(workbook_path):
     ai = MiniLegalAI(workbook_path)
+    ai.db = excel_data
+    ai.build_tfidf_matrix()
 else:
     ai = None
     st.warning("⚠️ ملف Excel للمساعد القانوني غير موجود، سيتم تفعيل المساعد عند توفره.")
@@ -149,7 +163,7 @@ def show_statistics(df):
         st.plotly_chart(fig, use_container_width=True)
 
 # ==============================
-# 🏠 Pages (Home, Workers, Employers, Inspectors, Researchers)
+# 🏠 Pages
 # ==============================
 def show_home():
     st.title(f"⚖️ {config.get('APP_NAME')}")
@@ -205,7 +219,7 @@ def settings_page():
         settings.save_settings()
         st.success("✅ تم حفظ الإعدادات.")
         load_css(theme)
-        if os.path.exists(workbook):
+        if ai and os.path.exists(workbook):
             ai.reload(workbook)
 
 # ==============================
