@@ -4,7 +4,6 @@ import os, datetime, json, pandas as pd
 from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
 from helpers.ui_components import message_bubble, section_header, info_card
-from recommender import smart_recommender
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 import plotly.express as px
@@ -12,7 +11,7 @@ import plotly.express as px
 # ==============================
 # ⚙️ Initialize Settings
 # ==============================
-settings = SettingsManager()  # يقوم تلقائيًا بتحميل أو إنشاء config.json
+settings = SettingsManager()
 config = st.session_state["config"]
 
 # ==============================
@@ -147,6 +146,11 @@ def show_statistics(df):
         st.plotly_chart(fig, use_container_width=True)
 
 # ==============================
+# 💡 Smart Recommender
+# ==============================
+from helpers.recommender import smart_recommender  # تأكد أن هذا هو النسخة الجديدة مع fallback
+
+# ==============================
 # 🏠 Pages
 # ==============================
 def show_home():
@@ -165,7 +169,7 @@ def researchers_section(): section_header("📖 قسم الباحثين والم
 def settings_page(): section_header("⚙️ الإعدادات", "⚙️"); st.write("يمكن تعديل الإعدادات من هنا")
 
 # ==============================
-# ⚙️ Sidebar - القائمة الرئيسية
+# ⚙️ Sidebar
 # ==============================
 menu_items_labels = ["🏠 الصفحة الرئيسية", "👷 العمال", "🏢 أصحاب العمل",
                      "🕵️ مفتشو العمل", "📖 الباحثون والمتدربون", "⚙️ الإعدادات"]
@@ -173,8 +177,8 @@ menu_items_icons  = ["house", "people", "briefcase", "search", "book", "gear"]
 
 with st.sidebar:
     choice = option_menu(
-        "القائمة الرئيسية",   # عنوان القائمة
-        menu_items_labels,    # عناصر القائمة
+        "القائمة الرئيسية",
+        menu_items_labels,
         icons=menu_items_icons,
         default_index=0
     )
