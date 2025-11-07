@@ -113,9 +113,9 @@ def calculators_tab():
     for i, calc in enumerate(calcs):
         with cols[i % 3]:
             st.markdown(f"""
-            <div style="background:#D6EAF8; padding:20px; border-radius:20px; margin-bottom:20px; text-align:center;">
-                <h4>{calc['title']}</h4>
-                <p>{calc['desc']}</p>
+            <div style="background:#E8F6F3; padding:25px; border-radius:20px; margin-bottom:20px; text-align:center; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+                <h4 style="color:#117A65;">{calc['title']}</h4>
+                <p style="color:#1C2833;">{calc['desc']}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -136,11 +136,9 @@ def rights_tab():
     for idx, cat in enumerate(categories):
         with cols[idx % 2]:
             st.markdown(f"""
-            <div style="background:#A9CCE3; padding:20px; border-radius:20px; margin-bottom:20px;">
-                <h4>{cat['title']}</h4>
-                <ul>
-                    {''.join([f"<li>{item}</li>" for item in cat['items']])}
-                </ul>
+            <div style="background:#D6EAF8; padding:20px; border-radius:20px; margin-bottom:20px; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+                <h4 style="color:#154360;">{cat['title']}</h4>
+                <ul style="color:#1B2631;">{''.join([f"<li>{item}</li>" for item in cat['items']])}</ul>
             </div>
             """, unsafe_allow_html=True)
 
@@ -190,13 +188,15 @@ def complaint_simulator_tab():
 
         st.subheader("📄 التقرير القانوني")
         st.markdown(f"""
-        - **العامل:** {الاسم or "غير محدد"}
-        - **سنوات العمل:** {سنوات_العمل}
-        - **الراتب:** {الراتب} دينار
-        - **نوع الانتهاك:** {نوع_الانتهاك}
-        - **وصف الحالة:** {وصف_الحالة or 'لا يوجد وصف'}
-        - **التوصية:** {توصية}
-        """)
+        <div style="background:#FDFEFE; padding:20px; border-radius:20px; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
+        - <b>العامل:</b> {الاسم or "غير محدد"}<br>
+        - <b>سنوات العمل:</b> {سنوات_العمل}<br>
+        - <b>الراتب:</b> {الراتب} دينار<br>
+        - <b>نوع الانتهاك:</b> {نوع_الانتهاك}<br>
+        - <b>وصف الحالة:</b> {وصف_الحالة or 'لا يوجد وصف'}<br>
+        - <b>التوصية:</b> {توصية}
+        </div>
+        """, unsafe_allow_html=True)
         st.success("✅ التحليل تم بنجاح")
 
 # =====================================================
@@ -215,7 +215,7 @@ def complaints_places_tab():
     info = الجهات.get(محافظة)
     if info:
         st.markdown(f"""
-        <div style="background:#D6EAF8;padding:15px;border-radius:15px;margin-bottom:10px;">
+        <div style="background:#E8F8F5;padding:15px;border-radius:15px;margin-bottom:10px; box-shadow:0 3px 6px rgba(0,0,0,0.1);">
         <b>{info['الجهة']}</b><br>
         العنوان: {info['العنوان']}<br>
         الهاتف: {info['الهاتف']}<br>
@@ -230,16 +230,38 @@ def complaints_places_tab():
 # 👷 صفحة العمال
 # =====================================================
 def workers_section():
-    selected_tab = st.session_state.get("workers_tab", "🧮 الحاسبات")
+    selected_tab = st.session_state.get("workers_tab", None)
     
-    if selected_tab == "🧮 الحاسبات":
-        calculators_tab()
-    elif selected_tab == "📚 حقوق العمال":
-        rights_tab()
-    elif selected_tab == "📝 محاكي الشكوى":
-        complaint_simulator_tab()
-    elif selected_tab == "🏛️ الجهات المختصة":
-        complaints_places_tab()
+    if selected_tab is None:
+        # عرض الأقسام فقط
+        st.markdown("### 👷 أقسام صفحة العمال")
+        tabs = [
+            {"label": "🧮", "name": "🧮 الحاسبات"},
+            {"label": "📚", "name": "📚 حقوق العمال"},
+            {"label": "📝", "name": "📝 محاكي الشكوى"},
+            {"label": "🏛️", "name": "🏛️ الجهات المختصة"},
+        ]
+        TAB_BG = "#F0F8FF"
+        TAB_HOVER_BG = "#D6EAF8"
+        TAB_TEXT_COLOR = "#1C2833"
+        TAB_ICON_SIZE = "50px"
+        cols = st.columns(len(tabs))
+        for i, tab in enumerate(tabs):
+            with cols[i]:
+                if st.button(f'<div style="background:{TAB_BG}; border-radius:25px; padding:30px 20px; text-align:center; font-weight:600; color:{TAB_TEXT_COLOR}; font-size:18px; box-shadow:0 4px 8px rgba(0,0,0,0.1); cursor:pointer;">{tab["label"]}<br>{tab["name"]}</div>', key=tab["name"], use_container_width=True):
+                    st.session_state["workers_tab"] = tab["name"]
+    else:
+        # عرض الصفحة الفرعية المختارة
+        if selected_tab == "🧮 الحاسبات":
+            calculators_tab()
+        elif selected_tab == "📚 حقوق العمال":
+            rights_tab()
+        elif selected_tab == "📝 محاكي الشكوى":
+            complaint_simulator_tab()
+        elif selected_tab == "🏛️ الجهات المختصة":
+            complaints_places_tab()
+        if st.button("⬅️ العودة للأقسام"):
+            st.session_state["workers_tab"] = None
 
 # =====================================================
 # 🏠 الصفحة الرئيسية
@@ -261,49 +283,8 @@ def show_home():
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 👷 أقسام صفحة العمال")
-    
-    TAB_BG = "#E6F2F8"
-    TAB_HOVER_BG = "#D0E7F2"
-    TAB_ICON_SIZE = "40px"
-    
-    st.markdown(f"""
-    <style>
-    .tab-card {{
-        background-color: {TAB_BG};
-        border-radius: 20px;
-        padding: 25px;
-        text-align: center;
-        transition: transform 0.2s, background-color 0.2s;
-        cursor: pointer;
-        font-weight: bold;
-        color: #000;
-        font-size: 16px;
-    }}
-    .tab-card:hover {{
-        transform: translateY(-5px);
-        background-color: {TAB_HOVER_BG};
-    }}
-    .tab-icon {{
-        font-size: {TAB_ICON_SIZE};
-        margin-bottom: 10px;
-    }}
-    </style>
-    """, unsafe_allow_html=True)
-
-    tabs = [
-        {"label": "🧮", "name": "🧮 الحاسبات"},
-        {"label": "📚", "name": "📚 حقوق العمال"},
-        {"label": "📝", "name": "📝 محاكي الشكوى"},
-        {"label": "🏛️", "name": "🏛️ الجهات المختصة"},
-    ]
-
-    cols = st.columns(len(tabs))
-    for i, tab in enumerate(tabs):
-        with cols[i]:
-            if st.button(f'<div class="tab-card"><div class="tab-icon">{tab["label"]}</div>{tab["name"]}</div>', key=tab["name"], use_container_width=True):
-                st.session_state.current_page = "workers"
-                st.session_state["workers_tab"] = tab["name"]
+    if st.button("👷 اذهب إلى صفحة العمال"):
+        st.session_state.current_page = "workers"
 
 # =====================================================
 # 🧭 نظام التنقل
@@ -312,10 +293,7 @@ pages = {
     "home": show_home,
     "workers": workers_section,
 }
-if st.session_state.current_page != "home" and st.button("⬅️ العودة"):
-    st.session_state.current_page = "home"
-else:
-    pages[st.session_state.current_page]()
+pages[st.session_state.current_page]()
 
 # =====================================================
 # ⚖️ Footer
