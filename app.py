@@ -3,6 +3,7 @@ import os, pandas as pd
 from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
 from helpers.ui_components import message_bubble, section_header, info_card
+from recommender import smart_recommender
 import plotly.express as px
 
 # =====================================================
@@ -83,7 +84,6 @@ def init_ai():
     if os.path.exists(WORKBOOK_PATH):
         try:
             ai = MiniLegalAI(WORKBOOK_PATH)
-            ai.db = excel_data
             ai.build_tfidf_matrix()
             return ai
         except Exception as e:
@@ -113,65 +113,10 @@ def show_ai_assistant(key_prefix=""):
             st.markdown(f"**💡 مثال تطبيقي:** {example}")
 
 # =====================================================
-# 💡 Smart Recommender
+# 👷 الأقسام
 # =====================================================
 ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
-MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
-CARD_GRADIENT = "linear-gradient(135deg, #FFD700, #D4AF37)"
-CARD_TEXT_COLOR = "#000000"
 
-def get_recommendations(role):
-    mapping = {
-        "العمال": [
-            {"العنوان": "راجع حقوقك الأساسية", "الوصف": "تعرف على حقوقك وفق القانون الأردني.", "النوع": "توعية", "link": "#", "icon": "📚", "img": f"{ICON_PATH}rights.png"}
-        ],
-        "اصحاب العمل": [
-            {"العنوان": "نماذج وتقارير أصحاب العمل", "الوصف": "نماذج قانونية جاهزة.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}service_end.png"}
-        ],
-        "مفتشو العمل": [
-            {"العنوان": "نماذج التفتيش", "الوصف": "نماذج جاهزة للتوثيق.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}practice.png"}
-        ],
-        "الباحثون والمتدربون": [
-            {"العنوان": "استعراض السوابق القانونية", "الوصف": "اطلع على الحالات السابقة.", "النوع": "بحث", "link": "#", "icon": "🔍", "img": f"{ICON_PATH}legal_case.png"}
-        ]
-    }
-    return mapping.get(role, [])
-
-def smart_recommender(role="العمال", n=None):
-    recs = get_recommendations(role)
-    if not recs:
-        st.info("ℹ️ لا توجد توصيات حالياً لهذه الفئة.")
-        return
-    section_header("💡 اقتراحات ذكية لك", "💡")
-    n = n or MAX_CARDS
-    cols = st.columns(3)
-    for idx, rec in enumerate(recs[:n]):
-        with cols[idx % len(cols)]:
-            st.markdown(
-                f"""
-                <div style="background: {CARD_GRADIENT};
-                            border-radius:20px;
-                            padding:20px;
-                            margin:10px;
-                            box-shadow: 0px 8px 20px rgba(0,0,0,0.15);
-                            text-align:center;
-                            color:{CARD_TEXT_COLOR};
-                            transition: transform 0.3s;
-                            cursor:pointer;"
-                            onmouseover="this.style.transform='scale(1.05)';"
-                            onmouseout="this.style.transform='scale(1)';">
-                    <img src='{rec['img']}' alt='icon' width='60px' style='margin-bottom:12px;'/>
-                    <h3 style='margin-bottom:6px;'>{rec['icon']} {rec['العنوان']}</h3>
-                    <p style='font-size:15px; opacity:0.9;'>{rec['الوصف']}</p>
-                    <a href='{rec['link']}' target='_blank' style='color:{CARD_TEXT_COLOR}; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-# =====================================================
-# 👷 قسم العمال
-# =====================================================
 def workers_section():
     section_header("👷 قسم العمال", "👷")
     show_ai_assistant("workers")
@@ -181,11 +126,7 @@ def workers_section():
     years = st.number_input("عدد سنوات الخدمة:", min_value=0, step=1, key="workers_years")
     last_salary = st.number_input("آخر راتب شهري:", min_value=0.0, step=10.0, format="%.2f", key="workers_salary")
     if st.button("احسب المكافأة", key="workers_calc_bonus"):
-        bonus = 0
-        if years <= 5:
-            bonus = 0.5 * last_salary * years
-        else:
-            bonus = 0.5 * last_salary * 5 + last_salary * (years - 5)
+        bonus = 0.5 * last_salary * min(years, 5) + last_salary * max(years - 5, 0)
         st.success(f"💰 مكافأة نهاية الخدمة التقديرية: {bonus:,.2f} دينار")
     
     st.subheader("📚 حقوقك الأساسية كعامل")
@@ -208,55 +149,20 @@ def workers_section():
     else:
         st.info("ℹ️ بيانات الأقسام غير متوفرة لعرض الرسم البياني.")
 
-# =====================================================
-# باقي الأقسام (كما سبق)
-# =====================================================
 def employers_section():
     section_header("🏢 قسم أصحاب العمل", "🏢")
     show_ai_assistant("employers")
     smart_recommender("اصحاب العمل")
-    st.subheader("📄 نماذج وتقارير")
-    templates = [
-        {"title": "عقد عمل", "desc": "عقد عمل رسمي", "file": f"{ICON_PATH}contract.png"},
-        {"title": "تقرير الرواتب", "desc": "كشف الرواتب الشهرية", "file": f"{ICON_PATH}salary_report.png"},
-        {"title": "تقرير الالتزام القانوني", "desc": "التأكد من الالتزام بالقانون", "file": f"{ICON_PATH}compliance_report.png"}
-    ]
-    cols = st.columns(3)
-    for idx, tpl in enumerate(templates):
-        with cols[idx % 3]:
-            st.image(tpl["file"], width=60)
-            st.markdown(f"**{tpl['title']}**\n\n{tpl['desc']}")
 
 def inspectors_section():
     section_header("🕵️ قسم مفتشو العمل", "🕵️")
     show_ai_assistant("inspectors")
     smart_recommender("مفتشو العمل")
-    st.subheader("📄 نماذج التفتيش")
-    templates = [
-        {"title": "تقرير تفتيش شهري", "desc": "نموذج جاهز للتفتيش الشهري", "file": f"{ICON_PATH}inspection_monthly.png"},
-        {"title": "متابعة المخالفات", "desc": "تقرير متابعة المخالفات", "file": f"{ICON_PATH}inspection_followup.png"},
-        {"title": "محضر غرامات", "desc": "نماذج لتسجيل المخالفات", "file": f"{ICON_PATH}penalty_report.png"}
-    ]
-    cols = st.columns(3)
-    for idx, tpl in enumerate(templates):
-        with cols[idx % 3]:
-            st.image(tpl["file"], width=60)
-            st.markdown(f"**{tpl['title']}**\n\n{tpl['desc']}")
 
 def researchers_section():
     section_header("📖 الباحثون والمتدربون", "📖")
     show_ai_assistant("researchers")
     smart_recommender("الباحثون والمتدربون")
-    st.subheader("📚 مكتبة السوابق والتقارير")
-    reports = [
-        {"title": "حالات سابقة", "desc": "أمثلة عن المخالفات", "file": f"{ICON_PATH}past_cases.png"},
-        {"title": "نتائج التفتيش السابقة", "desc": "سجل كامل للتفتيش", "file": f"{ICON_PATH}inspection_results.png"}
-    ]
-    cols = st.columns(2)
-    for idx, rpt in enumerate(reports):
-        with cols[idx % 2]:
-            st.image(rpt["file"], width=50)
-            st.markdown(f"**{rpt['title']}**\n\n{rpt['desc']}")
 
 def settings_page():
     section_header("⚙️ الإعدادات", "⚙️")
@@ -275,6 +181,8 @@ if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
 
 def show_home():
+    CARD_GRADIENT = "linear-gradient(135deg, #FFD700, #D4AF37)"
+    CARD_TEXT_COLOR = "#000000"
     st.markdown(f"""
         <div style="text-align:center; padding:20px; background: {CARD_GRADIENT};
                     border-radius:15px; color:{CARD_TEXT_COLOR}; margin-bottom:20px;">
