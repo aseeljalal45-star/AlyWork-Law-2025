@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import os, datetime, json, pandas as pd
+import os, pandas as pd
 from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
 from helpers.ui_components import message_bubble, section_header, info_card
@@ -24,16 +24,15 @@ st.set_page_config(
 )
 
 # ==============================
-# 🌈 Load CSS officially
+# 🌈 Load official CSS
 # ==============================
-def load_css(theme=None):
-    theme = theme or config.get("THEME", "فاتح")
-    css_file = "assets/styles_light.css" if theme=="فاتح" else "assets/styles_dark.css"
+def load_official_css():
+    css_file = "assets/styles_official.css"  # أنشئ هذا الملف لتحتوي الألوان الرسمية
     if os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-load_css(settings.get("THEME"))
+load_official_css()
 
 # ==============================
 # 📊 Load Google Sheet safely
@@ -63,21 +62,20 @@ def load_google_sheets(url):
 data = load_google_sheets(SHEET_URL)
 
 # ==============================
-# 🤖 Initialize MiniLegalAI safely
+# 🤖 Initialize MiniLegalAI
 # ==============================
 workbook_path = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
 
 @st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
 def safe_load_excel(path):
     if not os.path.exists(path):
-        st.warning(f"⚠️ ملف Excel غير موجود: {path}. سيتم إنشاء DataFrame افتراضي.")
+        st.warning(f"⚠️ ملف Excel غير موجود: {path}")
         return pd.DataFrame(columns=['المادة','القسم','النص','مثال'])
     try:
         df = pd.read_excel(path, engine='openpyxl')
         df.fillna("", inplace=True)
         return df
-    except Exception as e:
-        st.error(f"⚠️ ملف Excel تالف أو غير صالح: {e}. سيتم إنشاء DataFrame افتراضي.")
+    except:
         return pd.DataFrame(columns=['المادة','القسم','النص','مثال'])
 
 excel_data = safe_load_excel(workbook_path)
@@ -87,12 +85,10 @@ if os.path.exists(workbook_path):
         ai = MiniLegalAI(workbook_path)
         ai.db = excel_data
         ai.build_tfidf_matrix()
-    except Exception as e:
+    except:
         ai = None
-        st.error(f"⚠️ خطأ في تهيئة المساعد القانوني: {e}")
 else:
     ai = None
-    st.warning("⚠️ ملف Excel للمساعد القانوني غير موجود، سيتم تفعيل المساعد عند توفره.")
 
 # ==============================
 # 🧠 AI Assistant
@@ -103,19 +99,16 @@ def show_ai_assistant():
     section_header("🤖 المساعد القانوني الذكي", "🤖")
     query = st.text_input("💬 اكتب سؤالك هنا:")
     if query:
-        try:
-            answer, reference, example = ai.advanced_search(query)
-            if "chat_history" not in st.session_state:
-                st.session_state["chat_history"] = []
-            st.session_state["chat_history"].append({"user": query, "ai": answer})
-            max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
-            for chat in st.session_state["chat_history"][-max_history:]:
-                message_bubble("User", chat["user"], is_user=True)
-                message_bubble("AI", chat["ai"], is_user=False)
-            st.markdown(f"**📜 نص القانون:** {reference}")
-            st.markdown(f"**💡 مثال تطبيقي:** {example}")
-        except Exception as e:
-            st.error(f"⚠️ خطأ أثناء البحث في المساعد: {e}")
+        answer, reference, example = ai.advanced_search(query)
+        if "chat_history" not in st.session_state:
+            st.session_state["chat_history"] = []
+        st.session_state["chat_history"].append({"user": query, "ai": answer})
+        max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
+        for chat in st.session_state["chat_history"][-max_history:]:
+            message_bubble("User", chat["user"], is_user=True)
+            message_bubble("AI", chat["ai"], is_user=False)
+        st.markdown(f"**📜 نص القانون:** {reference}")
+        st.markdown(f"**💡 مثال تطبيقي:** {example}")
 
 # ==============================
 # 📈 Data Table
