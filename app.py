@@ -165,18 +165,19 @@ def researchers_section(): section_header("📖 قسم الباحثين والم
 def settings_page(): section_header("⚙️ الإعدادات", "⚙️"); st.write("يمكن تعديل الإعدادات من هنا")
 
 # ==============================
-# ⚙️ Sidebar
+# ⚙️ Sidebar - القائمة الرئيسية
 # ==============================
-menu_items = config.get("SIDEBAR", {}).get("MENU_ITEMS", [])
-labels = [i.get("label", "غير معروف") for i in menu_items]
-icons = [i.get("icon", "") for i in menu_items]
+menu_items_labels = ["🏠 الصفحة الرئيسية", "👷 العمال", "🏢 أصحاب العمل",
+                     "🕵️ مفتشو العمل", "📖 الباحثون والمتدربون", "⚙️ الإعدادات"]
+menu_items_icons  = ["house", "people", "briefcase", "search", "book", "gear"]
 
 with st.sidebar:
-    if labels:
-        choice = option_menu("القائمة الرئيسية", labels, icons=icons, default_index=0)
-    else:
-        st.info("⚠️ لم يتم تعريف عناصر القائمة الرئيسية.")
-        choice = None
+    choice = option_menu(
+        "القائمة الرئيسية",   # عنوان القائمة
+        menu_items_labels,    # عناصر القائمة
+        icons=menu_items_icons,
+        default_index=0
+    )
 
 pages = {
     "🏠 الصفحة الرئيسية": show_home,
