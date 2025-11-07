@@ -144,16 +144,16 @@ def smart_recommender(role="العمال", n=None):
     n = n or MAX_CARDS
     cols = st.columns(3)
     type_styles = {
-        "حاسبة": "linear-gradient(135deg, #4da6ff, #1e90ff)",
-        "توعية": "linear-gradient(135deg, #66cc99, #339966)",
-        "قانوني": "linear-gradient(135deg, #7f7fff, #5555ff)",
-        "تعليمي": "linear-gradient(135deg, #40c0c0, #008080)",
-        "نموذج": "linear-gradient(135deg, #a0d6b4, #66aa88)",
-        "بحث": "linear-gradient(135deg, #9ec1f7, #6699cc)"
+        "حاسبة": "linear-gradient(135deg, #b0b0b0, #909090)",
+        "توعية": "linear-gradient(135deg, #909090, #707070)",
+        "قانوني": "linear-gradient(135deg, #707070, #6a7f8c)",
+        "تعليمي": "linear-gradient(135deg, #6a7f8c, #8b7fa6)",
+        "نموذج": "linear-gradient(135deg, #8b7fa6, #b0a0c0)",
+        "بحث": "linear-gradient(135deg, #b0a0c0, #c0c0c0)"
     }
     for idx, rec in enumerate(recs[:n]):
         with cols[idx % len(cols)]:
-            style = type_styles.get(rec["النوع"], "linear-gradient(135deg, #9ca3af, #6b7280)")
+            style = type_styles.get(rec["النوع"], "linear-gradient(135deg, #d0d0d0, #a0a0a0)")
             st.markdown(
                 f"""
                 <div style="background: {style};
@@ -218,19 +218,19 @@ if "current_page" not in st.session_state:
 
 def show_home():
     st.markdown("""
-        <div style="text-align:center; padding:20px; background: linear-gradient(90deg, #4da6ff, #66cc99);
-                    border-radius:15px; color:white; margin-bottom:20px;">
+        <div style="text-align:center; padding:20px; background: linear-gradient(90deg, #b0b0b0, #909090);
+                    border-radius:15px; color:#222; margin-bottom:20px;">
             <h1 style="margin:0; font-size:40px;">⚖️ {}</h1>
             <p style="font-size:18px; margin-top:5px;">الوصول السريع إلى أقسام المنصة الذكية</p>
         </div>
     """.format(config.get('APP_NAME')), unsafe_allow_html=True)
 
     categories = [
-        {"label": "👷 العمال", "key": "workers", "color":"#4da6ff", "icon": "workers.png"},
-        {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#66cc99", "icon": "employers.png"},
-        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "color":"#40c0c0", "icon": "inspectors.png"},
-        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#7f7fff", "icon": "researchers.png"},
-        {"label": "⚙️ الإعدادات", "key": "settings", "color":"#b19cd9", "icon": "settings.png"}
+        {"label": "👷 العمال", "key": "workers", "color":"#b0b0b0", "icon": "workers.png"},
+        {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#909090", "icon": "employers.png"},
+        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "color":"#707070", "icon": "inspectors.png"},
+        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#6a7f8c", "icon": "researchers.png"},
+        {"label": "⚙️ الإعدادات", "key": "settings", "color":"#8b7fa6", "icon": "settings.png"}
     ]
 
     cols = st.columns(3)
