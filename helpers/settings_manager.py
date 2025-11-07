@@ -1,83 +1,107 @@
-import json
+import pandas as pd
 import os
-import streamlit as st
-from datetime import datetime
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-class SettingsManager:
-    def __init__(self, path="helpers/settings.json"):
-        self.path = path
-        self.settings = self.load_settings()
+class MiniLegalAI:
+    def __init__(self, workbook_path=None):
+        """
+        تهيئة المساعد الذكي وربط قاعدة البيانات القانونية.
+        :param workbook_path: مسار ملف Excel الرئيسي (AlyWork_Law_Pro)
+        """
+        # إذا لم يتم تحديد المسار، يستخدم اسم الملف الافتراضي
+        self.workbook_path = workbook_path or "AlyWork_Law_Pro_v2025_v24_ColabStreamlitReady.xlsx"
+        self.db = self.load_database()
+        self.vectorizer = None
+        self.tfidf_matrix = None
+        
+        if not self.db.empty:
+            self.build_tfidf_matrix()
 
-    # ==============================
-    # تحميل الإعدادات من ملف JSON أو إعدادات افتراضية
-    # ==============================
-    def load_settings(self):
-        if os.path.exists(self.path):
-            try:
-                with open(self.path, "r", encoding="utf-8") as f:
-                    settings = json.load(f)
-                st.info(f"✅ تم تحميل الإعدادات بنجاح ({len(settings)} إعداد).")
-                return settings
-            except json.JSONDecodeError as e:
-                st.warning(f"⚠️ خطأ في ملف الإعدادات: {e}. سيتم استخدام الإعدادات الافتراضية.")
-                return self.default_settings()
-        else:
-            st.warning("⚠️ لم يتم العثور على ملف settings.json، سيتم إنشاء إعدادات افتراضية.")
-            return self.default_settings()
-
-    # ==============================
-    # إعدادات افتراضية
-    # ==============================
-    def default_settings(self):
-        return {
-            "APP_NAME": "AlyWork Law Pro",
-            "SHEET_URL": "",
-            "LANG": "ar",
-            "THEME": "فاتح",
-            "VERSION": "v25.0",
-            "LAST_UPDATED": datetime.now().isoformat()
-        }
-
-    # ==============================
-    # حفظ الإعدادات مع تسجيل الوقت
-    # ==============================
-    def save_settings(self):
-        self.settings["LAST_UPDATED"] = datetime.now().isoformat()
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+    def load_database(self):
+        """
+        تحميل قاعدة البيانات من ملف Excel.
+        يتوقع وجود الأعمدة: المادة، القسم، النص، مثال
+        """
         try:
-            with open(self.path, "w", encoding="utf-8") as f:
-                json.dump(self.settings, f, ensure_ascii=False, indent=4)
-            st.success("✅ تم حفظ الإعدادات بنجاح.")
+            if not os.path.exists(self.workbook_path):
+                print(f"⚠️ ملف قاعدة البيانات غير موجود: {self.workbook_path}")
+                return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
+            
+            df = pd.read_excel(self.workbook_path, engine='openpyxl')
+            # تنظيف الأعمدة الفارغة وتعبئتها
+            df.fillna("", inplace=True)
+            
+            # التحقق من وجود الأعمدة المطلوبة
+            required_cols = ['المادة', 'القسم', 'النص']
+            for col in required_cols:
+                if col not in df.columns:
+                    print(f"⚠️ العمود '{col}' مفقود في قاعدة البيانات.")
+                    df[col] = ""
+            
+            # إنشاء عمود "مثال" إن لم يكن موجودًا
+            if 'مثال' not in df.columns:
+                df['مثال'] = ""
+            
+            return df
+        
         except Exception as e:
-            st.error(f"❌ حدث خطأ أثناء حفظ الإعدادات: {e}")
+            print(f"⚠️ خطأ عند تحميل قاعدة البيانات: {e}")
+            return pd.DataFrame(columns=['المادة', 'القسم', 'النص', 'مثال'])
 
-    # ==============================
-    # الحصول على قيمة إعداد
-    # ==============================
-    def get(self, key, default=None):
-        return self.settings.get(key, default)
+    def preprocess_text(self, text):
+        """
+        تنظيف النصوص: حذف علامات الترقيم والأحرف الخاصة
+        """
+        text = str(text).strip()
+        text = re.sub(r"[^\w\s]", " ", text)
+        text = re.sub(r"\s+", " ", text)
+        return text
 
-    # ==============================
-    # تعيين قيمة إعداد جديدة وحفظها تلقائيًا
-    # ==============================
-    def set(self, key, value):
-        self.settings[key] = value
-        self.save_settings()
+    def build_tfidf_matrix(self):
+        """
+        بناء مصفوفة TF-IDF للنصوص في قاعدة البيانات
+        """
+        if self.db.empty:
+            print("⚠️ لا يمكن بناء مصفوفة TF-IDF لأن قاعدة البيانات فارغة.")
+            return
+        
+        corpus = self.db['النص'].apply(self.preprocess_text).tolist()
+        self.vectorizer = TfidfVectorizer()
+        self.tfidf_matrix = self.vectorizer.fit_transform(corpus)
 
-    # ==============================
-    # تحديث إعدادات متعددة دفعة واحدة
-    # ==============================
-    def update(self, new_settings: dict):
-        if isinstance(new_settings, dict):
-            self.settings.update(new_settings)
-            self.save_settings()
-        else:
-            st.error("⚠️ يجب أن يكون التحديث على شكل dict.")
+    def advanced_search(self, query, top_n=1):
+        """
+        البحث الذكي في قاعدة البيانات باستخدام TF-IDF وCosine Similarity
+        :param query: الاستعلام النصي
+        :param top_n: عدد النتائج الأعلى تطابقًا
+        :return: (answer, reference, example)
+        """
+        if self.db.empty or self.tfidf_matrix is None:
+            return "⚠️ قاعدة البيانات غير جاهزة للبحث.", "", ""
+        
+        if not query.strip():
+            return "⚠️ يرجى إدخال نص للبحث.", "", ""
+        
+        try:
+            query_clean = self.preprocess_text(query)
+            query_vec = self.vectorizer.transform([query_clean])
+            similarities = cosine_similarity(query_vec, self.tfidf_matrix).flatten()
 
-    # ==============================
-    # إعادة الإعدادات إلى الافتراضية
-    # ==============================
-    def reset_to_default(self):
-        self.settings = self.default_settings()
-        self.save_settings()
-        st.info("♻️ تم إعادة الإعدادات إلى الوضع الافتراضي.")
+            # ترتيب النتائج حسب أعلى تشابه
+            top_indices = similarities.argsort()[::-1][:top_n]
+            best_score = similarities[top_indices[0]]
+
+            if best_score == 0:
+                return "⚠️ لم يتم العثور على تطابق مباشر في قاعدة البيانات.", "", ""
+
+            row = self.db.iloc[top_indices[0]]
+            answer = row.get('النص', 'لا يوجد نص متاح.')
+            reference = f"المادة {row.get('المادة', 'غير محددة')} - القسم: {row.get('القسم', 'غير محدد')}"
+            example = row.get('مثال', 'لا يوجد مثال متاح.')
+
+            return answer, reference, example
+
+        except Exception as e:
+            return f"⚠️ حدث خطأ أثناء عملية البحث: {e}", "", ""
