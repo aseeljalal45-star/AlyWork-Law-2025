@@ -1,16 +1,26 @@
-# Streamlit & UI
-streamlit==1.26.0
-streamlit-option-menu==0.3.2
-streamlit-aggrid==1.2.0.post1
+# ==============================
+# متطلبات التشغيل لمشروع AlyWork Law Pro على Streamlit Cloud
+# ==============================
 
-# Data handling
-pandas==2.0.3
-openpyxl==3.1.2
-xlrd==2.0.1
+# واجهة المستخدم
+streamlit>=1.25.0
 
-# Environment & settings
-python-dotenv==1.0.0
-watchdog==3.0.0
+# جداول تفاعلية
+st-aggrid>=1.15.0
+streamlit-option-menu>=0.5.3
 
-# Visualization
-plotly==5.16.0
+# معالجة البيانات
+pandas>=2.0.0
+numpy>=1.26.0
+openpyxl>=3.1.0
+xlrd>=2.0.1
+
+# التحليل الذكي
+scikit-learn>=1.3.0
+
+# الرسوم البيانية
+plotly>=5.20.0
+
+# إعدادات وبيئة
+python-dotenv>=1.1.0
+watchdog>=3.0.0
