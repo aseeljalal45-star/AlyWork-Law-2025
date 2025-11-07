@@ -1,96 +1,31 @@
-/* ==============================
-   Global Styles - Dark Theme
-============================== */
+/* الخلفية */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #121212;
+    background-color: #0B1E3F;
     color: #FFFFFF;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* ==============================
-   Grid Cards (Smart Recommender)
-============================== */
-.smart-card {
-    border-radius: 15px;
-    padding: 15px;
-    margin: 5px;
-    box-shadow: 2px 4px 15px rgba(0,0,0,0.5);
-    transition: transform 0.3s, box-shadow 0.3s;
-    text-align: center;
-    color: #fff;
+/* العناوين */
+h1, h2, h3, h4 {
+    color: #90CAF9;
 }
 
-.smart-card:hover {
-    transform: scale(1.05);
-    box-shadow: 4px 8px 25px rgba(0,0,0,0.7);
-}
-
-.smart-card img {
-    margin-bottom: 10px;
-}
-
-/* ==============================
-   Message Bubbles
-============================== */
-.message-bubble {
-    padding: 10px;
+/* البطاقات */
+.stCard {
+    background-color: #1565C0;
     border-radius: 10px;
-    margin: 5px;
-    max-width: 80%;
-}
-
-.message-user {
-    background-color: #1E88E5;
-    color: #FFFFFF;
-    text-align: right;
-    margin-left: auto;
-}
-
-.message-ai {
-    background-color: #333333;
-    color: #FFFFFF;
-    text-align: left;
-    margin-right: auto;
-}
-
-/* ==============================
-   Section Headers
-============================== */
-.section-header {
-    margin-top: 20px;
-    margin-bottom: 10px;
-    font-size: 24px;
-    font-weight: bold;
-    border-bottom: 2px solid #BB86FC;
-    padding-bottom: 5px;
-}
-
-/* ==============================
-   Info Cards
-============================== */
-.info-card {
-    background-color: #1F1F1F;
     padding: 10px;
-    border-radius: 8px;
-    margin: 4px 0;
-    box-shadow: 0 0 3px rgba(255,255,255,0.05);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
 }
 
-/* ==============================
-   Buttons
-============================== */
+/* الأزرار */
 .stButton>button {
-    border-radius: 8px;
-    padding: 8px 15px;
-    background: linear-gradient(135deg, #BB86FC, #3700B3);
-    color: #fff;
+    background-color: #1976D2;
+    color: white;
+    border-radius: 5px;
+    padding: 5px 15px;
     font-weight: bold;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .stButton>button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    background-color: #0D47A1;
 }
