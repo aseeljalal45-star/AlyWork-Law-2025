@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 from streamlit_option_menu import option_menu
 import os, datetime, pandas as pd
@@ -13,8 +12,8 @@ import plotly.express as px
 # ==============================
 # ⚙️ Initialize Settings
 # ==============================
-settings = SettingsManager()  # تحميل أو إنشاء config.json
-config = st.session_state.get("config", {})
+settings = SettingsManager()
+config = st.session_state["config"]
 
 # ==============================
 # ⚙️ Page config
@@ -159,6 +158,7 @@ def show_home():
     show_ai_assistant()
     smart_recommender("العمال", n=config.get("RECOMMENDER", {}).get("MAX_CARDS", 6))
 
+# فئات المستخدمين
 def workers_section(): section_header("👷 قسم العمال", "👷"); show_ai_assistant(); smart_recommender("العمال")
 def employers_section(): section_header("🏢 قسم أصحاب العمل", "🏢"); show_ai_assistant(); smart_recommender("اصحاب العمل")
 def inspectors_section(): section_header("🕵️ قسم المفتشين", "🕵️"); show_ai_assistant(); smart_recommender("مفتشو العمل")
@@ -168,8 +168,14 @@ def settings_page(): section_header("⚙️ الإعدادات", "⚙️"); st.w
 # ==============================
 # ⚙️ Sidebar
 # ==============================
-menu_items_labels = ["🏠 الصفحة الرئيسية", "👷 العمال", "🏢 أصحاب العمل",
-                     "🕵️ مفتشو العمل", "📖 الباحثون والمتدربون", "⚙️ الإعدادات"]
+menu_items_labels = [
+    "🏠 الصفحة الرئيسية",
+    "👷 العمال",
+    "🏢 أصحاب العمل",
+    "🕵️ مفتشو العمل",
+    "📖 الباحثون والمتدربون",
+    "⚙️ الإعدادات"
+]
 menu_items_icons  = ["house", "people", "briefcase", "search", "book", "gear"]
 
 with st.sidebar:
