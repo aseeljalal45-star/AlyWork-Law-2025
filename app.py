@@ -3,7 +3,6 @@ import os, pandas as pd
 from helpers.mini_ai_smart import MiniLegalAI
 from helpers.settings_manager import SettingsManager
 from helpers.ui_components import message_bubble, section_header, info_card
-import plotly.express as px
 
 # =====================================================
 # ⚙️ إعدادات عامة
@@ -18,228 +17,110 @@ st.set_page_config(
 )
 
 # =====================================================
-# 🌈 تحميل CSS رسمي
+# 🌈 تحميل CSS عالمي متقدم
 # =====================================================
-def load_official_css(css_file="assets/styles_official.css"):
+def load_advanced_css(css_file="assets/styles_official.css"):
+    css = """
+    /* عام */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    h1, h2, h3, h4 { font-weight: 700; }
+
+    /* البطاقات الرئيسية */
+    .card-hover {
+        border-radius: 25px;
+        padding: 30px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        background: linear-gradient(135deg, #4da6ff, #66cc99);
+        margin-bottom: 25px;
+    }
+    .card-hover:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+
+    /* النصوص */
+    .card-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .card-desc { font-size: 16px; opacity: 0.85; }
+
+    /* أزرار العودة */
+    .back-btn {
+        background: #3333ff;
+        color: white;
+        border-radius: 12px;
+        padding: 8px 15px;
+        font-weight: 600;
+        margin-top: 20px;
+    }
+    """
     if os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        st.info(f"ℹ️ ملف CSS الرسمي غير موجود: {css_file}")
+            css += f.read()
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
-load_official_css()
-
-# =====================================================
-# 🧮 تحميل Google Sheet و Excel
-# =====================================================
-def sheet_to_csv_url(sheet_url):
-    import re
-    if "docs.google.com/spreadsheets" in sheet_url and "export?format=csv" not in sheet_url:
-        m = re.search(r"/d/([a-zA-Z0-9-_]+)", sheet_url)
-        if m:
-            return f"https://docs.google.com/spreadsheets/d/{m.group(1)}/export?format=csv"
-    return sheet_url
-
-SHEET_URL = settings.get("SHEET_URL", config.get("SHEET_URL"))
-WORKBOOK_PATH = settings.get("WORKBOOK_PATH", config.get("WORKBOOK_PATH"))
-
-@st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
-def load_google_sheets(url):
-    if not url:
-        st.info("ℹ️ لم يتم تحديد رابط Google Sheet بعد.")
-        return pd.DataFrame()
-    try:
-        url = sheet_to_csv_url(url)
-        return pd.read_csv(url)
-    except Exception as e:
-        st.warning(f"⚠️ خطأ أثناء تحميل Google Sheet: {e}")
-        return pd.DataFrame()
-
-@st.cache_data(ttl=config.get("CACHE", {}).get("TTL_SECONDS", 600))
-def load_excel(path, expected_cols=None):
-    expected_cols = expected_cols or ['المادة', 'القسم', 'النص', 'مثال']
-    if not os.path.exists(path):
-        st.info(f"ℹ️ ملف Excel غير موجود: {path}. سيتم إنشاء DataFrame افتراضي.")
-        return pd.DataFrame(columns=expected_cols)
-    try:
-        df = pd.read_excel(path, engine='openpyxl')
-        for col in expected_cols:
-            if col not in df.columns:
-                df[col] = ""
-        df = df[expected_cols]
-        df.fillna("", inplace=True)
-        return df
-    except Exception as e:
-        st.warning(f"⚠️ خطأ أثناء قراءة Excel: {e}. سيتم إنشاء DataFrame افتراضي.")
-        return pd.DataFrame(columns=expected_cols)
-
-data = load_google_sheets(SHEET_URL)
-excel_data = load_excel(WORKBOOK_PATH)
+load_advanced_css()
 
 # =====================================================
-# 🤖 تهيئة المساعد القانوني
-# =====================================================
-def init_ai():
-    if os.path.exists(WORKBOOK_PATH):
-        try:
-            ai = MiniLegalAI(WORKBOOK_PATH)
-            ai.db = excel_data
-            ai.build_tfidf_matrix()
-            return ai
-        except Exception as e:
-            st.warning(f"⚠️ لم يتم تهيئة المساعد القانوني بالكامل: {e}")
-            return None
-    return None
-
-ai = init_ai()
-
-def show_ai_assistant():
-    if not config.get("AI", {}).get("ENABLE", True) or ai is None:
-        st.info("🤖 المساعد غير مفعل حالياً.")
-        return
-    section_header("🤖 المساعد القانوني الذكي", "🤖")
-    query = st.text_input("💬 اكتب سؤالك القانوني هنا:")
-    if query:
-        answer, reference, example = ai.advanced_search(query)
-        st.session_state.setdefault("chat_history", []).append({"user": query, "ai": answer})
-        max_history = config.get("AI", {}).get("MAX_HISTORY", 20)
-        for chat in st.session_state["chat_history"][-max_history:]:
-            message_bubble("👤 المستخدم", chat["user"], is_user=True)
-            message_bubble("🤖 المساعد", chat["ai"], is_user=False)
-        if reference:
-            st.markdown(f"**📜 نص القانون:** {reference}")
-        if example:
-            st.markdown(f"**💡 مثال تطبيقي:** {example}")
-
-# =====================================================
-# 💡 Smart Recommender
-# =====================================================
-ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
-MAX_CARDS = config.get("RECOMMENDER", {}).get("MAX_CARDS", 6)
-
-def get_recommendations(role):
-    mapping = {
-        "العمال": [
-            {"العنوان": "احسب مكافأة نهاية الخدمة", "الوصف": "استخدم الحاسبة لتقدير مستحقاتك.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"},
-            {"العنوان": "راجع حقوقك الأساسية", "الوصف": "تعرف على حقوقك وفق القانون الأردني.", "النوع": "توعية", "link": "#", "icon": "📚", "img": f"{ICON_PATH}rights.png"}
-        ],
-        "اصحاب العمل": [
-            {"العنوان": "حاسبة تكاليف الموظفين", "الوصف": "تقدير التزامات الأجور والضرائب.", "النوع": "حاسبة", "link": "#", "icon": "🧮", "img": f"{ICON_PATH}service_end.png"}
-        ],
-        "مفتشو العمل": [
-            {"العنوان": "نموذج تقرير تفتيش", "الوصف": "نماذج جاهزة للتوثيق.", "النوع": "نموذج", "link": "#", "icon": "📄", "img": f"{ICON_PATH}practice.png"}
-        ],
-        "الباحثون والمتدربون": [
-            {"العنوان": "استعراض السوابق القانونية", "الوصف": "اطلع على الحالات السابقة.", "النوع": "بحث", "link": "#", "icon": "🔍", "img": f"{ICON_PATH}legal_case.png"}
-        ]
-    }
-    return mapping.get(role, [])
-
-def smart_recommender(role="العمال", n=None):
-    recs = get_recommendations(role)
-    if not recs:
-        st.info("ℹ️ لا توجد توصيات حالياً لهذه الفئة.")
-        return
-    section_header("💡 اقتراحات ذكية لك", "💡")
-    n = n or MAX_CARDS
-    cols = st.columns(3)
-    type_styles = {
-        "حاسبة": "linear-gradient(135deg, #4da6ff, #1e90ff)",
-        "توعية": "linear-gradient(135deg, #66cc99, #339966)",
-        "قانوني": "linear-gradient(135deg, #7f7fff, #5555ff)",
-        "تعليمي": "linear-gradient(135deg, #40c0c0, #008080)",
-        "نموذج": "linear-gradient(135deg, #a0d6b4, #66aa88)",
-        "بحث": "linear-gradient(135deg, #9ec1f7, #6699cc)"
-    }
-    for idx, rec in enumerate(recs[:n]):
-        with cols[idx % len(cols)]:
-            style = type_styles.get(rec["النوع"], "linear-gradient(135deg, #9ca3af, #6b7280)")
-            st.markdown(
-                f"""
-                <div style="background: {style};
-                            border-radius:15px;
-                            padding:18px;
-                            margin:8px;
-                            box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
-                            text-align:center;
-                            color:white;">
-                    <img src='{rec['img']}' alt='icon' width='50px' style='margin-bottom:10px;'/>
-                    <h4 style='margin-bottom:5px;'>{rec['icon']} {rec['العنوان']}</h4>
-                    <p style='font-size:14px; opacity:0.9;'>{rec['الوصف']}</p>
-                    <a href='{rec['link']}' target='_blank' style='color:#fff; text-decoration:underline;'>اضغط هنا للتفاصيل</a>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-# =====================================================
-# 🏠 صفحات الفئات
-# =====================================================
-def workers_section():
-    section_header("👷 قسم العمال", "👷")
-    show_ai_assistant()
-    smart_recommender("العمال")
-
-def employers_section():
-    section_header("🏢 قسم أصحاب العمل", "🏢")
-    show_ai_assistant()
-    smart_recommender("اصحاب العمل")
-
-def inspectors_section():
-    section_header("🕵️ قسم المفتشين", "🕵️")
-    show_ai_assistant()
-    smart_recommender("مفتشو العمل")
-
-def researchers_section():
-    section_header("📖 الباحثون والمتدربون", "📖")
-    show_ai_assistant()
-    smart_recommender("الباحثون والمتدربون")
-
-def settings_page():
-    section_header("⚙️ الإعدادات", "⚙️")
-    st.write("يمكنك تعديل الإعدادات من هنا.")
-    new_path = st.text_input("📁 مسار ملف Excel:", value=WORKBOOK_PATH)
-    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=SHEET_URL)
-    if st.button("💾 حفظ"):
-        settings.settings["WORKBOOK_PATH"] = new_path
-        settings.settings["SHEET_URL"] = new_sheet
-        settings.save_settings()
-        st.success("✅ تم حفظ الإعدادات بنجاح!")
-
-# =====================================================
-# 🏠 الصفحة الرئيسية
+# 🏠 الصفحة الرئيسية عالمية
 # =====================================================
 if "current_page" not in st.session_state:
     st.session_state.current_page = "home"
 
+ICON_PATH = config.get("UI", {}).get("ICON_PATH", "assets/icons/")
+
 def show_home():
-    st.title(f"⚖️ {config.get('APP_NAME')}")
-    st.markdown("<h4 style='color:gray;'>اختر فئتك للانتقال إلى القسم المناسب:</h4>", unsafe_allow_html=True)
+    # خلفية متدرجة للصفحة
+    st.markdown("""
+        <div style="padding:50px; border-radius:20px; background: linear-gradient(120deg,#1e3c72,#2a5298);
+                    color:white; text-align:center; margin-bottom:30px;">
+            <h1 style="font-size:48px; font-weight:800;">⚖️ {}</h1>
+            <p style="font-size:20px; opacity:0.9;">منصة ذكية للوصول السريع إلى أقسام قانون العمل الأردني</p>
+        </div>
+    """.format(config.get('APP_NAME')), unsafe_allow_html=True)
+
+    # الأقسام
     categories = [
-        {"label": "👷 العمال", "key": "workers", "color":"#4da6ff", "img": f"{ICON_PATH}workers.png"},
-        {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#66cc99", "img": f"{ICON_PATH}employers.png"},
-        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "color":"#40c0c0", "img": f"{ICON_PATH}inspectors.png"},
-        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#7f7fff", "img": f"{ICON_PATH}researchers.png"},
-        {"label": "⚙️ الإعدادات", "key": "settings", "color":"#b19cd9", "img": f"{ICON_PATH}settings.png"}
+        {"label": "👷 العمال", "key": "workers", "color":"#4da6ff", "icon": "workers.png"},
+        {"label": "🏢 أصحاب العمل", "key": "employers", "color":"#66cc99", "icon": "employers.png"},
+        {"label": "🕵️ مفتشو العمل", "key": "inspectors", "color":"#40c0c0", "icon": "inspectors.png"},
+        {"label": "📖 الباحثون والمتدربون", "key": "researchers", "color":"#7f7fff", "icon": "researchers.png"},
+        {"label": "⚙️ الإعدادات", "key": "settings", "color":"#b19cd9", "icon": "settings.png"}
     ]
-    cols = st.columns(len(categories))
+
+    cols = st.columns(3)
     for idx, cat in enumerate(categories):
-        with cols[idx]:
-            st.markdown(
-                f"""
-                <div style='background: {cat['color']}; padding: 25px; border-radius: 20px;
-                            text-align: center; cursor: pointer; transition: transform 0.2s;'>
-                    <img src='{cat['img']}' width='60px' style='margin-bottom:15px;'/>
-                    <h4 style='color:white; margin-bottom:5px;'>{cat['label']}</h4>
+        with cols[idx % 3]:
+            st.markdown(f"""
+                <div class="card-hover" style="background: linear-gradient(135deg, {cat['color']}, #2222cc);">
+                    <img src="{ICON_PATH}{cat['icon']}" width="80px" style="margin-bottom:15px;"/>
+                    <div class="card-title">{cat['label']}</div>
+                    <div class="card-desc">اضغط للدخول إلى القسم الخاص بك واستكشاف الميزات.</div>
                 </div>
-                """, unsafe_allow_html=True
-            )
+            """, unsafe_allow_html=True)
             if st.button(f"اختيار {cat['label']}", key=f"btn_{cat['key']}"):
                 st.session_state.current_page = cat["key"]
 
 # =====================================================
 # 🏠 قاموس الصفحات
 # =====================================================
+def workers_section(): section_header("👷 قسم العمال", "👷"); show_ai_assistant()
+def employers_section(): section_header("🏢 قسم أصحاب العمل", "🏢"); show_ai_assistant()
+def inspectors_section(): section_header("🕵️ قسم المفتشين", "🕵️"); show_ai_assistant()
+def researchers_section(): section_header("📖 الباحثون والمتدربون", "📖"); show_ai_assistant()
+def settings_page():
+    section_header("⚙️ الإعدادات", "⚙️")
+    st.write("يمكنك تعديل الإعدادات من هنا.")
+    new_path = st.text_input("📁 مسار ملف Excel:", value=settings.settings.get("WORKBOOK_PATH"))
+    new_sheet = st.text_input("🗂️ رابط Google Sheet:", value=settings.settings.get("SHEET_URL"))
+    if st.button("💾 حفظ"):
+        settings.settings["WORKBOOK_PATH"] = new_path
+        settings.settings["SHEET_URL"] = new_sheet
+        settings.save_settings()
+        st.success("✅ تم حفظ الإعدادات بنجاح!")
+
 pages = {
     "home": show_home,
     "workers": workers_section,
@@ -258,6 +139,6 @@ else:
     pages[st.session_state.current_page]()
 
 # =====================================================
-# 🕒 Footer
+# 🕒 Footer عالمي
 # =====================================================
 st.markdown(f"<hr><center><small>{config.get('FOOTER', {}).get('TEXT')}</small></center>", unsafe_allow_html=True)
