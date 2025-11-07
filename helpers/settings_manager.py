@@ -17,7 +17,7 @@ class SettingsManager:
             try:
                 with open(self.path, "r", encoding="utf-8") as f:
                     settings = json.load(f)
-                # إذا كان رابط Google Sheet فارغ، ضع الرابط الافتراضي
+                # إذا كان رابط Google Sheet فارغ، ضع الرابط الافتراضي الحقيقي
                 if not settings.get("SHEET_URL"):
                     settings["SHEET_URL"] = "https://docs.google.com/spreadsheets/d/1aCnqHzxWh8RlIgCleHByoCPHMzI1i5fCjrpizcTxGVc/export?format=csv"
                 return settings
