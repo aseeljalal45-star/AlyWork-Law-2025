@@ -1,13 +1,15 @@
 # ==============================
-# متطلبات التشغيل لمشروع AlyWork Law Pro على Streamlit Cloud
+# AlyWork Law Pro – Requirements for Streamlit Cloud
 # ==============================
 
 # واجهة المستخدم
 streamlit>=1.25.0
 
+# قوائم واختيارات تفاعلية
+streamlit-option-menu>=0.5.3
+
 # جداول تفاعلية
 st-aggrid>=1.15.0
-streamlit-option-menu>=0.5.3
 
 # معالجة البيانات
 pandas>=2.0.0
