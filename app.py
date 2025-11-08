@@ -123,9 +123,7 @@ def show_home_page():
     
     col1, col2, col3, col4 = st.columns(4)
     with col1: st.metric("📊 المواد القانونية", "150+")
-    with col2: st.metric("👥 المستفيدين", "5,000+")
     with col3: st.metric("⚖️ المحافظات", "12")
-    with col4: st.metric("💼 نسبة الرضا", "95%")
     
     st.markdown("<br>", unsafe_allow_html=True)
     
