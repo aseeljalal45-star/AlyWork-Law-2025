@@ -4,14 +4,22 @@ import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
 
-# ========================================
+# ==========================
 # تحميل إعدادات البيئة
-# ========================================
+# ==========================
 load_dotenv()
 
-# ========================================
-# 🛠 دوال بديلة لـ ui_components
-# ========================================
+# ==========================
+# استيراد المكونات المساعدة
+# ==========================
+from helpers.smart_recommender import smart_recommender, role_selector
+from helpers.mini_ai_smart import MiniLegalAI
+from helpers.settings_manager import SettingsManager
+from helpers.data_loader import DataLoader
+
+# ==========================
+# تعريف مكونات UI محليًا لتجنب مشاكل الاستيراد
+# ==========================
 def section_header(title, subtitle=""):
     st.markdown(f"### {title}\n**{subtitle}**")
 
@@ -27,17 +35,9 @@ def mini_card(title, content):
 def feature_highlight(title, description):
     st.write(f"**{title}**: {description}")
 
-# ========================================
-# استيراد المكونات الأخرى
-# ========================================
-from helpers.smart_recommender import smart_recommender, role_selector
-from helpers.mini_ai_smart import MiniLegalAI
-from helpers.settings_manager import SettingsManager
-from helpers.data_loader import DataLoader
-
-# ========================================
-# إعداد التطبيق والبيئة
-# ========================================
+# =====================================================
+# 🎯 إعدادات التطبيق والبيئة
+# =====================================================
 def setup_application():
     env_config = {
         "APP_INFO": {
@@ -54,6 +54,7 @@ def setup_application():
             "MAX_HISTORY": int(os.getenv("AI_MAX_HISTORY", "20"))
         }
     }
+    
     settings_manager = SettingsManager()
     settings_manager.update(env_config)
     return settings_manager
@@ -61,9 +62,7 @@ def setup_application():
 settings_manager = setup_application()
 config = st.session_state.get("config", settings_manager.settings)
 
-# ========================================
 # إعداد صفحة Streamlit
-# ========================================
 st.set_page_config(
     page_title=config.get("APP_INFO", {}).get("APP_NAME", "منصة قانون العمل الذكية"),
     page_icon="⚖️",
@@ -71,9 +70,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ========================================
-# تحميل CSS مخصص
-# ========================================
+# =====================================================
+# 🎨 تحميل التصميم
+# =====================================================
 def load_custom_css():
     css_file = "assets/styles_official.css"
     if os.path.exists(css_file):
@@ -90,24 +89,28 @@ def load_custom_css():
 
 load_custom_css()
 
-# ========================================
-# تهيئة المكونات الذكية
-# ========================================
-@st.cache_resource
-def init_ai_assistant():
+# =====================================================
+# 🤖 تهيئة المكونات الذكية مع حماية من الأخطاء
+# =====================================================
+ai_assistant = None
+try:
     workbook_path = config.get("DATA_SOURCES", {}).get("WORKBOOK_PATH", "")
-    return MiniLegalAI(workbook_path)
+    if workbook_path and os.path.exists(workbook_path):
+        ai_assistant = MiniLegalAI(workbook_path)
+    else:
+        st.warning("⚠️ ملف البيانات غير موجود، سيتم تعطيل البحث الذكي.")
+except Exception as e:
+    st.warning(f"⚠️ حدث خطأ أثناء تحميل AI: {e}")
 
 @st.cache_resource
 def init_data_loader():
     return DataLoader()
 
-ai_assistant = init_ai_assistant()
 data_loader = init_data_loader()
 
-# ========================================
+# =====================================================
 # 🏠 الصفحة الرئيسية
-# ========================================
+# =====================================================
 def show_home_page():
     st.markdown(f"""
     <div class="main-header">
@@ -127,9 +130,13 @@ def show_home_page():
     st.markdown("<br>", unsafe_allow_html=True)
     
     st.markdown("### 🎯 التوصيات الذكية لك")
-    selected_role = role_selector()
-    smart_recommender(selected_role, show_header=False)
+    try:
+        selected_role = role_selector()
+        smart_recommender(selected_role, show_header=False)
+    except Exception as e:
+        st.warning(f"⚠️ لا يمكن عرض التوصيات الذكية: {e}")
     
+    # الميزات الرئيسية
     st.markdown("### 🚀 خدماتنا الرئيسية")
     features = [
         {"icon": "🧮", "title": "الحاسبات القانونية", "description": "حساب دقيق للمستحقات المالية وفق القانون الأردني", "features": ["مكافأة نهاية الخدمة", "بدل العمل الإضافي", "الإجازات المرضية"]},
@@ -151,16 +158,57 @@ def show_home_page():
             </div>
             """, unsafe_allow_html=True)
 
-# ========================================
-# 🧭 نظام التنقل الرئيسي
-# ========================================
+# =====================================================
+# بقية الأقسام (الحاسبات، الشكوى، الجهات، البحث، الإعدادات)
+# =====================================================
+# يمكنك نسخ باقي وظائف show_calculators_section, show_complaint_simulator,
+# show_authorities_section, show_settings_page من الكود السابق كما هو
+# مع تعديل show_legal_search كما يلي:
+
+def show_legal_search():
+    section_header("🔍 البحث الذكي في القوانين", "ابحث في التشريعات والقوانين باستخدام الذكاء الاصطناعي")
+    
+    if not ai_assistant:
+        st.warning("⚠️ لا يمكن استخدام البحث الذكي لأن ملف البيانات غير متاح أو حدث خطأ أثناء التحميل.")
+        return
+    
+    search_query = st.text_input("اكتب استفسارك القانوني:", placeholder="مثال: مكافأة نهاية الخدمة بعد 5 سنوات عمل...")
+    
+    if st.button("🔎 ابحث في القوانين") and search_query:
+        with st.spinner("جاري البحث..."):
+            try:
+                results = ai_assistant.advanced_search(search_query, top_n=3)
+                if results:
+                    st.success(f"🎯 تم العثور على {len(results)} نتيجة")
+                    for i, result in enumerate(results, 1):
+                        with st.expander(f"📜 النتيجة {i} (دقة {result['score']}%)", expanded=i==1):
+                            st.write(f"**النص القانوني:** {result['text']}")
+                            if result['example']: st.write(f"**مثال تطبيقي:** {result['example']}")
+                            st.write(f"**المرجع:** {result['reference']}")
+                else:
+                    st.warning("⚠️ لم يتم العثور على نتائج")
+            except Exception as e:
+                st.error(f"❌ حدث خطأ أثناء البحث: {e}")
+
+# =====================================================
+# 🧭 Main
+# =====================================================
 def main():
     with st.sidebar:
-        st.markdown(f"<div style='text-align: center; padding: 1rem;'><h2>⚖️ {config.get('APP_INFO', {}).get('APP_NAME', 'منصة قانون العمل')}</h2><p style='color: #666; font-size: 0.9rem;'>الإصدار {config.get('APP_INFO', {}).get('VERSION', 'v25.1')}</p></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div style='text-align: center; padding: 1rem;'>"
+            f"<h2>⚖️ {config.get('APP_INFO', {}).get('APP_NAME', 'منصة قانون العمل')}</h2>"
+            f"<p style='color: #666; font-size: 0.9rem;'>الإصدار {config.get('APP_INFO', {}).get('VERSION', 'v25.1')}</p>"
+            f"</div>", unsafe_allow_html=True
+        )
         st.markdown("---")
         page_options = {
             "🏠 الصفحة الرئيسية": show_home_page,
-            # يمكنك إضافة باقي الأقسام هنا بنفس الطريقة
+            "🧮 الحاسبات القانونية": show_calculators_section,
+            "📝 محاكي الشكوى": show_complaint_simulator,
+            "🏛️ الجهات المختصة": show_authorities_section,
+            "🔍 البحث في القوانين": show_legal_search,
+            "⚙️ الإعدادات": show_settings_page
         }
         selected_page = st.selectbox("اختر القسم", list(page_options.keys()))
         st.markdown("---")
@@ -169,7 +217,11 @@ def main():
         st.write("📞 06-5802666")
         st.write("🕒 الأحد - الخميس: 8:00 ص - 3:00 م")
     
-    if selected_page in page_options: page_options[selected_page]()
+    if selected_page in page_options:
+        try:
+            page_options[selected_page]()
+        except Exception as e:
+            st.error(f"❌ حدث خطأ أثناء عرض الصفحة: {e}")
     
     st.markdown("---")
     footer_text = config.get("FOOTER", {}).get("TEXT", "© 2025 منصة قانون العمل الذكية — جميع الحقوق محفوظة.")
