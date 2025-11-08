@@ -1,0 +1,20 @@
+[server]
+maxUploadSize = 200
+maxMessageSize = 200
+port = 8501
+address = "0.0.0.0"
+
+[browser]
+serverAddress = "localhost"
+gatherUsageStats = false
+
+[runner]
+magicEnabled = false
+
+# إعدادات الذاكرة والأداء
+[memory]
+maxCacheSize = 512  # MB
+
+# إعدادات الملفات
+[fileWatcherType]
+usePolling = true
