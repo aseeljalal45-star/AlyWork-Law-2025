@@ -1,18 +1,35 @@
 import streamlit as st
 import os
+import sys
 import pandas as pd
 from datetime import datetime
 from dotenv import load_dotenv
 
+# =====================================================
+# 🛠 ضبط مسار helpers لتجنب ImportError
+# =====================================================
+current_dir = os.path.dirname(os.path.abspath(__file__))
+helpers_dir = os.path.join(current_dir, "helpers")
+if helpers_dir not in sys.path:
+    sys.path.append(helpers_dir)
+
+# =====================================================
 # تحميل إعدادات البيئة
+# =====================================================
 load_dotenv()
 
-# استيراد المكونات المساعدة
-from helpers.smart_recommender import smart_recommender, role_selector, show_smart_recommendations
-from helpers.ui_components import section_header, message_bubble, info_card, mini_card, feature_highlight
-from helpers.mini_ai_smart import MiniLegalAI
-from helpers.settings_manager import SettingsManager
-from helpers.data_loader import DataLoader
+# =====================================================
+# استيراد المكونات المساعدة بعد ضبط sys.path
+# =====================================================
+try:
+    from smart_recommender import smart_recommender, role_selector, show_smart_recommendations
+    from ui_components import section_header, message_bubble, info_card, mini_card, feature_highlight
+    from mini_ai_smart import MiniLegalAI
+    from settings_manager import SettingsManager
+    from data_loader import DataLoader
+except ImportError as e:
+    st.error(f"❌ خطأ في استيراد الموديولات: {e}")
+    st.stop()
 
 # =====================================================
 # 🎯 إعدادات التطبيق والبيئة
@@ -20,7 +37,6 @@ from helpers.data_loader import DataLoader
 def setup_application():
     """تهيئة التطبيق وإعدادات البيئة"""
     
-    # تحميل إعدادات البيئة
     env_config = {
         "APP_INFO": {
             "APP_NAME": os.getenv("APP_NAME", "⚖️ منصة قانون العمل الذكية"),
@@ -37,19 +53,17 @@ def setup_application():
         }
     }
     
-    # تهيئة مدير الإعدادات
     settings_manager = SettingsManager()
-    
-    # دمج إعدادات البيئة مع الإعدادات الأساسية
     settings_manager.update(env_config)
     
     return settings_manager
 
+# =====================================================
 # تهيئة التطبيق
+# =====================================================
 settings_manager = setup_application()
 config = st.session_state.get("config", settings_manager.settings)
 
-# إعداد صفحة Streamlit
 st.set_page_config(
     page_title=config.get("APP_INFO", {}).get("APP_NAME", "منصة قانون العمل الذكية"),
     page_icon="⚖️",
@@ -61,34 +75,18 @@ st.set_page_config(
 # 🎨 تحميل التصميم
 # =====================================================
 def load_custom_css():
-    """تحميل ملف التصميم المخصص"""
     css_file = "assets/styles_official.css"
     if os.path.exists(css_file):
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     else:
-        # تصميم افتراضي إذا لم يوجد الملف
         st.markdown("""
         <style>
-        .main-header {
-            background: linear-gradient(135deg, #1E3A8A, #2563EB);
-            color: white;
-            padding: 2rem;
-            border-radius: 20px;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .feature-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin: 1rem 0;
-            transition: transform 0.3s ease;
-        }
-        .feature-card:hover {
-            transform: translateY(-5px);
-        }
+        .main-header { background: linear-gradient(135deg, #1E3A8A, #2563EB); color: white;
+        padding: 2rem; border-radius: 20px; text-align: center; margin-bottom: 2rem;}
+        .feature-card { background: white; padding: 1.5rem; border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin: 1rem 0; transition: transform 0.3s ease;}
+        .feature-card:hover { transform: translateY(-5px);}
         </style>
         """, unsafe_allow_html=True)
 
@@ -99,26 +97,20 @@ load_custom_css()
 # =====================================================
 @st.cache_resource
 def init_ai_assistant():
-    """تهيئة المساعد الذكي"""
     workbook_path = config.get("DATA_SOURCES", {}).get("WORKBOOK_PATH", "")
     return MiniLegalAI(workbook_path)
 
 @st.cache_resource
 def init_data_loader():
-    """تهيئة محمل البيانات"""
     return DataLoader()
 
-# تهيئة المكونات
 ai_assistant = init_ai_assistant()
 data_loader = init_data_loader()
 
 # =====================================================
-# 🏠 الصفحة الرئيسية المتميزة
+# 🏠 الصفحة الرئيسية
 # =====================================================
 def show_home_page():
-    """عرض الصفحة الرئيسية المحسنة"""
-    
-    # الهيدر الرئيسي
     st.markdown(f"""
     <div class="main-header">
         <h1 style="margin:0; font-size: 3rem;">{config.get("APP_INFO", {}).get("APP_NAME", "⚖️ منصة قانون العمل الذكية")}</h1>
@@ -128,48 +120,27 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
     
-    # إحصائيات سريعة
     col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("📊 المواد القانونية", "150+")
-    with col2:
-        st.metric("👥 المستفيدين", "5,000+")
-    with col3:
-        st.metric("⚖️ المحافظات", "12")
-    with col4:
-        st.metric("💼 نسبة الرضا", "95%")
+    with col1: st.metric("📊 المواد القانونية", "150+")
+    with col2: st.metric("👥 المستفيدين", "5,000+")
+    with col3: st.metric("⚖️ المحافظات", "12")
+    with col4: st.metric("💼 نسبة الرضا", "95%")
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # نظام التوصيات الذكية
     st.markdown("### 🎯 التوصيات الذكية لك")
     selected_role = role_selector()
     smart_recommender(selected_role, show_header=False)
     
-    # الميزات الرئيسية
     st.markdown("### 🚀 خدماتنا الرئيسية")
-    
     features = [
-        {
-            "icon": "🧮",
-            "title": "الحاسبات القانونية",
-            "description": "حساب دقيق للمستحقات المالية وفق القانون الأردني",
-            "features": ["مكافأة نهاية الخدمة", "بدل العمل الإضافي", "الإجازات المرضية"]
-        },
-        {
-            "icon": "📝", 
-            "title": "محاكي الشكوى الذكي",
-            "description": "تحليل الانتهاكات وتقديم الإجراءات القانونية المناسبة",
-            "features": ["تحليل آلي", "توصيات مخصصة", "نماذج جاهزة"]
-        },
-        {
-            "icon": "🏛️",
-            "title": "الجهات المختصة", 
-            "description": "دليل شامل للجهات الرسمية في جميع المحافظات",
-            "features": ["عنوان دقيق", "معلومات اتصال", "أوقات العمل"]
-        }
+        {"icon":"🧮","title":"الحاسبات القانونية","description":"حساب دقيق للمستحقات المالية وفق القانون الأردني",
+         "features":["مكافأة نهاية الخدمة","بدل العمل الإضافي","الإجازات المرضية"]},
+        {"icon":"📝","title":"محاكي الشكوى الذكي","description":"تحليل الانتهاكات وتقديم الإجراءات القانونية المناسبة",
+         "features":["تحليل آلي","توصيات مخصصة","نماذج جاهزة"]},
+        {"icon":"🏛️","title":"الجهات المختصة","description":"دليل شامل للجهات الرسمية في جميع المحافظات",
+         "features":["عنوان دقيق","معلومات اتصال","أوقات العمل"]}
     ]
-    
     cols = st.columns(3)
     for idx, feature in enumerate(features):
         with cols[idx]:
@@ -186,208 +157,14 @@ def show_home_page():
                 """, unsafe_allow_html=True)
 
 # =====================================================
-# 🧮 قسم الحاسبات القانونية
+# باقي الدوال (show_calculators_section, show_complaint_simulator, ...)
+# يمكن الاحتفاظ بها كما هي من النسخة الأصلية
 # =====================================================
-def show_calculators_section():
-    """عرض الحاسبات القانونية"""
-    section_header("🧮 الحاسبات القانونية", "حساب دقيق للمستحقات المالية وفق القانون الأردني")
-    
-    calc_type = st.selectbox(
-        "اختر نوع الحاسبة:",
-        ["مكافأة نهاية الخدمة", "بدلات العمل الإضافي", "التعويض عن الإجازات", "بدل النقل والسكن"]
-    )
-    
-    if calc_type == "مكافأة نهاية الخدمة":
-        with st.form("end_of_service_calc"):
-            col1, col2 = st.columns(2)
-            with col1:
-                years = st.number_input("سنوات الخدمة", min_value=0, max_value=50, value=5)
-                basic_salary = st.number_input("الأجر الأساسي (دينار)", min_value=0, value=500)
-            with col2:
-                service_type = st.selectbox("نوع نهاية الخدمة", ["استقالة", "إنهاء خدمة", "بلوغ سن المعاش"])
-                last_salary = st.number_input("آخر راتب (دينار)", min_value=0, value=500)
-            
-            if st.form_submit_button("🔄 احسب المكافأة"):
-                # محاكاة الحساب (يمكن استبدالها بحسابات حقيقية)
-                if service_type == "استقالة":
-                    if years <= 5:
-                        compensation = years * 0.5 * basic_salary
-                    else:
-                        compensation = (5 * 0.5 * basic_salary) + ((years - 5) * basic_salary)
-                else:
-                    compensation = years * basic_salary
-                
-                st.success(f"💰 المكافأة المستحقة: **{compensation:,.0f} دينار أردني**")
-
-# =====================================================
-# 📝 محاكي الشكوى الذكي
-# =====================================================
-def show_complaint_simulator():
-    """عرض محاكي الشكوى الذكي"""
-    section_header("📝 محاكي الشكوى الذكي", "تحليل الانتهاكات وتقديم الحلول القانونية المثلى")
-    
-    with st.form("complaint_form"):
-        st.subheader("👤 معلومات العامل")
-        col1, col2 = st.columns(2)
-        with col1:
-            name = st.text_input("الاسم الكامل")
-            years_service = st.slider("سنوات الخدمة", 0, 40, 3)
-        with col2:
-            phone = st.text_input("رقم الهاتف")
-            monthly_salary = st.number_input("الراتب الشهري (دينار)", min_value=0, value=500)
-        
-        st.subheader("⚠️ تفاصيل الانتهاك")
-        violation_type = st.selectbox(
-            "نوع الانتهاك",
-            ["عدم دفع الأجر/المستحقات", "الفصل التعسفي", "العمل الإضافي غير المدفوع", 
-             "عدم منح الإجازات القانونية", "ظروف عمل غير آمنة", "انتهاكات أخرى"]
-        )
-        
-        violation_details = st.text_area("وصف تفصيلي للانتهاك", placeholder="صف ما حدث بالتفصيل...")
-        
-        if st.form_submit_button("🔍 حلل الحالة وقدم التوصيات"):
-            with st.spinner("جاري تحليل الحالة وتوليد التوصيات..."):
-                # محاكاة التحليل
-                import time
-                time.sleep(2)
-                
-                # عرض النتائج
-                st.success("✅ تم تحليل الحالة بنجاح")
-                
-                recommendations = {
-                    "عدم دفع الأجر/المستحقات": [
-                        "تقديم شكوى لمديرية العمل المختصة",
-                        "طلب صورة من كشوف المرتبات", 
-                        "توثيق جميع عمليات الدفع",
-                        "الاحتفاظ بجميع المراسلات"
-                    ],
-                    "الفصل التعسفي": [
-                        "طلب تعويض الفصل التعسفي",
-                        "تقديم شكوى لمحكمة العمل",
-                        "إثبات عدم وجود مبرر للفصل",
-                        "الاحتفاظ بجميع الوثائق"
-                    ]
-                }
-                
-                st.subheader("📋 التوصيات المقدمة")
-                recs = recommendations.get(violation_type, [
-                    "تقديم شكوى مفصلة لمديرية العمل",
-                    "الاحتفاظ بجميع الأدلة والوثائق", 
-                    "استشارة محامٍ متخصص"
-                ])
-                
-                for i, rec in enumerate(recs, 1):
-                    st.markdown(f"{i}. {rec}")
-
-# =====================================================
-# 🏛️ قسم الجهات المختصة
-# =====================================================
-def show_authorities_section():
-    """عرض دليل الجهات المختصة"""
-    section_header("🏛️ الجهات المختصة", "دليل شامل للجهات الرسمية في جميع محافظات المملكة")
-    
-    governorates = ["عمان", "إربد", "الزرقاء", "البلقاء", "الكرك", "معان", "الطفيلة", "المفرق", "مادبا", "جرش", "عجلون", "العقبة"]
-    selected_gov = st.selectbox("اختر المحافظة", governorates)
-    
-    authorities_data = {
-        "عمان": {
-            "مديرية العمل - عمان": {
-                "عنوان": "عمان، شارع عيسى الناوري 11",
-                "هاتف": "06-5802666",
-                "بريد": "info@mol.gov.jo",
-                "موقع": "http://www.mol.gov.jo",
-                "أوقات العمل": "الأحد - الخميس: 8:00 ص - 3:00 م"
-            }
-        },
-        "إربد": {
-            "مديرية العمل - إربد": {
-                "عنوان": "إربد، المنطقة الشمالية", 
-                "هاتف": "02-7241000",
-                "بريد": "irbid@mol.gov.jo",
-                "أوقات العمل": "الأحد - الخميس: 8:00 ص - 3:00 م"
-            }
-        }
-    }
-    
-    gov_data = authorities_data.get(selected_gov, authorities_data["عمان"])
-    
-    for authority, info in gov_data.items():
-        with st.expander(f"🏢 {authority}", expanded=True):
-            col1, col2 = st.columns(2)
-            with col1:
-                st.write(f"**📍 العنوان:** {info['عنوان']}")
-                st.write(f"**📞 الهاتف:** {info['هاتف']}")
-            with col2:
-                st.write(f"**📧 البريد:** {info['بريد']}")
-                st.write(f"**🕒 أوقات العمل:** {info['أوقات العمل']}")
-
-# =====================================================
-# 🔍 البحث الذكي في القوانين
-# =====================================================
-def show_legal_search():
-    """عرض محرك البحث الذكي في القوانين"""
-    section_header("🔍 البحث الذكي في القوانين", "ابحث في التشريعات والقوانين باستخدام الذكاء الاصطناعي")
-    
-    search_query = st.text_input("اكتب استفسارك القانوني:", placeholder="مثال: مكافأة نهاية الخدمة بعد 5 سنوات عمل...")
-    
-    if st.button("🔎 ابحث في القوانين") and search_query:
-        with st.spinner("جاري البحث في التشريعات..."):
-            results = ai_assistant.advanced_search(search_query, top_n=3)
-            
-            if results and len(results) > 0:
-                st.success(f"🎯 تم العثور على {len(results)} نتيجة ذات صلة")
-                
-                for i, result in enumerate(results, 1):
-                    with st.expander(f"📜 النتيجة {i} (دقة {result['score']}%)", expanded=i==1):
-                        st.write(f"**النص القانوني:** {result['text']}")
-                        if result['example']:
-                            st.write(f"**مثال تطبيقي:** {result['example']}")
-                        st.write(f"**المرجع:** {result['reference']}")
-            else:
-                st.warning("⚠️ لم يتم العثور على نتائج تطابق استفسارك")
-
-# =====================================================
-# ⚙️ صفحة الإعدادات
-# =====================================================
-def show_settings_page():
-    """عرض صفحة الإعدادات"""
-    section_header("⚙️ الإعدادات", "إدارة إعدادات التطبيق والبيانات")
-    
-    tab1, tab2, tab3 = st.tabs(["الإعدادات العامة", "إدارة البيانات", "حول التطبيق"])
-    
-    with tab1:
-        st.subheader("الإعدادات العامة")
-        current_theme = st.selectbox("السمة", ["فاتح", "داكن"])
-        current_lang = st.selectbox("اللغة", ["العربية", "English"])
-        
-        if st.button("💾 حفظ الإعدادات"):
-            st.success("تم حفظ الإعدادات بنجاح")
-    
-    with tab2:
-        st.subheader("إدارة البيانات")
-        st.info("هنا يمكنك إدارة قاعدة البيانات والملفات")
-        
-        if st.button("🔄 تحديث قاعدة البيانات"):
-            ai_assistant.reload()
-            st.success("تم تحديث قاعدة البيانات بنجاح")
-        
-        if st.button("🧹 مسح الذاكرة المؤقتة"):
-            st.cache_data.clear()
-            st.success("تم مسح الذاكرة المؤقتة بنجاح")
-    
-    with tab3:
-        st.subheader("حول التطبيق")
-        st.write(f"**اسم التطبيق:** {config.get('APP_INFO', {}).get('APP_NAME', 'N/A')}")
-        st.write(f"**الإصدار:** {config.get('APP_INFO', {}).get('VERSION', 'N/A')}")
-        st.write(f"**البريد الدعم:** {config.get('APP_INFO', {}).get('SUPPORT_EMAIL', 'N/A')}")
 
 # =====================================================
 # 🧭 نظام التنقل الرئيسي
 # =====================================================
 def main():
-    """الدالة الرئيسية للتطبيق"""
-    
-    # الشريط الجانبي
     with st.sidebar:
         st.markdown(f"""
         <div style="text-align: center; padding: 1rem;">
@@ -395,10 +172,7 @@ def main():
             <p style="color: #666; font-size: 0.9rem;">الإصدار {config.get("APP_INFO", {}).get("VERSION", "v25.1")}</p>
         </div>
         """, unsafe_allow_html=True)
-        
         st.markdown("---")
-        
-        # قائمة التنقل
         page_options = {
             "🏠 الصفحة الرئيسية": show_home_page,
             "🧮 الحاسبات القانونية": show_calculators_section,
@@ -407,24 +181,19 @@ def main():
             "🔍 البحث في القوانين": show_legal_search,
             "⚙️ الإعدادات": show_settings_page
         }
-        
         selected_page = st.selectbox("اختر القسم", list(page_options.keys()))
-        
         st.markdown("---")
         st.markdown("### 📞 الدعم الفني")
         st.write("📧 support@alyworklaw.com")
         st.write("📞 06-5802666")
         st.write("🕒 الأحد - الخميس: 8:00 ص - 3:00 م")
     
-    # عرض الصفحة المحددة
     if selected_page in page_options:
         page_options[selected_page]()
     
-    # الفوتر
     st.markdown("---")
     footer_text = config.get("FOOTER", {}).get("TEXT", "© 2025 منصة قانون العمل الذكية — جميع الحقوق محفوظة.")
     st.markdown(f"<center><small>{footer_text}</small></center>", unsafe_allow_html=True)
 
-# تشغيل التطبيق
 if __name__ == "__main__":
     main()
