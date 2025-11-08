@@ -1,21 +1,17 @@
+import os
 import pandas as pd
-import streamlit as st
 
 class DataLoader:
-    @st.cache_data(ttl=600)
-    def load_data(_self, source_path):
-        """تحميل البيانات من مصادر متعددة"""
-        try:
-            if source_path.startswith("http"):
-                df = pd.read_csv(source_path)
-                st.success(f"✅ تم تحميل {len(df)} صف من الرابط")
-            elif source_path.endswith(".xlsx"):
-                df = pd.read_excel(source_path, engine='openpyxl')
-                st.success(f"✅ تم تحميل {len(df)} صف من ملف Excel")
-            else:
-                df = pd.DataFrame()
-            
-            return df
-        except Exception as e:
-            st.error(f"❌ خطأ في تحميل البيانات: {e}")
-            return pd.DataFrame()
+    def __init__(self):
+        self.loaded_data = {}
+
+    def load_csv(self, file_path, sheet_name=None):
+        """تحميل CSV/Excel بأمان"""
+        if not os.path.exists(file_path):
+            return None
+        if file_path.endswith(".csv"):
+            df = pd.read_csv(file_path)
+        else:
+            with pd.ExcelFile(file_path) as xls:
+                df = pd.read_excel(xls, sheet_name=sheet_name or 0)
+        return df
