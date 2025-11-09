@@ -3,8 +3,6 @@ import os
 import pandas as pd
 from datetime import datetime, timedelta
 import json
-import requests
-from streamlit_lottie import st_lottie
 
 # ==========================
 # إعدادات التطبيق
