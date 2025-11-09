@@ -138,26 +138,432 @@ def calculate_vacation(salary, vacation_days):
     return daily_rate * vacation_days
 
 # ==========================
-# 🏠 الصفحة الرئيسية المحسنة
+# 🏠 الصفحة الرئيسية المبسطة
 # ==========================
 def show_home_page():
     st.markdown("""
-    <div class="main-header">
-        <h1 style="margin:0; font-size: 3rem;">⚖️ منصة حق - المنصة القانونية الذكية</h1>
-        <p style="font-size: 1.2rem; margin: 1rem 0 0 0; opacity: 0.9;">
-        المنصة الشاملة للتوعية القانونية وحماية الحقوق في الأردن
+    <div style="text-align: center; padding: 2rem 0;">
+        <h1 style="margin: 0; font-size: 3.5rem; color: #1E3A8A;">⚖️ منصة حق</h1>
+        <p style="font-size: 1.2rem; color: #666; margin: 0.5rem 0;">
+        المنصة القانونية الذكية - الأردن 2025
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # تنويه مهم
-    st.markdown("""
-    <div class="disclaimer">
-        <h4>📢 تنويه مهم</h4>
-        <p>هذه المنصة تقدم خدمات توعية وتعليم قانوني عام فقط، ولا تغني عن استشارة محامٍ متخصص. 
-        المعلومات المقدمة لأغراض التوعية ولا تعتبر استشارة قانونية ملزمة.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # قسم العمال
+    st.markdown("### 👷 للعاملين")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 200px;">
+            <h4 style="color: #1E40AF;">📋 الحقوق الأساسية</h4>
+            <ul style="padding-right: 1rem;">
+                <li>العقود والتعاقد</li>
+                <li>الأجور والمستحقات</li>
+                <li>الإجازات والراحة</li>
+                <li>السلامة المهنية</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 200px;">
+            <h4 style="color: #1E40AF;">🧮 الحاسبات</h4>
+            <ul style="padding-right: 1rem;">
+                <li>مكافأة نهاية الخدمة</li>
+                <li>بدل العمل الإضافي</li>
+                <li>مستحقات الإجازات</li>
+                <li>التعويضات</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 200px;">
+            <h4 style="color: #1E40AF;">📞 الدعم القانوني</h4>
+            <ul style="padding-right: 1rem;">
+                <li>تقديم الشكاوى</li>
+                <li>نماذج جاهزة</li>
+                <li>جهات الاختصاص</li>
+                <li>استشارات عاجلة</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # قسم أصحاب العمل
+    st.markdown("### 👔 لأصحاب العمل")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 200px;">
+            <h4 style="color: #059669;">📋 الالتزامات القانونية</h4>
+            <ul style="padding-right: 1rem;">
+                <li>التوظيف والتعاقد</li>
+                <li>الأجور والرواتب</li>
+                <li>السلامة المهنية</li>
+                <li>إنهاء الخدمة</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 200px;">
+            <h4 style="color: #059669;">🔍 الامتثال القانوني</h4>
+            <ul style="padding-right: 1rem;">
+                <li>مدقق الامتثال</li>
+                <li>تقييم ذاتي</li>
+                <li>فحص العقود</li>
+                <li>تقارير الامتثال</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 200px;">
+            <h4 style="color: #059669;">📊 الإدارة القانونية</h4>
+            <ul style="padding-right: 1rem;">
+                <li>نماذج وعقود</li>
+                <li>إدارة المخاطر</li>
+                <li>حاسبات مالية</li>
+                <li>تقارير وإحصائيات</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # قسم الباحثين والخريجين
+    st.markdown("### 🎓 للباحثين والخريجين الجدد")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 180px;">
+            <h4 style="color: #7C3AED;">🔬 الباحثين</h4>
+            <ul style="padding-right: 1rem;">
+                <li>الموسوعة القانونية</li>
+                <li>السوابق القضائية</li>
+                <li>الدراسات والأبحاث</li>
+                <li>مقارنات دولية</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 180px;">
+            <h4 style="color: #7C3AED;">👨‍💼 الخريجين الجدد</h4>
+            <ul style="padding-right: 1rem;">
+                <li>دليل الانطلاق المهني</li>
+                <li>نصائح التوظيف</li>
+                <li>حقوق الخريجين</li>
+                <li>التأهيل لسوق العمل</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # خدمات إضافية مهمة
+    st.markdown("### 🛠️ خدمات إضافية")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown("""
+        <div style="text-align: center; background: white; padding: 1rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 120px;">
+            <div style="font-size: 2rem;">⏰</div>
+            <h4 style="margin: 0.5rem 0;">منبه المواعيد</h4>
+            <p style="font-size: 0.8rem; color: #666;">تذكير بالمواعيد القانونية</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="text-align: center; background: white; padding: 1rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 120px;">
+            <div style="font-size: 2rem;">🗺️</div>
+            <h4 style="margin: 0.5rem 0;">خريطة الحقوق</h4>
+            <p style="font-size: 0.8rem; color: #666;">تصور تفاعلي للحقوق</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="text-align: center; background: white; padding: 1rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 120px;">
+            <div style="font-size: 2rem;">🔍</div>
+            <h4 style="margin: 0.5rem 0;">بحث قانوني</h4>
+            <p style="font-size: 0.8rem; color: #666;">بحث في التشريعات</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style="text-align: center; background: white; padding: 1rem; border-radius: 10px; border: 1px solid #e0e0e0; height: 120px;">
+            <div style="font-size: 2rem;">🏛️</div>
+            <h4 style="margin: 0.5rem 0;">الجهات المختصة</h4>
+            <p style="font-size: 0.8rem; color: #666;">دليل الجهات الرسمية</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # تحديثات 2025
+    st.markdown("### 📢 آخر التحديثات 2025")
+    
+    updates = [
+        {"icon": "💰", "text": "الحد الأدنى للأجور: 290 دينار"},
+        {"icon": "🏥", "text": "إجازة الأمومة: 10 أسابيع"},
+        {"icon": "🛡️", "text": "تنظيم الحماية من التحرش"},
+        {"icon": "🌐", "text": "قانون العمل عن بُعد"}
+    ]
+    
+    cols = st.columns(4)
+    for idx, update in enumerate(updates):
+        with cols[idx]:
+            st.markdown(f"""
+            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 10px;">
+                <div style="font-size: 1.5rem;">{update['icon']}</div>
+                <p style="margin: 0.5rem 0; font-size: 0.9rem;">{update['text']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+# ==========================
+# 🧭 الشريط الجانبي المحسن
+# ==========================
+def main():
+    with st.sidebar:
+        # شعار المنصة فقط
+        st.markdown("""
+        <div style="text-align: center; padding: 1rem 0 2rem 0;">
+            <h2 style="margin: 0; color: #1E3A8A;">⚖️ منصة حق</h2>
+            <p style="margin: 0; color: #666; font-size: 0.9rem;">المنصة القانونية الذكية</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # تصنيفات رئيسية
+        st.markdown("### 📂 الأقسام الرئيسية")
+        
+        # قسم العمال
+        with st.expander("👷 قسم العمال", expanded=True):
+            st.markdown("""
+            - 📋 الحقوق الأساسية
+            - 💰 الحقوق المالية  
+            - ⏰ وقت العمل والإجازات
+            - 🛡️ السلامة والحماية
+            - ⚖️ الإنذارات والفصل
+            - 📞 الشكاوى والمنازعات
+            - 🧮 حاسبات المستحقات
+            - 📚 المكتبة القانونية
+            """)
+        
+        # قسم أصحاب العمل
+        with st.expander("👔 قسم أصحاب العمل", expanded=False):
+            st.markdown("""
+            - 📋 الالتزامات القانونية
+            - 📝 نماذج وعقود
+            - 💰 الحاسبات المالية
+            - ⚖️ إدارة المخاطر
+            - 🔍 مدقق الامتثال
+            - 📊 التقارير والإحصائيات
+            """)
+        
+        # قسم الباحثين
+        with st.expander("🔬 قسم الباحثين", expanded=False):
+            st.markdown("""
+            - 📚 التشريعات الأساسية
+            - ⚖️ السوابق القضائية
+            - 📊 الدراسات والأبحاث
+            - 🌍 مقارنات دولية
+            - 📈 تحليلات إحصائية
+            """)
+        
+        # خدمات إضافية
+        with st.expander("🛠️ خدمات إضافية", expanded=False):
+            st.markdown("""
+            - 🎓 دليل الخريجين الجدد
+            - ⏰ منبه المواعيد
+            - 🗺️ خريطة الحقوق
+            - 🔍 البحث في القوانين
+            - 🏛️ الجهات المختصة
+            - 📁 منظم المستندات
+            """)
+        
+        st.markdown("---")
+        
+        # معلومات الاتصال المختصرة
+        st.markdown("### 📞 اتصل بنا")
+        st.markdown("""
+        **📧 البريد الإلكتروني:**  
+        support@haqq-platform.jo
+        
+        **🌐 الموقع الإلكتروني:**  
+        www.haqq-platform.jo
+        """)
+        
+        st.markdown("---")
+        
+        # تنويه صغير
+        st.markdown("""
+        <div style="font-size: 0.8rem; color: #666; text-align: center;">
+        منصة توعية قانونية - لا تغني عن استشارة محامٍ متخصص
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # عرض الصفحة المحددة
+    page_options = {
+        "🏠 الصفحة الرئيسية": show_home_page,
+        "👷 العمال": show_workers_section,
+        "👔 أصحاب العمل": show_employers_section,
+        "🔬 الباحثين": show_researchers_section,
+        "🎓 دليل الخريجين": show_graduates_guide,
+        "⏰ منبه المواعيد": show_reminder_system,
+        "🗺️ خريطة الحقوق": show_rights_map,
+        "🔍 البحث في القوانين": show_legal_search,
+        "🏛️ الجهات المختصة": show_authorities_section,
+        "🛠️ خدمات أخرى": show_other_services
+    }
+    
+    # استخدام query parameters للتنقل
+    query_params = st.experimental_get_query_params()
+    selected_page = query_params.get("page", ["🏠 الصفحة الرئيسية"])[0]
+    
+    if selected_page in page_options:
+        page_options[selected_page]()
+    else:
+        show_home_page()
+
+# ==========================
+# 🛠️ صفحة الخدمات الأخرى
+# ==========================
+def show_other_services():
+    st.markdown("### 🛠️ الخدمات الإضافية")
+    
+    services_cols = st.columns(2)
+    
+    with services_cols[0]:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0;">
+            <h4>📁 منظم المستندات</h4>
+            <ul>
+                <li>رفع وتنظيم المستندات</li>
+                <li>تصنيف المستندات</li>
+                <li>الببحث والفلترة</li>
+                <li>الأمان والنسخ الاحتياطي</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; margin-top: 1rem;">
+            <h4>📝 محلل العقود</h4>
+            <ul>
+                <li>تحليل العقد</li>
+                <li>المقارنة القانونية</li>
+                <li>التقرير الشامل</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with services_cols[1]:
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0;">
+            <h4>🔍 مدقق الامتثال</h4>
+            <ul>
+                <li>فحص العقد</li>
+                <li>تقييم الامتثال</li>
+                <li>التوصيات</li>
+                <li>تقارير الامتثال</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 1px solid #e0e0e0; margin-top: 1rem;">
+            <h4>🧮 الحاسبات القانونية</h4>
+            <ul>
+                <li>نهاية الخدمة</li>
+                <li>العمل الإضافي</li>
+                <li>الإجازات والأمومة</li>
+                <li>الحاسبة الشاملة</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # روابط سريعة
+    st.markdown("### 🔗 روابط سريعة")
+    quick_links = st.columns(4)
+    
+    with quick_links[0]:
+        if st.button("⏰ المنبه", use_container_width=True):
+            st.experimental_set_query_params(page="⏰ منبه المواعيد")
+    with quick_links[1]:
+        if st.button("🗺️ الخريطة", use_container_width=True):
+            st.experimental_set_query_params(page="🗺️ خريطة الحقوق")
+    with quick_links[2]:
+        if st.button("🔍 البحث", use_container_width=True):
+            st.experimental_set_query_params(page="🔍 البحث في القوانين")
+    with quick_links[3]:
+        if st.button("🏛️ الجهات", use_container_width=True):
+            st.experimental_set_query_params(page="🏛️ الجهات المختصة")
+
+# ==========================
+# 🎓 دليل الخريجين الجدد المبسط
+# ==========================
+def show_graduates_guide():
+    st.markdown("### 🎓 دليل الخريجين الجدد")
+    
+    tabs = st.tabs(["بداية المسيرة", "نصائح عملية", "جهات الدعم", "الموارد المجانية"])
+    
+    with tabs[0]:
+        st.markdown("""
+        #### 🚀 بداية المسيرة المهنية
+        
+        **📝 قبل بدء العمل:**
+        - تأكد من وجود عقد عمل مكتوب
+        - اقرأ جميع بنود العقد بعناية
+        - اسأل عن كل ما هو غير واضح
+        - احصل على نسخة موقعة من العقد
+        
+        **💼 أول شهر عمل:**
+        - تعرف على ثقافة المؤسسة
+        - افهم نظام العمل والإجازات
+        - تواصل مع زملائك ومسؤوليك
+        - احتفظ بسجل لإنجازاتك
+        """)
+    
+    with tabs[1]:
+        st.markdown("""
+        #### 💡 نصائح عملية
+        
+        **✅ نصائح للنجاح:**
+        - كن منضبطاً في الحضور والانصراف
+        - طور مهاراتك باستمرار
+        - احترم زملائك ومسؤوليك
+        - كن إيجابياً وقابلاً للتعلم
+        
+        **⚠️ تنبيهات هامة:**
+        - توثيق ساعات العمل الإضافي
+        - الاحتفاظ بكشوف الرواتب
+        - معرفة حقوقك القانونية
+        - عدم التوقيع على مستندات غير واضحة
+        """)
+    
+    with tabs[3]:
+        st.markdown("""
+        #### 📚 موارد مجانية
+        
+        **📞 جهات الدعم:**
+        - وزارة العمل: 06-5802666
+        - نقابة المحامين: 06-5664111
+        - مراكز التشغيل الجامعية
+        
+        **🌐 منصات مفيدة:**
+        - منصة تمكين للتوظيف
+        - بوابة العمل الإلكترونية
+        - منصات التدريب المجانية
+        """)
+( )if __name__ == "__main__":
     
 
 # ==========================
