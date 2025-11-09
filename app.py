@@ -101,13 +101,7 @@ if 'notifications' not in st.session_state:
 # دوال مساعدة محسنة
 # ==========================
 def load_lottie_url(url: str):
-    try:
-        r = requests.get(url)
-        if r.status_code != 200:
-            return None
-        return r.json()
-    except:
-        return None
+    return None
 
 def calculate_end_service(salary, years, months, contract_type, end_reason):
     """حساب دقيق لمكافأة نهاية الخدمة حسب القانون الأردني 2025"""
