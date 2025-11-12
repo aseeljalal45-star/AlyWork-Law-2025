@@ -3558,8 +3558,6 @@ def show_complaints_section():
             filtered_df = filtered_df[filtered_df['الخدمات'] == selected_service]
         
         st.dataframe(filtered_df, use_container_width=True, hide_index=True)
-        
-st.markdown("#### 📞 قنوات التواصل الإضافية")
 
 contact_channels = {
     "🌐 الموقع الإلكتروني لوزارة العمل": "https://www.mol.gov.jo",
