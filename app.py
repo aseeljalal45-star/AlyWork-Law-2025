@@ -2,32 +2,26 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-# ==========================
-# 🖼️ نظام رفع الشعار (ضعه هنا)
-# ==========================
-def handle_logo_upload():
-    """معالجة رفع صورة الشعار"""
-    uploaded_file = st.file_uploader(
-        "📤 رفع شعار المنصة", 
-        type=['png', 'jpg', 'jpeg'],
-        help="اختر صورة مربعة الشكل لتحقيق أفضل نتيجة",
-        key="logo_uploader"
-    )
+def show_home_page():
+    LOGO_URL = "https://ibb.co/2wNdPyf"
     
-    if uploaded_file is not None:
+    # استخدام columns لتنسيق الشعار والاسم
+    col1, col2 = st.columns([1, 3])
+    
+    with col1:
+        # عرض الصورة مباشرة
         try:
-            image = Image.open(uploaded_file)
-            st.session_state.logo_image = image
-            st.success("✅ تم رفع الشعار بنجاح!")
-            return image
-        except Exception as e:
-            st.error("❌ حدث خطأ في تحميل الصورة")
-            return None
-    elif 'logo_image' in st.session_state:
-        return st.session_state.logo_image
-    else:
-        return None
-```
+            st.image(LOGO_URL, width=80)
+        except:
+            st.markdown('<div style="font-size: 60px; text-align: center;">⚖️</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="text-align: center; padding: 10px;">
+            <div class="platform-name">SiraWork سيرا</div>
+            <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
+        </div>
+        """, unsafe_allow_html=True)
 # ==========================
 # 🎯 إعدادات التطبيق الأساسية
 # ==========================
