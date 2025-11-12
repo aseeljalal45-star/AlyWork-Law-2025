@@ -3,34 +3,21 @@ import pandas as pd
 from datetime import datetime
 import os
 def show_home_page():
+    # الرابط المباشر
     LOGO_URL = "https://ibb.co/2wNdPyf"
     
-    st.markdown("""
-    <div class="main-header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 2rem; padding: 20px;">
-            
-            <!-- حاوية الشعار -->
-            <div style="position: relative;">
-                <div style="width: 100px; height: 100px; 
-                            border-radius: 20px; overflow: hidden;
-                            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-                            border: 4px solid white;
-                            background: white;">
-                    <img src="{}" 
-                         alt="شعار SiraWork"
-                         style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-            </div>
-            
-            <!-- اسم المنصة -->
-            <div style="text-align: center;">
-                <div class="platform-name">SiraWork سيرا</div>
-                <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
-            </div>
-            
+    col1, col2 = st.columns([1, 3])
+    
+    with col1:
+        st.image(LOGO_URL, width=80)
+    
+    with col2:
+        st.markdown("""
+        <div style="text-align: center;">
+            <div class="platform-name">SiraWork سيرا</div>
+            <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
         </div>
-    </div>
-    """.format(LOGO_URL), unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 # ==========================
 # 🎯 إعدادات التطبيق الأساسية
 # ==========================
