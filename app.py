@@ -2312,16 +2312,6 @@ def show_calculators_section():
     </div>
     """, unsafe_allow_html=True)
 
-    # شريط الإحصائيات السريع
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("عدد الحاسبات", "12", "3 جديدة")
-    with col2:
-        st.metric("عمليات الحساب", "1,247", "48 اليوم")
-    with col3:
-        st.metric("الدقة القانونية", "100%", "محدث 2025")
-    with col4:
-        st.metric("توفير الوقت", "85%", "مقارنة باليدوي")
 
     # التبويبات الرئيسية
     calculator_tabs = st.tabs([
