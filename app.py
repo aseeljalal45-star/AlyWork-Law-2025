@@ -3573,13 +3573,6 @@ def show_complaints_disputes():
             "صندوق الشكاوى الإلكتروني": "من خلال الموقع الإلكتروني",
             "الحسابات الرسمية على وسائل التواصل": "@moljo"
         }
-        
-        for channel, details in contact_channels.items():
-            st.markdown(f"**{channel}:** {details}")
-
-# تشغيل الوظيفة
-if __name__ == "__main__":
-    show_complaints_disputes()
 
 # ==========================
 # ⚙️ قسم الإعدادات
