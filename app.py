@@ -147,7 +147,7 @@ def show_breadcrumbs(section_name):
     """, unsafe_allow_html=True)
 
 # ==========================
-# 🏠 الصفحة الرئيسية مع الشعار الحقيقي
+# 🏠 الصفحة الرئيسية مع الشعار بدون خلفية
 # ==========================
 def show_home_page():
     # الرابط المباشر للصورة
@@ -156,30 +156,37 @@ def show_home_page():
     # الهيدر الرئيسي مع الشعار
     st.markdown("""
     <div class="main-header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 2rem; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 2rem;">
     """, unsafe_allow_html=True)
     
-    # الشعار من الرابط المباشر
-    try:
-        # محاولة عرض الصورة مباشرة
-        st.markdown(f"""
-        <div style="width: 100px; height: 100px; 
-                    border-radius: 20px; overflow: hidden;
-                    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-                    border: 4px solid white;
-                    background: white;
-                    display: flex; align-items: center; justify-content: center;">
-            <img src="{LOGO_URL}" 
-                 alt="شعار SiraWork"
-                 style="width: 100%; height: 100%; object-fit: cover;"
-                 onerror="this.style.display='none'">
+    # الشعار بدون خلفية وبالحجم الطبيعي
+    st.markdown(f"""
+    <div style="display: flex; align-items: center;">
+        <img src="{LOGO_URL}" 
+             alt="شعار SiraWork"
+             style="height: 80px; width: auto; display: block;">
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # اسم المنصة
+    st.markdown("""
+            <div style="text-align: center; margin-right: 10px;">
+                <div class="platform-name">SiraWork سيرا</div>
+                <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-    except:
-        # إذا فشل عرض الصورة، استخدم أيقونة
-        st.markdown("""
-        <div style="font-size: 80px; color: #1E3A8A;">⚖️</div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # اسم المنصة
+    st.markdown("""
+            <div style="text-align: center; margin-right: 10px;">
+                <div class="platform-name">SiraWork سيرا</div>
+                <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # اسم المنصة
     st.markdown("""
