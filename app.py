@@ -337,18 +337,20 @@ def show_enhanced_basic_rights():
         }
     ]
     
-    for expander in contract_expanders:
+   for expander in contract_expanders:
         with st.expander(expander["title"], expanded=True):
             st.markdown(expander["content"])
     
     # حقوق الفئات الخاصة المحدثة
     st.markdown("##### 👥 حقوق الفئات الخاصة - محدث 2024")
- special_categories = st.tabs([
-    "👩 المرأة العاملة", 
-    "👦 الأحداث",  # ← تم الإصلاح
-    "🌍 غير الأردنيين", 
-    "♿ ذوو الإعاقة"
-])
+    
+    special_categories = st.tabs([
+        "👩 المرأة العاملة", 
+        "👦 العمال الأحداث", 
+        "🌍 غير الأردنيين",
+        "♿ ذوو الإعاقة"
+    ])
+    
     
     with special_categories[0]:
         st.markdown("**👩 حقوق المرأة العاملة - محدث 2024**")
