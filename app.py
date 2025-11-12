@@ -3573,18 +3573,6 @@ contact_channels = {
     "💬 الحسابات الرسمية على وسائل التواصل": "@moljo"
 }
 
-for channel, value in contact_channels.items():
-    if value.startswith(('http', 'tel:')):
-        # إنشاء روابط قابلة للنقر
-        if value.startswith('http'):
-            display_text = value
-        else:
-            display_text = value.replace('tel:', '')
-        
-        st.markdown(f"**{channel}:** [{display_text}]({value})")
-    else:
-        st.markdown(f"**{channel}:** {value}")
-
 # ==========================
 # ⚙️ قسم الإعدادات
 # ==========================
