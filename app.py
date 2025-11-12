@@ -3585,27 +3585,6 @@ for channel, value in contact_channels.items():
     else:
         st.markdown(f"**{channel}:** {value}")
 
-# أو يمكنك استخدام هذا التنسيق البديل الأكثر تطوراً:
-st.markdown("---")
-st.markdown("#### 📞 قنوات التواصل الإضافية (مُنسقة)")
-
-for channel, value in contact_channels.items():
-    col1, col2 = st.columns([2, 3])
-    
-    with col1:
-        st.markdown(f"**{channel}**")
-    
-    with col2:
-        if value.startswith(('http', 'tel:')):
-            if value.startswith('http'):
-                display_text = "رابط الموقع"
-                st.markdown(f"[{display_text}]({value})")
-            else:
-                display_text = value.replace('tel:', '')
-                st.markdown(f"`{display_text}`")
-        else:
-            st.markdown(value)
-
 # ==========================
 # ⚙️ قسم الإعدادات
 # ==========================
