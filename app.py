@@ -2487,7 +2487,7 @@ def show_breadcrumbs(section_name):
     <div style="background: #f8f9fa; padding: 0.5rem 1rem; border-radius: 5px; margin-bottom: 1rem; font-size: 0.9rem;">
         <span>🏠 الرئيسية</span> > <span>🔬 قسم الباحثين</span> > <span>{section_name}</span>
     </div>
-    """, unsafe_allow_html=True))
+    """, unsafe_allow_html=True)
     # ==========================
 # 🧮 دوال الحاسبات المفقودة - الإصلاح
 # ==========================
