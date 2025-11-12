@@ -2,22 +2,10 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-def show_home_page():
-    # الرابط المباشر
-    LOGO_URL = "https://ibb.co/2wNdPyf"
-    
-    col1, col2 = st.columns([1, 3])
-    
-    with col1:
-        st.image(LOGO_URL, width=80)
-    
-    with col2:
-        st.markdown("""
-        <div style="text-align: center;">
-            <div class="platform-name">SiraWork سيرا</div>
-            <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
-        </div>
-        """, unsafe_allow_html=True)
+import requests
+from PIL import Image
+import io
+
 # ==========================
 # 🎯 إعدادات التطبيق الأساسية
 # ==========================
@@ -53,7 +41,7 @@ def load_custom_css():
     /* تصميم نظيف ومركز */
     .main-header { 
         text-align: center; 
-        padding: 3rem 0;
+        padding: 2rem 0;
         margin-bottom: 2rem;
     }
     .platform-name {
@@ -95,13 +83,6 @@ def load_custom_css():
         color: #6B7280;
         margin-top: 3rem;
         border-top: 1px solid #E5E7EB;
-    }
-    .privacy-highlight {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 0.5rem 0;
     }
     
     /* تحسينات عامة */
@@ -166,14 +147,47 @@ def show_breadcrumbs(section_name):
     """, unsafe_allow_html=True)
 
 # ==========================
-# 🏠 الصفحة الرئيسية
+# 🏠 الصفحة الرئيسية مع الشعار الحقيقي
 # ==========================
 def show_home_page():
-    # عنوان المنصة
+    # الرابط المباشر للصورة
+    LOGO_URL = "https://i.ibb.co/2wNdPyf/logo.png"
+    
+    # الهيدر الرئيسي مع الشعار
     st.markdown("""
     <div class="main-header">
-        <div class="platform-name">SiraWork سيرا</div>
-        <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 2rem; flex-wrap: wrap;">
+    """, unsafe_allow_html=True)
+    
+    # الشعار من الرابط المباشر
+    try:
+        # محاولة عرض الصورة مباشرة
+        st.markdown(f"""
+        <div style="width: 100px; height: 100px; 
+                    border-radius: 20px; overflow: hidden;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                    border: 4px solid white;
+                    background: white;
+                    display: flex; align-items: center; justify-content: center;">
+            <img src="{LOGO_URL}" 
+                 alt="شعار SiraWork"
+                 style="width: 100%; height: 100%; object-fit: cover;"
+                 onerror="this.style.display='none'">
+        </div>
+        """, unsafe_allow_html=True)
+    except:
+        # إذا فشل عرض الصورة، استخدم أيقونة
+        st.markdown("""
+        <div style="font-size: 80px; color: #1E3A8A;">⚖️</div>
+        """, unsafe_allow_html=True)
+    
+    # اسم المنصة
+    st.markdown("""
+            <div style="text-align: center;">
+                <div class="platform-name">SiraWork سيرا</div>
+                <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -226,7 +240,7 @@ def show_home_page():
             <li><strong>استخدم الأدوات المتاحة</strong> في كل قسم</li>
             <li><strong>اطلع على المعلومات التوعوية</strong> والشرح القانوني</li>
         </ol>
-        
+    </div>
     """, unsafe_allow_html=True)
     
     # تذييل الصفحة
