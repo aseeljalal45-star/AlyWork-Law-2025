@@ -2,9 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-import requests
-from PIL import Image
-import io
 
 # ==========================
 # 🎯 إعدادات التطبيق الأساسية
@@ -41,7 +38,7 @@ def load_custom_css():
     /* تصميم نظيف ومركز */
     .main-header { 
         text-align: center; 
-        padding: 2rem 0;
+        padding: 3rem 0;
         margin-bottom: 2rem;
     }
     .platform-name {
@@ -83,6 +80,13 @@ def load_custom_css():
         color: #6B7280;
         margin-top: 3rem;
         border-top: 1px solid #E5E7EB;
+    }
+    .privacy-highlight {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.5rem 0;
     }
     
     /* تحسينات عامة */
@@ -146,88 +150,15 @@ def show_breadcrumbs(section_name):
     </div>
     """, unsafe_allow_html=True)
 
-import streamlit as st
-from PIL import Image
-import io
-
 # ==========================
-# 🖼️ نظام رفع الشعار
-# ==========================
-def handle_logo_upload():
-    """معالجة رفع صورة الشعار"""
-    uploaded_file = st.file_uploader(
-        "📤 رفع شعار المنصة", 
-        type=['png', 'jpg', 'jpeg'],
-        help="اختر صورة مربعة الشكل لتحقيق أفضل نتيجة"
-    )
-    
-    if uploaded_file is not None:
-        # عرض الصورة المرفوعة
-        image = Image.open(uploaded_file)
-        
-        # حفظ الصورة في الجلسة
-        st.session_state.logo_image = image
-        st.session_state.logo_uploaded = True
-        
-        st.success("✅ تم رفع الشعار بنجاح!")
-        return image
-    elif 'logo_image' in st.session_state:
-        return st.session_state.logo_image
-    else:
-        return None
-
-# ==========================
-# 🏠 الصفحة الرئيسية مع الشعار الحقيقي
+# 🏠 الصفحة الرئيسية
 # ==========================
 def show_home_page():
-    # قسم رفع الشعار (في الشريط الجانبي أو في الإعدادات)
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 🖼️ إعدادات الشعار")
-    
-    logo_image = handle_logo_upload()
-    
-    # العنوان مع الشعار
+    # عنوان المنصة
     st.markdown("""
     <div class="main-header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 25px; margin-bottom: 2rem;">
-    """, unsafe_allow_html=True)
-    
-    # عرض الشعار أو الأيقونة الافتراضية
-    if logo_image:
-        # تحويل الصورة إلى bytes لعرضها
-        img_bytes = io.BytesIO()
-        logo_image.save(img_bytes, format='PNG')
-        
-        st.markdown(f"""
-            <div style="width: 80px; height: 80px; border-radius: 15px; 
-                        overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                        border: 3px solid #1E3A8A;">
-                <img src="data:image/png;base64,{base64.b64encode(img_bytes.getvalue()).decode()}" 
-                     style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-        """, unsafe_allow_html=True)
-    else:
-        # الأيقونة الافتراضية
-        st.markdown("""
-            <div style="font-size: 60px; color: #1E3A8A;">⚖️</div>
-        """, unsafe_allow_html=True)
-    
-    # اسم المنصة
-    st.markdown("""
-            <div style="text-align: center;">
-                <div class="platform-name">SiraWork سيرا</div>
-                <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    # اسم المنصة
-    st.markdown("""
-            <div style="text-align: center;">
-                <div class="platform-name">SiraWork سيرا</div>
-                <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
-            </div>
-        </div>
+        <div class="platform-name">SiraWork سيرا</div>
+        <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -280,7 +211,7 @@ def show_home_page():
             <li><strong>استخدم الأدوات المتاحة</strong> في كل قسم</li>
             <li><strong>اطلع على المعلومات التوعوية</strong> والشرح القانوني</li>
         </ol>
-    </div>
+        
     """, unsafe_allow_html=True)
     
     # تذييل الصفحة
