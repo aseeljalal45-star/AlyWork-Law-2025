@@ -2,7 +2,32 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
-
+# ==========================
+# 🖼️ نظام رفع الشعار (ضعه هنا)
+# ==========================
+def handle_logo_upload():
+    """معالجة رفع صورة الشعار"""
+    uploaded_file = st.file_uploader(
+        "📤 رفع شعار المنصة", 
+        type=['png', 'jpg', 'jpeg'],
+        help="اختر صورة مربعة الشكل لتحقيق أفضل نتيجة",
+        key="logo_uploader"
+    )
+    
+    if uploaded_file is not None:
+        try:
+            image = Image.open(uploaded_file)
+            st.session_state.logo_image = image
+            st.success("✅ تم رفع الشعار بنجاح!")
+            return image
+        except Exception as e:
+            st.error("❌ حدث خطأ في تحميل الصورة")
+            return None
+    elif 'logo_image' in st.session_state:
+        return st.session_state.logo_image
+    else:
+        return None
+```
 # ==========================
 # 🎯 إعدادات التطبيق الأساسية
 # ==========================
