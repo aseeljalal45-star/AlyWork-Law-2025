@@ -150,33 +150,33 @@ def show_breadcrumbs(section_name):
 # 🏠 الصفحة الرئيسية مع الشعار بدون خلفية
 # ==========================
 def show_home_page():
-    # الرابط المباشر للصورة
     LOGO_URL = "https://i.ibb.co/2wNdPyf/logo.png"
     
-    # الهيدر الرئيسي مع الشعار
-    st.markdown("""
-    <div class="main-header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 2rem;">
-    """, unsafe_allow_html=True)
+    # استخدام columns لمحاذاة دقيقة
+    col1, col2 = st.columns([1, 2])
     
-    # الشعار بدون خلفية وبالحجم الطبيعي
-    st.markdown(f"""
-    <div style="display: flex; align-items: center;">
-        <img src="{LOGO_URL}" 
-             alt="شعار SiraWork"
-             style="height: 80px; width: auto; display: block;">
-    </div>
-    """, unsafe_allow_html=True)
+    with col1:
+        # الشعار فقط في المنتصف
+        st.markdown(f"""
+        <div style="display: flex; justify-content: center; align-items: center; height: 100px;">
+            <img src="{LOGO_URL}" 
+                 alt="شعار SiraWork"
+                 style="height: 65px; width: auto;">
+        </div>
+        """, unsafe_allow_html=True)
     
-    # اسم المنصة
-    st.markdown("""
-            <div style="text-align: center; margin-right: 10px;">
-                <div class="platform-name">SiraWork سيرا</div>
-                <div class="platform-subtitle">منصة توعوية تعليمية لمحاكاة القضايا العمالية</div>
+    with col2:
+        # النص مع محاذاة مثالية
+        st.markdown("""
+        <div style="text-align: right; padding-right: 20px; line-height: 1.2;">
+            <div style="font-size: 3rem; font-weight: bold; color: #1E3A8A; margin: 0;">
+                SiraWork سيرا
+            </div>
+            <div style="font-size: 1.3rem; color: #6B7280; margin-top: 5px;">
+                منصة توعوية تعليمية لمحاكاة القضايا العمالية
             </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
     # اسم المنصة
     st.markdown("""
