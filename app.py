@@ -2444,6 +2444,163 @@ def show_qistas_platform():
     **💎 خلاصة:** قسطاس تمثل نقلة نوعية في مجال البحث القانوني الرقمي في العالم العربي، 
     وتوفر للباحثين والمختصين بيئة متكاملة للوصول إلى المعلومة القانونية الموثوقة.
     """)
+    # ==========================
+# 🧮 دوال الحاسبات المفقودة - الإصلاح
+# ==========================
+def calculate_annual_leave(basic_salary, service_years, actual_days, vacation_type):
+    """حساب مستحقات الإجازة السنوية"""
+    daily_rate = basic_salary / 30
+    vacation_pay = daily_rate * actual_days
+    
+    st.success(f"""
+    ## 🌴 نتائج حساب الإجازة السنوية
+    
+    **المبلغ المستحق:** **{vacation_pay:,.0f}** دينار
+    
+    **التفاصيل:**
+    - الراتب الأساسي: {basic_salary:,.0f} دينار
+    - مدة الخدمة: {service_years} سنوات
+    - أيام الإجازة الفعلية: {actual_days} يوم
+    - نوع الإجازة: {vacation_type}
+    - معدل اليوم: {daily_rate:,.2f} دينار
+    """)
+
+def calculate_maternity_leave(salary, actual_leave, multiple_birth, complications):
+    """حساب مستحقات إجازة الأمومة"""
+    daily_rate = salary / 30
+    
+    if multiple_birth:
+        actual_leave += 14  # إضافة أسبوعين للولادة المتعددة
+    
+    if complications:
+        actual_leave += 14  # إضافة أسبوعين للمضاعفات
+    
+    maternity_pay = daily_rate * actual_leave
+    
+    st.success(f"""
+    ## 🤰 نتائج حساب إجازة الأمومة
+    
+    **المبلغ المستحق:** **{maternity_pay:,.0f}** دينار
+    
+    **التفاصيل:**
+    - الراتب الأساسي: {salary:,.0f} دينار
+    - أيام الإجازة: {actual_leave} يوم
+    - ولادة متعددة: {'نعم' if multiple_birth else 'لا'}
+    - مضاعفات ولادة: {'نعم' if complications else 'لا'}
+    - المدة القانونية: 70 يوم + إضافات حسب الحالة
+    """)
+
+def calculate_social_security(employee_salary, employee_rate, employer_rate, salary_ceiling, calculation_type):
+    """حساب اشتراكات الضمان الاجتماعي"""
+    # حساب الاشتراكات
+    employee_share = min(employee_salary, salary_ceiling) * (employee_rate / 100)
+    employer_share = min(employee_salary, salary_ceiling) * (employer_rate / 100)
+    total_share = employee_share + employer_share
+    
+    # ضرب حسب الفترة
+    multipliers = {"شهري": 1, "ربع سنوي": 3, "سنوي": 12}
+    multiplier = multipliers.get(calculation_type, 1)
+    
+    st.success(f"""
+    ## 🏛️ نتائج حساب الضمان الاجتماعي
+    
+    **الاشتراكات ({calculation_type}):**
+    - **نسبة الموظف ({employee_rate}%):** {employee_share * multiplier:,.0f} دينار
+    - **نسبة صاحب العمل ({employer_rate}%):** {employer_share * multiplier:,.0f} دينار
+    - **الإجمالي:** {total_share * multiplier:,.0f} دينار
+    
+    **التفاصيل:**
+    - الراتب الشهري: {employee_salary:,.0f} دينار
+    - الحد الأقصى للأجر الخاضع: {salary_ceiling:,.0f} دينار
+    - فترة الحساب: {calculation_type}
+    """)
+
+def calculate_pension(final_salary, total_years, contribution_years, pension_type):
+    """حساب المعاش التقاعدي"""
+    # حساب متوسط الراتب
+    avg_salary = final_salary
+    
+    # حساب نسبة المعاش حسب المدة
+    pension_rate = min(contribution_years / 40, 1.0)  # حد أقصى 100%
+    
+    # حساب المعاش الشهري
+    monthly_pension = avg_salary * pension_rate * 0.80  # 80% من متوسط الراتب
+    
+    st.success(f"""
+    ## 💰 نتائج حساب المعاش التقاعدي
+    
+    **المعاش الشهري:** **{monthly_pension:,.0f}** دينار
+    
+    **التفاصيل:**
+    - متوسط الأجر الأخير: {avg_salary:,.0f} دينار
+    - إجمالي سنوات الخدمة: {total_years} سنة
+    - سنوات الاشتراك الفعلية: {contribution_years} سنة
+    - نوع المعاش: {pension_type}
+    - نسبة الاستحقاق: {pension_rate*100:.1f}%
+    """)
+
+def calculate_unfair_dismissal(last_salary, service_years, notice_period, dismissal_reason):
+    """حساب تعويض الفصل التعسفي"""
+    # حساب التعويض الأساسي
+    base_compensation = last_salary * service_years
+    
+    # إضافات حسب السبب
+    multipliers = {
+        "تعسفي بدون سبب": 2.0,
+        "لأسباب اقتصادية": 1.5,
+        "لأسباب تأديبية غير مبررة": 1.8,
+        "للمشاركة النقابية": 2.5
+    }
+    
+    multiplier = multipliers.get(dismissal_reason, 1.0)
+    
+    # حساب تعويض الإخطار
+    notice_compensation = 0
+    if notice_period == "لم يتم الإخطار":
+        notice_compensation = last_salary
+    elif notice_period == "إخطار ناقص":
+        notice_compensation = last_salary * 0.5
+    
+    total_compensation = (base_compensation * multiplier) + notice_compensation
+    
+    st.success(f"""
+    ## ⚖️ نتائج حساب تعويض الفصل التعسفي
+    
+    **إجمالي التعويض:** **{total_compensation:,.0f}** دينار
+    
+    **التفاصيل:**
+    - الراتب الأخير: {last_salary:,.0f} دينار
+    - سنوات الخدمة: {service_years} سنة
+    - سبب الفصل: {dismissal_reason}
+    - فترة الإخطار: {notice_period}
+    - تعويض الفصل: {base_compensation * multiplier:,.0f} دينار
+    - تعويض الإخطار: {notice_compensation:,.0f} دينار
+    """)
+
+def calculate_salary_delay(monthly_salary, delay_months, delay_days, delay_frequency):
+    """حساب تعويض تأخر الرواتب"""
+    # حساب الأيام الإجمالية
+    total_delay_days = (delay_months * 30) + delay_days
+    
+    # حساب التعويض اليومي (8% سنوي = 0.022% يومي)
+    daily_compensation_rate = 0.00022
+    daily_compensation = monthly_salary * daily_compensation_rate
+    
+    total_compensation = daily_compensation * total_delay_days
+    
+    st.success(f"""
+    ## ⏰ نتائج حساب تعويض تأخر الرواتب
+    
+    **إجمالي التعويض:** **{total_compensation:,.0f}** دينار
+    
+    **التفاصيل:**
+    - الراتب الشهري: {monthly_salary:,.0f} دينار
+    - أشهر التأخير: {delay_months} شهر
+    - أيام التأخير: {delay_days} يوم
+    - إجمالي أيام التأخير: {total_delay_days} يوم
+    - نمط التأخير: {delay_frequency}
+    - معدل التعويض: 8% سنوياً
+    """)
 # ==========================
 # 🧮 قسم الحاسبات المتكاملة - النظام الشامل
 # ==========================
