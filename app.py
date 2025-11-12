@@ -282,7 +282,19 @@ def show_workers_section():
 # ==========================
 def show_enhanced_basic_rights():
     st.markdown("#### 📋 الحقوق الأساسية والضمانات الدستورية - محدث 2024")
-
+    
+    # التحديثات الرئيسية
+    st.markdown("##### 🆕 أحدث التعديلات التشريعية 2024")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("فترة التجربة", "3 أشهر", "-3 أشهر")
+    with col2:
+        st.metric("الحد الأدنى للأجور", "290 دينار", "+30 دينار")
+    with col3:
+        st.metric("إجازة الأمومة", "10 أسابيع", "+2 أسبوع")
+    with col4:
+        st.metric("إجازة الوالدية", "3 أيام", "جديدة")
     
     # الحقوق التعاقدية المحدثة
     st.markdown("##### 📝 الحقوق التعاقدية المحدثة")
@@ -337,7 +349,7 @@ def show_enhanced_basic_rights():
         }
     ]
     
-   for expander in contract_expanders:
+    for expander in contract_expanders:
         with st.expander(expander["title"], expanded=True):
             st.markdown(expander["content"])
     
@@ -350,7 +362,6 @@ def show_enhanced_basic_rights():
         "🌍 غير الأردنيين",
         "♿ ذوو الإعاقة"
     ])
-    
     
     with special_categories[0]:
         st.markdown("**👩 حقوق المرأة العاملة - محدث 2024**")
@@ -455,7 +466,6 @@ def show_enhanced_basic_rights():
             with st.expander(f"♿ {right['title']}"):
                 st.write(f"**التفاصيل:** {right['details']}")
                 st.write(f"**الشروط:** {right['conditions']}")
-
 # ==========================
 # 💰 الحقوق المالية - محدث حسب التعديلات
 # ==========================
