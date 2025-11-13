@@ -221,7 +221,43 @@ def show_home_page():
     </div>
     """, unsafe_allow_html=True)
 
+# ==========================
+# 👷 قسم العمال - الإصدار المكتمل
+# ==========================
+def show_workers_section():
+    show_breadcrumbs("👷 قسم العمال")
+    
+    st.markdown("""
+    <div class="main-header">
+        <h1>👷 منصة حقوق العاملين في الأردن</h1>
+        <p>دليل شامل حسب قانون العمل الأردني رقم 8 لسنة 1996 وتعديلاته</p>
+    </div>
+    """, unsafe_allow_html=True)
 
+    worker_tabs = st.tabs([
+        "📋 الحقوق الأساسية", 
+        "👥 حقوق الفئات الخاصة",
+        "💰 الحقوق المالية",
+        "⏰ وقت العمل والإجازات", 
+        "🛡️ الحماية والسلامة",
+        "🔍 فحص الحقوق",
+        "📝 واجبات العامل"
+    ])
+
+    with worker_tabs[0]:
+        show_enhanced_basic_rights()
+    with worker_tabs[1]:
+        show_special_categories_rights()
+    with worker_tabs[2]:
+        show_enhanced_financial_rights()
+    with worker_tabs[3]:
+        show_enhanced_work_time()
+    with worker_tabs[4]:
+        show_enhanced_protection()
+    with worker_tabs[5]:
+        show_enhanced_rights_checker()
+    with worker_tabs[6]:
+        show_worker_obligations()
 # ==========================
 # 📋 الحقوق الأساسية - مكتمل بجميع المواد
 # ==========================
