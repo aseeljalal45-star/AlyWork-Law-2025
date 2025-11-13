@@ -1930,19 +1930,19 @@ def show_legislative_resources():
             {
                 "اسم التشريع": "قانون العمل الأردني رقم 8 لسنة 1996",
                 "الوصف": "النص الأساسي لقانون العمل مع جميع التعديلات",
-                "رابط": "https://mol.gov.jo/EBv4.0/root_storage/ar/eb_list_page/%D9%82%D8%A7%D9%86%D9%88%D9%86_%D8%A7%D9%84%D8%B9%D9%85%D9%84_%D8%A7%D9%84%D8%A7%D8%B1%D8%AF%D9%86%D9%8A.pdf",
+                "رابط": "https://www.mol.gov.jo/AR/List/%D8%A7%D9%84%D9%82%D9%88%D8%A7%D9%86%D9%8A%D9%86",
                 "مصدر": "الموقع الرسمي لوزارة العمل"
             },
             {
                 "اسم التشريع": "دستور المملكة الأردنية",
                 "الوصف": "الدستور الأردني - الباب الثاني: حقوق الأردنيين وواجباتهم",
-                "رابط": "https://mop.gov.jo/EBV4.0/Root_Storage/AR/Electronic%20Library/Constitution/Constitution.pdf",
+                "رابط": "https://representatives.jo/Ar/Pages/%D8%A7%D9%84%D8%AF%D8%B3%D8%AA%D9%88%D8%B1",
                 "مصدر": "رئاسة الوزراء"
             },
             {
                 "اسم التشريع": "قانون الضمان الاجتماعي",
                 "الوصف": "قانون الضمان الاجتماعي الأردني وتعديلاته",
-                "رابط": "https://www.ssc.gov.jo/wp-content/uploads/2021/10/%D9%82%D8%A7%D9%86%D9%88%D9%86-%D8%A7%D9%84%D8%B6%D9%85%D8%A7%D9%86-%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9%D9%8A-%D8%B1%D9%82%D9%85-1-%D9%84%D8%B3%D9%86%D8%A9-2014.pdf",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.ssc.gov.jo/wp-content/uploads/2021/10/%25D9%2582%25D8%25A7%25D9%2586%25D9%2588%25D9%2586-%25D8%25A7%25D9%2584%25D8%25B6%25D9%2585%25D8%25A7%25D9%2586-%25D8%25A7%25D9%2584%25D8%25A7%25D8%25AC%25D8%25AA%25D9%2585%25D8%25A7%25D8%25B9%25D9%258A-%25D8%25B1%25D9%2582%25D9%2585-%25D9%25A1-%25D9%2584%25D8%25B3%25D9%2586%25D8%25A9-%25D9%25A2%25D9%25A0%25D9%25A1%25D9%25A4-1.pdf&ved=2ahUKEwi50dyM_-2QAxXvVKQEHeTkGTUQFnoECBoQAQ&usg=AOvVaw2zF0XzGu-PHO-CACZd9dWe",
                 "مصدر": "مؤسسة الضمان الاجتماعي"
             }
         ]
@@ -1960,19 +1960,19 @@ def show_legislative_resources():
             {
                 "النظام": "نظام العمل المؤقت",
                 "الوصف": "تنظيم عقود العمل المؤقتة والمرنة",
-                "رابط": "https://mol.gov.jo/EBv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%A7%D9%86%D8%B8%D9%85%D8%A9_%D9%88%D8%A7%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85%D8%A7%D8%AA.pdf",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://jordanianlaw.com/%25D8%25A7%25D9%2584%25D9%2582%25D9%2588%25D8%25A7%25D9%2586%25D9%258A%25D9%2586/%25D9%2582%25D8%25A7%25D9%2586%25D9%2588%25D9%2586-%25D8%25A7%25D9%2584%25D8%25B9%25D9%2585%25D9%2584-%25D8%25A7%25D9%2584%25D9%2585%25D8%25A4%25D9%2582%25D8%25AA/&ved=2ahUKEwiSu5am_-2QAxXLUaQEHU0rKWoQFnoECB4QAQ&usg=AOvVaw1v6PQchSfyw4q3pWVUvSPX",
                 "حالة": "ساري المفعول"
             },
             {
                 "النظام": "نظام السلامة والصحة المهنية",
                 "الوصف": "اشتراطات السلامة في بيئات العمل",
-                "رابط": "https://mol.gov.jo/EBv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%A7%D9%86%D8%B8%D9%85%D8%A9_%D9%88%D8%A7%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85%D8%A7%D8%AA.pdf",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://mol.gov.jo/AR/List/%25D8%25AA%25D8%25B4%25D8%25B1%25D9%258A%25D8%25B9%25D8%25A7%25D8%25AA_%25D8%25A7%25D9%2584%25D8%25B3%25D9%2584%25D8%25A7%25D9%2585%25D8%25A9_%25D9%2588%25D8%25A7%25D9%2584%25D8%25B5%25D8%25AD%25D8%25A9_%25D8%25A7%25D9%2584%25D9%2585%25D9%2587%25D9%2586%25D9%258A%25D8%25A9&ved=2ahUKEwj6wajB_-2QAxX8KvsDHb-5LGkQFnoECCsQBQ&usg=AOvVaw26C8c8Or82KoAK_FKsw6CQ",
                 "حالة": "ساري المفعول"
             },
             {
                 "النظام": "تعليمات الحد الأدنى للأجور",
                 "الوصف": "تنظيم وتحديث الحد الأدنى للأجور",
-                "رابط": "https://mol.gov.jo/EBv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%A7%D9%86%D8%B8%D9%85%D8%A9_%D9%88%D8%A7%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85%D8%A7%D8%AA.pdf",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://mol.gov.jo/ar/NewsDetails/%25D8%25A7%25D9%2584%25D8%25AB%25D9%2584%25D8%25A7%25D8%25AB%25D9%258A%25D8%25A9_%25D8%25AA%25D8%25B1%25D9%2581%25D8%25B9_%25D8%25A7%25D9%2584%25D8%25AD%25D8%25AF_%25D8%25A7%25D9%2584%25D8%25A3%25D8%25AF%25D9%2586%25D9%2589_%25D9%2584%25D9%2584%25D8%25A3%25D8%25AC%25D9%2588%25D8%25B1_%25D8%25A5%25D9%2584%25D9%2589_290_%25D8%25AF%25D9%258A%25D9%2586%25D8%25A7%25D8%25B1%25D8%25A7_%25D8%25A7%25D8%25B9%25D8%25AA%25D8%25A8%25D8%25A7%25D8%25B1%25D8%25A7%25D9%258B_%25D9%2585%25D9%2586_%25D8%25A8%25D8%25AF%25D8%25A7%25D9%258A%25D8%25A9_%25D8%25B9%25D8%25A7%25D9%2585_2025&ved=2ahUKEwiiwt_X_-2QAxVYTqQEHQ_LC1gQFnoECBoQAQ&usg=AOvVaw1JeFwKBGQfIiI0MDsBiLvc",
                 "حالة": "ساري المفعول"
             }
         ]
@@ -2013,19 +2013,19 @@ def show_academic_resources():
             {
                 "المجلة": "المجلة الأردنية للقانون",
                 "الناشر": "الجامعة الأردنية",
-                "رابط": "https://law.ju.edu.jo/ar/arabic/Pages/Journal.aspx",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://dsr.ju.edu.jo/djournals/index.php/Law/user/setLocale/ar_IQ%3Fsource%3D%252Fdjournals%252Findex.php%252FLaw%252Fsearch&ved=2ahUKEwiWkeD0_-2QAxWwT6QEHcnRA1UQFnoECCYQAQ&usg=AOvVaw1n3sJNVEj5QbM6yd3WHo36",
                 "التخصص": "القانون العام والخاص"
             },
             {
                 "المجلة": "مجلة الشريعة والقانون",
                 "الناشر": "جامعة الإمارات",
-                "رابط": "https://scholarworks.uaeu.ac.ae/sharia_law/",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://scholarworks.uaeu.ac.ae/sharia_and_law/&ved=2ahUKEwjtlMCLgO6QAxVIOPsDHXevGQMQFnoECCEQAQ&usg=AOvVaw3cMX6GLqdlEkXkpn4s0sPc",
                 "التخصص": "الفقه والقانون المقارن"
             },
             {
                 "المجلة": "مجلة جامعة النجاح للأبحاث",
                 "الناشر": "جامعة النجاح الوطنية",
-                "رابط": "https://scholar.najah.edu/journals/",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.dfaj.net/index.php%3Fr%3Djournals/Journal%26i%3D31&ved=2ahUKEwjJy7qpgO6QAxXhAfsDHSqDChMQFnoECCEQAQ&usg=AOvVaw0HDV_IngGzTgOETDZr7rY2",
                 "التخصص": "الأبحاث العلمية المحكمة"
             }
         ]
@@ -2043,19 +2043,19 @@ def show_academic_resources():
             {
                 "المركز": "مركز الدراسات الاستراتيجية",
                 "الجامعة": "الجامعة الأردنية", 
-                "رابط": "https://css.ju.edu.jo/ar/arabic/",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://jcss.org/&ved=2ahUKEwi7k4vDgO6QAxVgOPsDHYs-JEUQFnoECB8QAQ&usg=AOvVaw0OGAjjEqgcM8V9EVDORl56",
                 "الإصدارات": "تقارير - أوراق سياسات - دراسات"
             },
             {
                 "المركز": "مركز حقوق الإنسان",
                 "الجامعة": "الجامعة الأردنية",
-                "رابط": "https://humanrights.ju.edu.jo/ar/arabic/",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://international.ju.edu.jo/ar/arabic/Lists/Courses/Disp_Course.aspx%3FID%3D432%26dept%3D%2520%25D8%25A7%25D9%2584%25D8%25AA%25D9%2586%25D9%2585%25D9%258A%25D8%25A9%2520%25D8%25A7%25D9%2584%25D8%25AF%25D9%2588%25D9%2584%25D9%258A%25D8%25A9%26prog%3D%25D9%2585%25D8%25A7%25D8%25AC%25D8%25B3%25D8%25AA%25D9%258A%25D8%25B1%2520%25D8%25AD%25D9%2582%25D9%2588%25D9%2582%2520%25D8%25A7%25D9%2584%25D8%25A5%25D9%2586%25D8%25B3%25D8%25A7%25D9%2586%2520%25D9%2588%25D8%25A7%25D9%2584%25D8%25AA%25D9%2586%25D9%2585%25D9%258A%25D8%25A9%2520%25D8%25A7%25D9%2584%25D8%25A5%25D9%2586%25D8%25B3%25D8%25A7%25D9%2586%25D9%258A%25D8%25A9%2520%26deptName%3D%2520%25D8%25A7%25D9%2584%25D8%25AA%25D9%2586%25D9%2585%25D9%258A%25D8%25A9%2520%25D8%25A7%25D9%2584%25D8%25AF%25D9%2588%25D9%2584%25D9%258A%25D8%25A9&ved=2ahUKEwisxJntgO6QAxVJTKQEHY7IFXkQFnoECD4QAQ&usg=AOvVaw3QYRMaBMvid8OuvYYiof_t",
                 "الإصدارات": "دراسات حقوقية - تقارير - أبحاث"
             },
             {
                 "المركز": "مركز دراسات العمل والتنمية",
                 "الجامعة": "الجامعة الهاشمية",
-                "رابط": "https://www.hu.edu.jo/ar/arabic/",
+                "رابط": "https://https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://hu.edu.jo/unitCenter/%3Funitid%3D90000000&ved=2ahUKEwjM9IiGge6QAxV8OfsDHQJoFOUQFnoECB4QAQ&usg=AOvVaw02g8CBlbBp7Zgs4LioQ62X",
                 "الإصدارات": "أبحاث اقتصادية - دراسات سوق العمل"
             }
         ]
@@ -2205,19 +2205,19 @@ def show_international_comparisons():
             {
                 "المنظمة": "منظمة العمل الدولية (ILO)",
                 "الوصف": "المرجع العالمي لمعايير العمل الدولية",
-                "رابط": "https://www.ilo.org/beirut/lang--ar/index.htm",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://mol.gov.jo/AR/List/%25D8%25A7%25D9%2584%25D8%25A7%25D8%25AA%25D9%2581%25D8%25A7%25D9%2582%25D9%258A%25D8%25A7%25D8%25AA_%25D8%25A7%25D9%2584%25D8%25AF%25D9%2588%25D9%2584%25D9%258A%25D8%25A9&ved=2ahUKEwiHwbKuge6QAxXlSKQEHZ5IFxsQFnoECBsQAQ&usg=AOvVaw3FwSpwkc8risJgwdx-S1pE",
                 "المحتوى": "اتفاقيات - توصيات - تقارير"
             },
             {
                 "المنظمة": "البنك الدولي - قسم العمل",
                 "الوصف": "تقارير عن أسواق العمل والتنظيم",
-                "رابط": "https://www.worldbank.org/ar/topic/labor-and-employment",
+                "رابط": "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.albankaldawli.org/ar/topic/jobsandgrowth/overview&ved=2ahUKEwjYp4POge6QAxWDdaQEHcn1Ir4QFnoECBsQAQ&usg=AOvVaw26eJ9YxAME90ZWPx0XjYhg",
                 "المحتوى": "تقارير اقتصادية - دراسات تأثير"
             },
             {
                 "المنظمة": "منظمة التجارة العالمية",
                 "الوصف": "تنظيم التجارة وتأثيرها على العمالة", 
-                "رابط": "https://www.wto.org/arabic/",
+                "رابط": "https://commonslibrary.parliament.uk/research-briefings/cbp-9942/",
                 "المحتوى": "دراسات تأثير العولمة على العمالة"
             }
         ]
