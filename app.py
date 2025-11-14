@@ -307,7 +307,7 @@ def show_home_page():
     st.markdown("""
     <div class="header-with-logo">
         <div class="logo-container">
-            <img src="https://particular-yellow-al3ldejxbx.edgeone.app/file_000000003d007230993c051b37edb825.png" 
+            <img src="https://ibb.co/DHJn4X7F" 
                  class="logo-img" 
                  alt="سيدة العدالة - شعار SiraWork">
         </div>
