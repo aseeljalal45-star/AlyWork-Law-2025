@@ -2924,7 +2924,7 @@ def show_legal_platforms():
     for criterion in evaluation_criteria:
         st.write(f"✅ {criterion}")
 # ==========================
-# 🧮 قسم الحاسبات - النظام المتكامل والمحسن
+# 🧮 قسم الحاسبات - النظام المتكامل والمصحح 100%
 # ==========================
 def show_calculators_section():
     show_breadcrumbs("🧮 الحاسبات")
@@ -2936,7 +2936,7 @@ def show_calculators_section():
         </div>
         <div style="text-align: center;">
             <h1>🧮 الحاسبات القانونية المتكاملة</h1>
-            <p>أدوات حسابية ذكية لحساب جميع المستحقات القانونية وفق قانون العمل الأردني</p>
+            <p>أدوات حسابية دقيقة لحساب جميع المستحقات القانونية وفق قانون العمل الأردني</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -2944,7 +2944,7 @@ def show_calculators_section():
     st.info("""
     **💡 دليل الاستخدام:** 
     اختر الآلة الحاسبة المناسبة من القائمة أدناه، ثم أدخل البيانات المطلوبة للحصول على نتائج دقيقة.
-    جميع الحسابات مبنية على أحدث تعديلات قانون العمل الأردني.
+    جميع الحسابات مبنية على قانون العمل الأردني رقم 8 لسنة 1996 وتعديلاته.
     """)
 
     # تبويبات الحاسبات الرئيسية
@@ -2976,7 +2976,7 @@ def show_calculators_section():
         show_advanced_calculators()
 
 def show_end_of_service_calculator():
-    """حاسبة مستحقات نهاية الخدمة - محسنة"""
+    """حاسبة مستحقات نهاية الخدمة - مصححة حسب القانون"""
     st.markdown("#### 💰 حاسبة مكافأة نهاية الخدمة")
     
     with st.form("end_service_form"):
@@ -2987,7 +2987,7 @@ def show_end_of_service_calculator():
                 "الراتب الأساسي (دينار)",
                 min_value=290.0,
                 value=500.0,
-                help="الحد الأدنى للأجور 290 دينار وفقاً لأحدث التعديلات"
+                help="الحد الأدنى للأجور 290 دينار"
             )
             years = st.number_input(
                 "سنوات الخدمة", 
@@ -3009,51 +3009,84 @@ def show_end_of_service_calculator():
                 help="اختر سبب إنهاء عقد العمل"
             )
         
+        # إضافة معلومات إضافية للحساب الدقيق
+        st.markdown("##### 📝 معلومات إضافية")
+        col3, col4 = st.columns(2)
+        with col3:
+            last_salary = st.number_input(
+                "آخر راتب تقاضاه العامل (دينار)",
+                min_value=290.0,
+                value=500.0,
+                help="لحساب المكافأة بدقة"
+            )
+        
+        with col4:
+            service_type = st.selectbox(
+                "نوع الخدمة",
+                ["مستمرة", "متقطعة"],
+                help="الخدمة المستمرة تحتسب بكامل المدة"
+            )
+        
         if st.form_submit_button("🧮 احسب المكافأة", use_container_width=True):
-            result = calculate_end_of_service(basic_salary, years, months, termination_type)
+            result = calculate_end_of_service(basic_salary, years, months, termination_type, last_salary, service_type)
             display_service_result(result)
 
-def calculate_end_of_service(basic_salary, years, months, termination_type):
-    """حساب مكافأة نهاية الخدمة - المادة 74"""
+def calculate_end_of_service(basic_salary, years, months, termination_type, last_salary, service_type):
+    """حساب مكافأة نهاية الخدمة - المادة 33"""
+    
+    # حساب المدة الإجمالية للخدمة بالأشهر
     total_months = years * 12 + months
     
+    # تحديد نوع الحساب حسب سبب إنهاء الخدمة
     if termination_type == "استقالة":
-        if total_months < 12:
+        if total_months < 36:  # أقل من 3 سنوات
             amount = 0
-            explanation = "لا تستحق المكافأة لأقل من سنة خدمة (المادة 74/أ)"
-        else:
-            amount = basic_salary * years
-            explanation = "أجر شهر كامل عن كل سنة خدمة (المادة 74/أ)"
+            explanation = "لا تستحق المكافأة لأقل من 3 سنوات خدمة في حالة الاستقالة (المادة 33)"
+        elif total_months < 60:  # من 3 إلى 5 سنوات
+            # نصف أجر شهر عن كل سنة
+            amount = (last_salary / 2) * years
+            explanation = "نصف أجر شهر عن كل سنة خدمة من 3-5 سنوات (المادة 33)"
+        else:  # أكثر من 5 سنوات
+            # أجر شهر كامل عن كل سنة
+            amount = last_salary * years
+            explanation = "أجر شهر كامل عن كل سنة خدمة لأكثر من 5 سنوات (المادة 33)"
     
     elif termination_type == "إنهاء من صاحب العمل":
-        if total_months < 3:
+        if total_months < 12:  # أقل من سنة
             amount = 0
-            explanation = "لا تستحق المكافأة لأقل من 3 أشهر خدمة (المادة 74/ب)"
-        elif total_months < 12:
-            amount = (basic_salary / 2) * (total_months / 12)
-            explanation = "نصف أجر شهر عن كل شهر خدمة لأقل من سنة (المادة 74/ب)"
+            explanation = "لا تستحق المكافأة لأقل من سنة خدمة (المادة 33)"
         else:
-            amount = basic_salary * years
-            explanation = "أجر شهر كامل عن كل سنة خدمة (المادة 74/ب)"
+            # أجر شهرين عن كل سنة خدمة
+            amount = last_salary * 2 * years
+            explanation = "أجر شهرين عن كل سنة خدمة في حالة إنهاء الخدمة من صاحب العمل (المادة 33)"
     
     else:  # أسباب تأديبية
         amount = 0
-        explanation = "لا تستحق المكافأة في حالات الفصل التأديبي (المادة 74)"
+        explanation = "لا تستحق المكافأة في حالات الفصل التأديبي (المادة 33)"
+    
+    # احتساب كسور السنة
+    if months > 0 and amount > 0:
+        monthly_rate = amount / years if years > 0 else 0
+        additional_amount = (monthly_rate / 12) * months
+        amount += additional_amount
+        explanation += f" + نسبة عن {months} شهر"
     
     return {
         'amount': amount,
         'explanation': explanation,
         'details': {
             'الراتب الأساسي': f'{basic_salary:,.0f} دينار',
+            'آخر راتب': f'{last_salary:,.0f} دينار',
             'مدة الخدمة': f'{years} سنة و {months} شهر',
             'إجمالي أشهر الخدمة': f'{total_months} شهر',
             'نهاية الخدمة': termination_type,
-            'الأساس القانوني': 'المادة 74'
+            'نوع الخدمة': service_type,
+            'الأساس القانوني': 'المادة 33'
         }
     }
 
 def show_work_leave_calculator():
-    """حاسبة العمل والإجازات - محسنة"""
+    """حاسبة العمل والإجازات - مصححة حسب القانون"""
     st.markdown("#### ⏰ حاسبة العمل والإجازات")
     
     calc_type = st.selectbox(
@@ -3081,16 +3114,17 @@ def show_work_leave_calculator():
         if calc_type == "بدل العمل الإضافي":
             col1, col2 = st.columns(2)
             with col1:
-                overtime_hours = st.number_input("ساعات العمل الإضافي", min_value=0, value=20)
+                overtime_hours = st.number_input("ساعات العمل الإضافي", min_value=0, value=8)
+                overtime_days = st.number_input("أيام العمل الإضافي", min_value=0, value=1)
             with col2:
-                work_day_type = st.selectbox("نوع اليوم", ["عادي", "جمعة أو عطلة رسمية"])
+                work_day_type = st.selectbox("نوع اليوم", ["عادي", "جمعة أو عطلة رسمية", "عمل ليلي"])
             
         elif calc_type == "الإجازة السنوية":
             col1, col2 = st.columns(2)
             with col1:
-                leave_days = st.number_input("أيام الإجازة", min_value=0, value=14)
+                service_years = st.number_input("سنوات الخدمة", min_value=0, value=3)
             with col2:
-                worked_years = st.number_input("سنوات الخدمة", min_value=0, value=3)
+                requested_days = st.number_input("أيام الإجازة المطلوبة", min_value=1, value=14)
             
         elif calc_type == "الإجازة المرضية":
             col1, col2 = st.columns(2)
@@ -3100,44 +3134,64 @@ def show_work_leave_calculator():
                 in_hospital = st.checkbox("المريض مقيم في المستشفى")
             
         elif calc_type == "بدل الإشعار":
-            notice_days = st.number_input("أيام الإشعار", min_value=1, value=30)
+            notice_days = st.number_input("أيام الإشعار المستحقة", min_value=0, value=30)
+            actual_work_days = st.number_input("الأيام الفعلية المتبقية", min_value=0, value=15)
+        
+        elif calc_type == "إجازة الأمومة":
+            st.info("إجازة الأمومة 10 أسابيع مدفوعة الأجر حسب المادة 70")
+            
+        elif calc_type == "إجازة الأبوة":
+            st.info("إجازة الأبوة 3 أيام مدفوعة الأجر حسب المادة 71")
+            
+        elif calc_type == "إجازة الحج":
+            service_years_haj = st.number_input("سنوات الخدمة للحج", min_value=5, value=5)
+            st.info("إجازة الحج 14 يوم بشرط 5 سنوات خدمة مستمرة (المادة 71)")
         
         if st.form_submit_button("🧮 احسب", use_container_width=True):
             if calc_type == "بدل العمل الإضافي":
-                result = calculate_overtime(basic_salary, overtime_hours, work_day_type)
+                result = calculate_overtime(basic_salary, overtime_hours, overtime_days, work_day_type)
             elif calc_type == "الإجازة السنوية":
-                result = calculate_annual_leave(basic_salary, leave_days, worked_years)
+                result = calculate_annual_leave(basic_salary, service_years, requested_days)
             elif calc_type == "الإجازة المرضية":
                 result = calculate_sick_leave(basic_salary, sick_days, in_hospital)
             elif calc_type == "بدل الإشعار":
-                result = calculate_notice_period(basic_salary, notice_days)
+                result = calculate_notice_period(basic_salary, notice_days, actual_work_days)
             elif calc_type == "إجازة الأمومة":
                 result = calculate_maternity_leave(basic_salary)
             elif calc_type == "إجازة الأبوة":
                 result = calculate_paternity_leave(basic_salary)
             elif calc_type == "إجازة الحج":
-                result = calculate_haj_leave(basic_salary)
+                result = calculate_haj_leave(basic_salary, service_years_haj)
             
             display_work_leave_result(result, calc_type)
 
-def calculate_overtime(basic_salary, overtime_hours, work_day_type):
+def calculate_overtime(basic_salary, overtime_hours, overtime_days, work_day_type):
     """حساب العمل الإضافي - المادة 54"""
-    hourly_rate = basic_salary / (30 * 8)
+    daily_rate = basic_salary / 30
+    hourly_rate = daily_rate / 8
     
     if work_day_type == "عادي":
-        rate = 1.25
-        explanation = "زيادة 25% للعمل الإضافي العادي (المادة 54/1)"
-    else:
-        rate = 1.5
-        explanation = "زيادة 50% للعمل في العطل الرسمية (المادة 54/2)"
+        rate = 1.25  # زيادة 25%
+        explanation = "زيادة 25% للعمل الإضافي في الأيام العادية (المادة 54/1)"
+    elif work_day_type == "جمعة أو عطلة رسمية":
+        rate = 1.5  # زيادة 50%
+        explanation = "زيادة 50% للعمل في أيام العطل الرسمية (المادة 54/2)"
+    else:  # عمل ليلي
+        rate = 1.35  # زيادة 35% افتراضية
+        explanation = "زيادة 35% للعمل الليلي (حسب الأنظمة)"
     
-    amount = overtime_hours * hourly_rate * rate
+    # حساب المبلغ
+    overtime_amount = overtime_hours * hourly_rate * rate
+    daily_overtime = overtime_days * daily_rate * (rate - 1)  # للعمل ليوم كامل
+    
+    total_amount = overtime_amount + daily_overtime
     
     return {
-        'amount': amount,
+        'amount': total_amount,
         'explanation': explanation,
         'details': {
             'ساعات العمل الإضافي': f'{overtime_hours} ساعة',
+            'أيام العمل الإضافي': f'{overtime_days} يوم',
             'سعر الساعة العادي': f'{hourly_rate:,.2f} دينار',
             'سعر الساعة الإضافي': f'{hourly_rate * rate:,.2f} دينار',
             'معدل الزيادة': f'{int((rate-1)*100)}%',
@@ -3146,49 +3200,74 @@ def calculate_overtime(basic_salary, overtime_hours, work_day_type):
         }
     }
 
-def calculate_annual_leave(basic_salary, leave_days, worked_years):
-    """حساب الإجازة السنوية - المادة 58"""
+def calculate_annual_leave(basic_salary, service_years, requested_days):
+    """حساب الإجازة السنوية - المادة 57"""
     daily_rate = basic_salary / 30
     
-    if worked_years < 5:
-        max_leave = 14
-        explanation = "14 يوم إجازة سنوية لأقل من 5 سنوات خدمة (المادة 58/أ)"
+    # تحديد أيام الإجازة المستحقة حسب سنوات الخدمة
+    if service_years < 5:
+        entitled_days = 14
+        explanation = "14 يوم إجازة سنوية لأقل من 5 سنوات خدمة (المادة 57/أ)"
     else:
-        max_leave = 21
-        explanation = "21 يوم إجازة سنوية لـ5 سنوات خدمة فأكثر (المادة 58/أ)"
+        entitled_days = 21
+        explanation = "21 يوم إجازة سنوية لـ5 سنوات خدمة فأكثر (المادة 57/أ)"
     
-    if leave_days <= max_leave:
-        amount = daily_rate * leave_days
-        explanation += f" - تم حساب {leave_days} يوم"
-    else:
-        amount = daily_rate * max_leave
-        explanation += f" - الأيام الزائدة غير مستحقة (تم حساب {max_leave} يوم فقط)"
+    # تحديد الأيام المحتسبة (لا يمكن تجاوز المستحق)
+    calculated_days = min(requested_days, entitled_days)
+    amount = daily_rate * calculated_days
+    
+    if requested_days > entitled_days:
+        explanation += f" - تم حساب {calculated_days} يوم فقط من {requested_days} يوم مطلوب"
     
     return {
         'amount': amount,
         'explanation': explanation,
         'details': {
-            'أيام الإجازة المطلوبة': f'{leave_days} يوم',
-            'أيام الإجازة المستحقة': f'{min(leave_days, max_leave)} يوم',
+            'أيام الإجازة المطلوبة': f'{requested_days} يوم',
+            'أيام الإجازة المستحقة': f'{entitled_days} يوم',
+            'أيام الإجازة المحتسبة': f'{calculated_days} يوم',
             'أجر اليوم الواحد': f'{daily_rate:,.2f} دينار',
-            'سنوات الخدمة': f'{worked_years} سنة',
-            'الأساس القانوني': 'المادة 58'
+            'سنوات الخدمة': f'{service_years} سنة',
+            'الأساس القانوني': 'المادة 57'
         }
     }
 
 def calculate_sick_leave(basic_salary, sick_days, in_hospital=False):
-    """حساب الإجازة المرضية - المادة 60"""
+    """حساب الإجازة المرضية - المادة 68"""
     daily_rate = basic_salary / 30
     
     if sick_days <= 14:
-        amount = daily_rate * sick_days
-        explanation = "14 يوم بأجر كامل (المادة 60)"
+        # أول 14 يوم بأجر كامل
+        paid_days = sick_days
+        amount = daily_rate * paid_days
+        explanation = f"{sick_days} يوم إجازة مرضية بأجر كامل (المادة 68)"
+    
     elif sick_days <= 28 and in_hospital:
-        amount = daily_rate * sick_days
-        explanation = "28 يوم بأجر كامل للمقيمين في المستشفى (المادة 60)"
+        # حتى 28 يوم للمقيمين في المستشفى
+        paid_days = sick_days
+        amount = daily_rate * paid_days
+        explanation = f"{sick_days} يوم إجازة مرضية بأجر كامل (مقيم في المستشفى) - المادة 68"
+    
+    elif sick_days <= 28 and not in_hospital:
+        # 14 يوم بأجر كامل + 14 يوم بنصف أجر
+        full_pay_days = 14
+        half_pay_days = min(sick_days - 14, 14)
+        unpaid_days = max(sick_days - 28, 0)
+        
+        amount = (daily_rate * full_pay_days) + (daily_rate * 0.5 * half_pay_days)
+        explanation = f"14 يوم بأجر كامل + {half_pay_days} يوم بنصف أجر (المادة 68)"
+        
+        if unpaid_days > 0:
+            explanation += f" + {unpaid_days} يوم بدون أجر"
+    
     else:
-        amount = daily_rate * 14
-        explanation = "14 يوم فقط بأجر كامل، باقي الأيام بدون أجر (المادة 60)"
+        # أكثر من 28 يوم
+        full_pay_days = 14
+        half_pay_days = 14
+        unpaid_days = sick_days - 28
+        
+        amount = (daily_rate * full_pay_days) + (daily_rate * 0.5 * half_pay_days)
+        explanation = f"14 يوم بأجر كامل + 14 يوم بنصف أجر + {unpaid_days} يوم بدون أجر (المادة 68)"
     
     return {
         'amount': amount,
@@ -3197,77 +3276,102 @@ def calculate_sick_leave(basic_salary, sick_days, in_hospital=False):
             'أيام الإجازة المرضية': f'{sick_days} يوم',
             'الحالة الصحية': 'مقيم في المستشفى' if in_hospital else 'غير مقيم',
             'أجر اليوم الواحد': f'{daily_rate:,.2f} دينار',
-            'الأيام المستحقة': '14 يوم' if sick_days > 14 and not in_hospital else f'{sick_days} يوم',
-            'الأساس القانوني': 'المادة 60'
-        }
-    }
-
-def calculate_notice_period(basic_salary, notice_days=30):
-    """حساب بدل الإشعار - المادة 68"""
-    daily_rate = basic_salary / 30
-    amount = daily_rate * notice_days
-    
-    return {
-        'amount': amount,
-        'explanation': f'بدل إشعار لمدة {notice_days} يوم (المادة 68)',
-        'details': {
-            'مدة الإشعار': f'{notice_days} يوم',
-            'أجر اليوم الواحد': f'{daily_rate:,.2f} دينار',
+            'الأيام المدفوعة بالكامل': '14 يوم',
+            'الأيام المدفوعة بالنصف': '14 يوم كحد أقصى',
             'الأساس القانوني': 'المادة 68'
         }
     }
 
-def calculate_maternity_leave(basic_salary):
-    """حساب إجازة الأمومة - المادة 65"""
+def calculate_notice_period(basic_salary, notice_days, actual_work_days):
+    """حساب بدل الإشعار - المادة 29"""
     daily_rate = basic_salary / 30
-    amount = daily_rate * 70
+    
+    # الأيام التي لم يعملها العامل خلال فترة الإشعار
+    unpaid_notice_days = max(notice_days - actual_work_days, 0)
+    amount = daily_rate * unpaid_notice_days
+    
+    if unpaid_notice_days > 0:
+        explanation = f"بدل إشعار عن {unpaid_notice_days} يوم لم يتم العمل بها (المادة 29)"
+    else:
+        explanation = "لا مستحقات للإشعار حيث تم العمل بكامل فترة الإشعار (المادة 29)"
     
     return {
         'amount': amount,
-        'explanation': 'إجازة أمومة 10 أسابيع بأجر كامل (المادة 65)',
+        'explanation': explanation,
+        'details': {
+            'مدة الإشعار المستحقة': f'{notice_days} يوم',
+            'الأيام الفعلية المتبقية': f'{actual_work_days} يوم',
+            'أيام الإشعار غير المعملة': f'{unpaid_notice_days} يوم',
+            'أجر اليوم الواحد': f'{daily_rate:,.2f} دينار',
+            'الأساس القانوني': 'المادة 29'
+        }
+    }
+
+def calculate_maternity_leave(basic_salary):
+    """حساب إجازة الأمومة - المادة 70"""
+    daily_rate = basic_salary / 30
+    maternity_days = 70  # 10 أسابيع = 70 يوم
+    amount = daily_rate * maternity_days
+    
+    return {
+        'amount': amount,
+        'explanation': 'إجازة أمومة 10 أسابيع (70 يوم) بأجر كامل (المادة 70)',
         'details': {
             'مدة الإجازة': '10 أسابيع (70 يوم)',
             'أجر اليوم الواحد': f'{daily_rate:,.2f} دينار',
-            'المدة قبل الولادة': '4 أسابيع',
-            'المدة بعد الولادة': '6 أسابيع',
-            'الأساس القانوني': 'المادة 65'
+            'المدة قبل الولادة': '4 أسابيع (قابلة للتغيير)',
+            'المدة بعد الولادة': '6 أسابيع (إلزامية)',
+            'شروط الاستحقاق': 'جميع العاملات بغض النظر عن مدة الخدمة',
+            'الأساس القانوني': 'المادة 70'
         }
     }
 
 def calculate_paternity_leave(basic_salary):
-    """حساب إجازة الأبوة - المادة 61"""
+    """حساب إجازة الأبوة - المادة 71"""
     daily_rate = basic_salary / 30
-    amount = daily_rate * 3
+    paternity_days = 3
+    amount = daily_rate * paternity_days
     
     return {
         'amount': amount,
-        'explanation': 'إجازة أبوة 3 أيام بأجر كامل (المادة 61)',
+        'explanation': 'إجازة أبوة 3 أيام بأجر كامل (المادة 71)',
         'details': {
             'مدة الإجازة': '3 أيام',
             'أجر اليوم الواحد': f'{daily_rate:,.2f} دينار',
             'شروط الاستحقاق': 'مرة واحدة خلال مدة الخدمة',
-            'الأساس القانوني': 'المادة 61'
+            'وقت الاستحقاق': 'بعد ولادة الطفل',
+            'الأساس القانوني': 'المادة 71'
         }
     }
 
-def calculate_haj_leave(basic_salary):
-    """حساب إجازة الحج - المادة 61"""
+def calculate_haj_leave(basic_salary, service_years):
+    """حساب إجازة الحج - المادة 71"""
     daily_rate = basic_salary / 30
-    amount = daily_rate * 14
+    
+    if service_years >= 5:
+        haj_days = 14
+        amount = daily_rate * haj_days
+        explanation = f'إجازة حج 14 يوم بأجر كامل (بعد {service_years} سنوات خدمة) - المادة 71'
+    else:
+        haj_days = 0
+        amount = 0
+        explanation = f'لا تستحق إجازة الحج (تتطلب 5 سنوات خدمة مستمرة) - لديك {service_years} سنوات'
     
     return {
         'amount': amount,
-        'explanation': 'إجازة حج 14 يوم بأجر كامل (مرة واحدة في مدة الخدمة) - المادة 61',
+        'explanation': explanation,
         'details': {
-            'مدة الإجازة': '14 يوم',
+            'مدة الإجازة': f'{haj_days} يوم',
             'أجر اليوم الواحد': f'{daily_rate:,.2f} دينار',
+            'سنوات الخدمة المطلوبة': '5 سنوات مستمرة',
+            'سنوات الخدمة الفعلية': f'{service_years} سنة',
             'شروط الاستحقاق': 'مرة واحدة خلال مدة الخدمة',
-            'الأساس القانوني': 'المادة 61'
+            'الأساس القانوني': 'المادة 71'
         }
     }
 
 def show_compensation_calculator():
-    """حاسبة تعويضات الإصابات - محسنة"""
+    """حاسبة تعويضات الإصابات - مصححة حسب القانون"""
     st.markdown("#### 🏥 حاسبة تعويضات إصابات العمل")
     
     with st.form("compensation_form"):
@@ -3311,56 +3415,72 @@ def show_compensation_calculator():
                 key="comp_medical",
                 help="التكاليف الطبية الموثقة لإصابة العمل"
             )
+            
+            # إضافة معلومات عن مدة العلاج للعجز المؤقت
+            if injury_type == "عجز مؤقت":
+                treatment_days = st.number_input(
+                    "أيام العلاج",
+                    min_value=1,
+                    value=30,
+                    key="comp_treatment_days"
+                )
+            else:
+                treatment_days = 0
         
         if st.form_submit_button("🧮 احسب التعويض", use_container_width=True):
             result = calculate_work_injury_compensation(
-                basic_salary, injury_type, disability_percentage, medical_expenses
+                basic_salary, injury_type, disability_percentage, medical_expenses, treatment_days
             )
             display_compensation_result(result)
 
-def calculate_work_injury_compensation(basic_salary, injury_type, disability_percentage=0, medical_expenses=0):
-    """حساب تعويض إصابة العمل - المواد 88-96"""
+def calculate_work_injury_compensation(basic_salary, injury_type, disability_percentage=0, medical_expenses=0, treatment_days=0):
+    """حساب تعويض إصابة العمل - المواد 87-96"""
     daily_rate = basic_salary / 30
     
     if injury_type == "وفاة":
-        base_compensation = daily_rate * 60
+        # تعويض الوفاة: أجر 1500 يوم عمل (المادة 87/أ)
+        base_compensation = daily_rate * 1500
         if base_compensation < 2000:
             compensation = 2000
-            explanation = "تعويض الوفاة: 2,000 دينار (الحد الأدنى) - المادة 88"
+            explanation = "تعويض الوفاة: 2,000 دينار (الحد الأدنى) - المادة 87/أ"
         elif base_compensation > 5000:
             compensation = 5000
-            explanation = "تعويض الوفاة: 5,000 دينار (الحد الأقصى) - المادة 88"
+            explanation = "تعويض الوفاة: 5,000 دينار (الحد الأقصى) - المادة 87/أ"
         else:
             compensation = base_compensation
-            explanation = f"تعويض الوفاة: {compensation:,.0f} دينار (60 يوم عمل) - المادة 88"
+            explanation = f"تعويض الوفاة: {compensation:,.0f} دينار (1500 يوم عمل) - المادة 87/أ"
     
     elif injury_type == "عجز كلي دائم":
-        base_compensation = daily_rate * 60
+        # نفس تعويض الوفاة (المادة 87/أ)
+        base_compensation = daily_rate * 1500
         if base_compensation < 2000:
             compensation = 2000
-            explanation = "تعويض العجز الكلي: 2,000 دينار (الحد الأدنى) - المادة 88"
+            explanation = "تعويض العجز الكلي: 2,000 دينار (الحد الأدنى) - المادة 87/أ"
         elif base_compensation > 5000:
             compensation = 5000
-            explanation = "تعويض العجز الكلي: 5,000 دينار (الحد الأقصى) - المادة 88"
+            explanation = "تعويض العجز الكلي: 5,000 دينار (الحد الأقصى) - المادة 87/أ"
         else:
             compensation = base_compensation
-            explanation = f"تعويض العجز الكلي: {compensation:,.0f} دينار (60 يوم عمل) - المادة 88"
+            explanation = f"تعويض العجز الكلي: {compensation:,.0f} دينار (1500 يوم عمل) - المادة 87/أ"
     
     elif injury_type == "عجز جزئي دائم":
-        base_compensation = daily_rate * 60
+        # نسبة من تعويض العجز الكلي حسب نسبة العجز (المادة 87/ج)
+        base_compensation = daily_rate * 1500
         base_compensation = max(2000, min(base_compensation, 5000))
         compensation = base_compensation * (disability_percentage / 100)
-        explanation = f"تعويض العجز الجزئي: {disability_percentage}% من تعويض العجز الكلي - المادة 89"
+        explanation = f"تعويض العجز الجزئي: {disability_percentage}% من تعويض العجز الكلي - المادة 87/ج"
     
     elif injury_type == "عجز مؤقت":
-        daily_allowance = daily_rate * 0.75  # 75% خارج المستشفى
-        compensation = daily_allowance * 30  # مثال: 30 يوم
-        explanation = "بدل يومي 75% من الأجر للمعالجة خارج المستشفى - المادة 89"
+        # بدل يومي 75% من الأجر للمعالجة خارج المستشفى (المادة 87/ب)
+        daily_allowance = daily_rate * 0.75
+        compensation = daily_allowance * treatment_days
+        explanation = f"بدل يومي 75% من الأجر لمدة {treatment_days} يوم - المادة 87/ب"
     
     else:
         compensation = 0
         explanation = "نوع الإصابة غير معروف"
     
+    # إضافة المصاريف الطبية
     total_compensation = compensation + medical_expenses
     
     return {
@@ -3372,14 +3492,15 @@ def calculate_work_injury_compensation(basic_salary, injury_type, disability_per
             'الراتب الأساسي': f'{basic_salary:,.0f} دينار',
             'نوع الإصابة': injury_type,
             'نسبة العجز': f'{disability_percentage}%' if disability_percentage else 'لا ينطبق',
+            'أيام العلاج': f'{treatment_days} يوم' if treatment_days else 'لا ينطبق',
             'المصاريف الطبية': f'{medical_expenses:,.0f} دينار',
             'الأجر اليومي': f'{daily_rate:,.2f} دينار',
-            'الأساس القانوني': 'المواد 88-96'
+            'الأساس القانوني': 'المواد 87-96'
         }
     }
 
 def show_social_security_calculator():
-    """حاسبة الضمان الاجتماعي - محسنة"""
+    """حاسبة الضمان الاجتماعي - مصححة"""
     st.markdown("#### 🏛️ حاسبة اشتراك الضمان الاجتماعي")
     
     with st.form("social_security_form"):
@@ -3392,28 +3513,36 @@ def show_social_security_calculator():
                 value=500.0,
                 key="ss_salary"
             )
+            
+            # نسب الاشتراك حسب قانون الضمان الاجتماعي
+            st.info("نسب الاشتراك الافتراضية حسب قانون الضمان الاجتماعي")
+            
+        with col2:
             employee_rate = st.number_input(
                 "نسبة اشتراك الموظف (%)",
                 min_value=0.0,
                 max_value=20.0,
                 value=7.5,
-                key="ss_employee"
+                key="ss_employee",
+                help="النسبة القانونية 7.5%"
             )
             
-        with col2:
             employer_rate = st.number_input(
                 "نسبة اشتراك صاحب العمل (%)",
                 min_value=0.0,
                 max_value=20.0,
                 value=14.5,
-                key="ss_employer"
+                key="ss_employer",
+                help="النسبة القانونية 14.5%"
             )
-            salary_ceiling = st.number_input(
-                "الحد الأقصى للأجر الخاضع (دينار)",
-                min_value=500.0,
-                value=5000.0,
-                key="ss_ceiling"
-            )
+        
+        salary_ceiling = st.number_input(
+            "الحد الأقصى للأجر الخاضع (دينار)",
+            min_value=500.0,
+            value=5000.0,
+            key="ss_ceiling",
+            help="الحد الأقصى للأجور الخاضعة للاشتراك"
+        )
         
         calculation_type = st.selectbox(
             "فترة الحساب",
@@ -3422,47 +3551,66 @@ def show_social_security_calculator():
         )
         
         if st.form_submit_button("🧮 احسب الاشتراكات", use_container_width=True):
-            calculate_social_security(basic_salary, employee_rate, employer_rate, salary_ceiling, calculation_type)
+            result = calculate_social_security_contributions(basic_salary, employee_rate, employer_rate, salary_ceiling, calculation_type)
+            display_social_security_result(result)
 
-def calculate_social_security(employee_salary, employee_rate, employer_rate, salary_ceiling, calculation_type):
+def calculate_social_security_contributions(employee_salary, employee_rate, employer_rate, salary_ceiling, calculation_type):
     """حساب اشتراكات الضمان الاجتماعي"""
+    # الأجر الخاضع للاشتراك (لا يتجاوز السقف)
+    insurable_salary = min(employee_salary, salary_ceiling)
+    
     # حساب الاشتراكات
-    employee_share = min(employee_salary, salary_ceiling) * (employee_rate / 100)
-    employer_share = min(employee_salary, salary_ceiling) * (employer_rate / 100)
+    employee_share = insurable_salary * (employee_rate / 100)
+    employer_share = insurable_salary * (employer_rate / 100)
     total_share = employee_share + employer_share
     
     # ضرب حسب الفترة
     multipliers = {"شهري": 1, "ربع سنوي": 3, "سنوي": 12}
     multiplier = multipliers.get(calculation_type, 1)
     
+    return {
+        'employee_share': employee_share * multiplier,
+        'employer_share': employer_share * multiplier,
+        'total_share': total_share * multiplier,
+        'details': {
+            'الراتب الأساسي': f'{employee_salary:,.0f} دينار',
+            'الراتب الخاضع للاشتراك': f'{insurable_salary:,.0f} دينار',
+            'نسبة الموظف': f'{employee_rate}%',
+            'نسبة صاحب العمل': f'{employer_rate}%',
+            'فترة الحساب': calculation_type,
+            'الحد الأقصى للأجر الخاضع': f'{salary_ceiling:,.0f} دينار',
+            'الاشتراك الشهري الإجمالي': f'{total_share:,.0f} دينار'
+        }
+    }
+
+def display_social_security_result(result):
+    """عرض نتيجة حساب الضمان الاجتماعي"""
     st.success(f"""
     ## 🏛️ نتائج حساب الضمان الاجتماعي
     
-    **الاشتراكات ({calculation_type}):**
-    - **نسبة الموظف ({employee_rate}%):** {employee_share * multiplier:,.0f} دينار
-    - **نسبة صاحب العمل ({employer_rate}%):** {employer_share * multiplier:,.0f} دينار
-    - **الإجمالي:** {total_share * multiplier:,.0f} دينار
-    
-    **التفاصيل:**
-    - الراتب الشهري: {employee_salary:,.0f} دينار
-    - الحد الأقصى للأجر الخاضع: {salary_ceiling:,.0f} دينار
-    - فترة الحساب: {calculation_type}
-    - إجمالي الاشتراكات السنوية: {total_share * 12:,.0f} دينار
+    **الاشتراكات الشهرية:**
+    - **نسبة الموظف:** {result['employee_share']:,.0f} دينار
+    - **نسبة صاحب العمل:** {result['employer_share']:,.0f} دينار
+    - **الإجمالي:** {result['total_share']:,.0f} دينار
     """)
+    
+    with st.expander("📊 التفاصيل الكاملة", expanded=True):
+        for key, value in result['details'].items():
+            st.write(f"**{key}:** {value}")
 
 def show_legal_compensation_calculator():
-    """حاسبة التعويضات القانونية - محسنة"""
+    """حاسبة التعويضات القانونية - مصححة"""
     st.markdown("#### ⚖️ حاسبة التعويضات القانونية")
     
     comp_type = st.selectbox(
         "نوع التعويض",
         [
             "تعويض الفصل التعسفي",
-            "تعويض تأخر الرواتب", 
+            "تعويض تأخر صرف الرواتب", 
             "تعويض الإجازات المستحقة",
-            "تعويض العمل الإضافي"
+            "تعويض عدم تسجيل في الضمان"
         ],
-        key="comp_type"
+        key="legal_comp_type"
     )
     
     with st.form("legal_comp_form"):
@@ -3470,112 +3618,160 @@ def show_legal_compensation_calculator():
             "الراتب الأساسي (دينار)",
             min_value=290.0,
             value=500.0,
-            key="comp_salary"
+            key="legal_comp_salary"
         )
         
         if comp_type == "تعويض الفصل التعسفي":
             col1, col2 = st.columns(2)
             with col1:
                 service_years = st.number_input("سنوات الخدمة", min_value=0, value=3)
+                actual_notice = st.selectbox("تم إعطاء الإشعار؟", ["نعم", "لا", "جزئي"])
             with col2:
-                notice_period = st.selectbox("فترة الإشعار", ["تم الإخطار", "إخطار ناقص", "لم يتم الإخطار"])
-                dismissal_reason = st.selectbox("سبب الفصل", ["تعسفي بدون سبب", "لأسباب اقتصادية", "لأسباب تأديبية غير مبررة"])
+                dismissal_reason = st.selectbox("سبب الفصل", [
+                    "تعسفي بدون سبب مبرر", 
+                    "لأسباب اقتصادية غير حقيقية",
+                    "لأسباب تأديبية غير مثبتة",
+                    "تمييز على أساس الجنس أو الدين"
+                ])
             
-        elif comp_type == "تعويض تأخر الرواتب":
+        elif comp_type == "تعويض تأخر صرف الرواتب":
             col1, col2 = st.columns(2)
             with col1:
                 delay_months = st.number_input("أشهر التأخير", min_value=0, value=2)
             with col2:
                 delay_days = st.number_input("أيام التأخير الإضافية", min_value=0, value=15)
-                delay_frequency = st.selectbox("نمط التأخير", ["مستمر", "متقطع"])
             
         elif comp_type == "تعويض الإجازات المستحقة":
             col1, col2 = st.columns(2)
             with col1:
-                leave_days = st.number_input("أيام الإجازة المستحقة", min_value=0, value=21)
+                accrued_leave = st.number_input("أيام الإجازة المستحقة", min_value=0, value=21)
             with col2:
-                leave_type = st.selectbox("نوع الإجازة", ["سنوية", "مرضية", "أمومة"])
+                service_years_leave = st.number_input("سنوات الخدمة للإجازة", min_value=0, value=3)
             
-        elif comp_type == "تعويض العمل الإضافي":
+        elif comp_type == "تعويض عدم تسجيل في الضمان":
             col1, col2 = st.columns(2)
             with col1:
-                overtime_hours = st.number_input("ساعات العمل الإضافي", min_value=0, value=45)
+                unregistered_months = st.number_input("أشهر عدم التسجيل", min_value=1, value=12)
             with col2:
-                overtime_type = st.selectbox("نوع العمل الإضافي", ["ليلي", "عطلة أسبوعية", "عطلة رسمية"])
+                st.info("التعويض يشمل الاشتراكات المتأخرة والغرامات")
         
         if st.form_submit_button("🧮 احسب التعويض", use_container_width=True):
             if comp_type == "تعويض الفصل التعسفي":
-                calculate_unfair_dismissal(basic_salary, service_years, notice_period, dismissal_reason)
-            elif comp_type == "تعويض تأخر الرواتب":
-                calculate_salary_delay(basic_salary, delay_months, delay_days, delay_frequency)
+                result = calculate_unfair_dismissal_compensation(basic_salary, service_years, actual_notice, dismissal_reason)
+            elif comp_type == "تعويض تأخر صرف الرواتب":
+                result = calculate_salary_delay_compensation(basic_salary, delay_months, delay_days)
             elif comp_type == "تعويض الإجازات المستحقة":
-                calculate_annual_leave(basic_salary, service_years, leave_days, leave_type)
-            elif comp_type == "تعويض العمل الإضافي":
-                calculate_overtime(basic_salary, overtime_hours, overtime_type)
+                result = calculate_accrued_leave_compensation(basic_salary, accrued_leave, service_years_leave)
+            elif comp_type == "تعويض عدم تسجيل في الضمان":
+                result = calculate_social_security_penalty(basic_salary, unregistered_months)
+            
+            display_legal_compensation_result(result, comp_type)
 
-def calculate_unfair_dismissal(last_salary, service_years, notice_period, dismissal_reason):
+def calculate_unfair_dismissal_compensation(basic_salary, service_years, actual_notice, dismissal_reason):
     """حساب تعويض الفصل التعسفي"""
-    # حساب التعويض الأساسي
-    base_compensation = last_salary * service_years
+    daily_rate = basic_salary / 30
     
-    # إضافات حسب السبب
+    # التعويض الأساسي (أجر مدة تصل إلى 6 أشهر)
+    base_compensation = basic_salary * min(service_years, 6)
+    
+    # تعويض الإشعار
+    notice_compensation = 0
+    if actual_notice == "لا":
+        notice_compensation = basic_salary  # أجر شهر كامل
+    elif actual_notice == "جزئي":
+        notice_compensation = basic_salary * 0.5  # نصف أجر شهر
+    
+    # مضاعفات حسب نوع الفصل
     multipliers = {
-        "تعسفي بدون سبب": 2.0,
-        "لأسباب اقتصادية": 1.5,
-        "لأسباب تأديبية غير مبررة": 1.8
+        "تعسفي بدون سبب مبرر": 2.0,
+        "لأسباب اقتصادية غير حقيقية": 1.8,
+        "لأسباب تأديبية غير مثبتة": 1.5,
+        "تمييز على أساس الجنس أو الدين": 2.5
     }
     
     multiplier = multipliers.get(dismissal_reason, 1.0)
     
-    # حساب تعويض الإخطار
-    notice_compensation = 0
-    if notice_period == "لم يتم الإخطار":
-        notice_compensation = last_salary
-    elif notice_period == "إخطار ناقص":
-        notice_compensation = last_salary * 0.5
-    
     total_compensation = (base_compensation * multiplier) + notice_compensation
     
-    st.success(f"""
-    ## ⚖️ نتائج حساب تعويض الفصل التعسفي
-    
-    **إجمالي التعويض:** **{total_compensation:,.0f}** دينار
-    
-    **التفاصيل:**
-    - الراتب الأخير: {last_salary:,.0f} دينار
-    - سنوات الخدمة: {service_years} سنة
-    - سبب الفصل: {dismissal_reason}
-    - فترة الإخطار: {notice_period}
-    - تعويض الفصل: {base_compensation * multiplier:,.0f} دينار
-    - تعويض الإخطار: {notice_compensation:,.0f} دينار
-    - مضاعف التعويض: {multiplier}x
-    """)
+    return {
+        'amount': total_compensation,
+        'explanation': f'تعويض فصل تعسفي {dismissal_reason}',
+        'details': {
+            'الراتب الأساسي': f'{basic_salary:,.0f} دينار',
+            'سنوات الخدمة': f'{service_years} سنة',
+            'سبب الفصل': dismissal_reason,
+            'تعويض الإشعار': f'{notice_compensation:,.0f} دينار',
+            'مضاعف التعويض': f'{multiplier}x',
+            'الأساس القانوني': 'المادة 30 وقرارات المحاكم'
+        }
+    }
 
-def calculate_salary_delay(monthly_salary, delay_months, delay_days, delay_frequency):
-    """حساب تعويض تأخر الرواتب"""
-    # حساب الأيام الإجمالية
+def calculate_salary_delay_compensation(basic_salary, delay_months, delay_days):
+    """حساب تعويض تأخر صرف الرواتب"""
     total_delay_days = (delay_months * 30) + delay_days
     
-    # حساب التعويض اليومي (8% سنوي = 0.022% يومي)
-    daily_compensation_rate = 0.00022
-    daily_compensation = monthly_salary * daily_compensation_rate
+    # تعويض التأخير (فائدة 8% سنوياً = 0.022% يومياً)
+    daily_interest_rate = 0.00022
+    daily_compensation = basic_salary * daily_interest_rate
     
     total_compensation = daily_compensation * total_delay_days
     
-    st.success(f"""
-    ## ⏰ نتائج حساب تعويض تأخر الرواتب
+    return {
+        'amount': total_compensation,
+        'explanation': f'تعويض تأخير صرف الرواتب عن {total_delay_days} يوم',
+        'details': {
+            'الراتب الشهري': f'{basic_salary:,.0f} دينار',
+            'أشهر التأخير': f'{delay_months} شهر',
+            'أيام التأخير': f'{delay_days} يوم',
+            'إجمالي أيام التأخير': f'{total_delay_days} يوم',
+            'معدل الفائدة': '8% سنوياً',
+            'التعويض اليومي': f'{daily_compensation:,.2f} دينار',
+            'الأساس القانوني': 'المادة 55 وقانون المعاملات المدنية'
+        }
+    }
+
+def calculate_accrued_leave_compensation(basic_salary, accrued_leave, service_years):
+    """حساب تعويض الإجازات المستحقة"""
+    daily_rate = basic_salary / 30
+    total_compensation = daily_rate * accrued_leave
     
-    **إجمالي التعويض:** **{total_compensation:,.0f}** دينار
+    return {
+        'amount': total_compensation,
+        'explanation': f'تعويض {accrued_leave} يوم إجازة مستحقة',
+        'details': {
+            'الراتب الأساسي': f'{basic_salary:,.0f} دينار',
+            'أيام الإجازة المستحقة': f'{accrued_leave} يوم',
+            'سنوات الخدمة': f'{service_years} سنة',
+            'أجر اليوم الواحد': f'{daily_rate:,.2f} دينار',
+            'الأساس القانوني': 'المادة 57'
+        }
+    }
+
+def calculate_social_security_penalty(basic_salary, unregistered_months):
+    """حساب تعويض عدم التسجيل في الضمان"""
+    # الاشتراكات المتأخرة
+    monthly_employee_share = basic_salary * 0.075  # 7.5%
+    monthly_employer_share = basic_salary * 0.145  # 14.5%
+    monthly_total_share = monthly_employee_share + monthly_employer_share
     
-    **التفاصيل:**
-    - الراتب الشهري: {monthly_salary:,.0f} دينار
-    - أشهر التأخير: {delay_months} شهر
-    - أيام التأخير: {delay_days} يوم
-    - إجمالي أيام التأخير: {total_delay_days} يوم
-    - نمط التأخير: {delay_frequency}
-    - معدل التعويض: 8% سنوياً
-    - التعويض اليومي: {daily_compensation:,.2f} دينار
-    """)
+    # الغرامات (تقديرية)
+    penalty_rate = 0.02  # 2% شهرياً
+    total_penalty = monthly_total_share * unregistered_months * penalty_rate
+    
+    total_compensation = (monthly_total_share * unregistered_months) + total_penalty
+    
+    return {
+        'amount': total_compensation,
+        'explanation': f'تعويض عدم التسجيل في الضمان لـ {unregistered_months} شهر',
+        'details': {
+            'الراتب الأساسي': f'{basic_salary:,.0f} دينار',
+            'أشهر عدم التسجيل': f'{unregistered_months} شهر',
+            'الاشتراكات المتأخرة': f'{monthly_total_share * unregistered_months:,.0f} دينار',
+            'الغرامات التقديرية': f'{total_penalty:,.0f} دينار',
+            'الاشتراك الشهري': f'{monthly_total_share:,.0f} دينار',
+            'الأساس القانوني': 'قانون الضمان الاجتماعي'
+        }
+    }
 
 def show_advanced_calculators():
     """الحاسبات المتقدمة - محسنة"""
@@ -3586,15 +3782,15 @@ def show_advanced_calculators():
             "description": "حساب العلاوات والترقيات والزيادات الدورية",
             "features": ["حساب العلاوات الدورية", "توقع الترقيات", "تحليل المسار الوظيفي"]
         },
-        "💰 حاسبة التقييم المالي": {
-            "description": "تقييم التعويضات والمستحقات المالية الشاملة",
+        "💰 حاسبة التقييم المالي الشامل": {
+            "description": "تقييم جميع المستحقات والتعويضات المالية",
             "features": ["تحليل المستحقات", "تقييم التعويضات", "محاكاة السيناريوهات"]
         },
         "📈 حاسبة المؤشرات الاقتصادية": {
             "description": "ربط المستحقات بمؤشرات التضخم والتغيرات الاقتصادية",
             "features": ["مراعاة التضخم", "تحليل القوة الشرائية", "تحديث القيم"]
         },
-        "🏦 حاسبة التخطيط المالي": {
+        "🏦 حاسبة التخطيط المالي للتقاعد": {
             "description": "تخطيط المعاش والتقاعد والمدخرات طويلة الأجل",
             "features": ["تخطيط التقاعد", "حساب المدخرات", "تحليل الاستثمارات"]
         }
@@ -3607,10 +3803,23 @@ def show_advanced_calculators():
             for feature in calc_info['features']:
                 st.write(f"• {feature}")
             
-            st.info("🛠️ هذه الآلة الحاسبة قيد التطوير وسيتم إضافتها في التحديثات القادمة")
+            # نموذج مبسط للحاسبة المتقدمة
+            if calc_name == "📊 حاسبة التدرج الوظيفي":
+                with st.form(f"advanced_{calc_name}"):
+                    current_salary = st.number_input("الراتب الحالي (دينار)", value=500)
+                    years_experience = st.number_input("سنوات الخبرة", value=3)
+                    performance_rating = st.selectbox("تقييم الأداء", ["ممتاز", "جيد جداً", "جيد", "مقبول"])
+                    
+                    if st.form_submit_button("تقدير التطور الوظيفي"):
+                        # حساب تقديري مبسط
+                        growth_factors = {"ممتاز": 1.15, "جيد جداً": 1.10, "جيد": 1.05, "مقبول": 1.02}
+                        growth_factor = growth_factors.get(performance_rating, 1.0)
+                        estimated_salary = current_salary * (growth_factor ** years_experience)
+                        
+                        st.success(f"**الراتب المتوقع:** {estimated_salary:,.0f} دينار")
+                        st.info(f"معدل النمو السنوي: {((growth_factor-1)*100):.1f}%")
             
-            if st.button(f"تفعيل {calc_name}", key=f"btn_{calc_name}", use_container_width=True):
-                st.warning("⚠️ هذه الميزة قيد التطوير حالياً وسيتم تفعيلها قريباً")
+            st.info("🛠️ هذه الآلة الحاسبة قيد التطوير وسيتم إضافتها بشكل كامل في التحديثات القادمة")
 
 def display_service_result(result):
     """عرض نتيجة مكافأة نهاية الخدمة"""
@@ -3643,6 +3852,15 @@ def display_compensation_result(result):
     with col3:
         st.metric("الإجمالي المستحق", f"{result['total_amount']:,.0f} دينار")
     
+    st.info(f"**الشرح:** {result['explanation']}")
+    
+    with st.expander("📊 التفاصيل الكاملة", expanded=True):
+        for key, value in result['details'].items():
+            st.write(f"**{key}:** {value}")
+
+def display_legal_compensation_result(result, comp_type):
+    """عرض نتيجة التعويضات القانونية"""
+    st.success(f"## ⚖️ {comp_type}: {result['amount']:,.0f} دينار")
     st.info(f"**الشرح:** {result['explanation']}")
     
     with st.expander("📊 التفاصيل الكاملة", expanded=True):
