@@ -41,7 +41,7 @@ def load_custom_css():
         color: #000000 !important;
     }
     
-    /* تصميم الهيدر مع الشعار */
+    /* تصميم الهيدر مع الشعار - خلفية بيضاء */
     .header-with-logo {
         display: flex;
         align-items: center;
@@ -54,12 +54,12 @@ def load_custom_css():
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #ffffff !important; /* خلفية بيضاء */
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border: 3px solid white;
+        border: 3px solid #e5e7eb;
         overflow: hidden;
     }
     .logo-img {
@@ -83,73 +83,6 @@ def load_custom_css():
         font-weight: 400;
         line-height: 1.4;
         text-align: center;
-    }
-    
-    /* تحسينات متقدمة للتبويبات - محسنة للقراءة */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 4px;
-        background-color: #f8fafc;
-        padding: 4px;
-        border-radius: 12px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        height: 60px;
-        white-space: pre-wrap;
-        border-radius: 8px;
-        gap: 6px;
-        padding: 12px 16px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        background-color: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        color: #475569;
-        transition: all 0.3s ease;
-    }
-    
-    .stTabs [data-baseweb="tab"]:hover {
-        background-color: #e2e8f0;
-        color: #334155;
-        border-color: #cbd5e1;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background-color: #1E3A8A !important;
-        color: white !important;
-        border-color: #1E3A8A !important;
-        box-shadow: 0 2px 8px rgba(30, 58, 138, 0.2);
-    }
-    
-    .stTabs [data-baseweb="tab-highlight"] {
-        background-color: transparent;
-    }
-    
-    /* تحسين محتوى التبويبات */
-    .tab-content {
-        padding: 1.5rem 0;
-    }
-    
-    .tab-content h3, .tab-content h4 {
-        color: #1E3A8A;
-        margin-bottom: 1rem;
-    }
-    
-    .tab-content p {
-        line-height: 1.6;
-        color: #374151;
-        font-size: 1rem;
-    }
-    
-    .tab-content .stExpander {
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        margin: 0.5rem 0;
-    }
-    
-    .tab-content .stExpander summary {
-        font-weight: 600;
-        color: #1E3A8A;
-        padding: 1rem;
     }
     
     /* تنويه أصغر حجماً */
@@ -240,14 +173,6 @@ def load_custom_css():
             padding: 0.6rem !important;
             margin: 0.2rem 0 !important;
         }
-        
-        /* تحسين التبويبات للجوال */
-        .stTabs [data-baseweb="tab"] {
-            height: auto;
-            min-height: 50px;
-            padding: 8px 12px;
-            font-size: 0.85rem;
-        }
     }
     
     /* تحسينات للشاشات الكبيرة */
@@ -276,32 +201,18 @@ def load_custom_css():
     h1, h2, h3, h4, h5, h6 {
         font-weight: 600 !important;
         line-height: 1.3 !important;
-        color: #1E3A8A !important;
     }
     
-    /* تحسين النص العام */
-    p, li, span, div {
-        color: #374151 !important;
-        line-height: 1.6 !important;
+    /* تحسينات عامة للتبويبات - العودة للتنسيق الأصلي */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
     }
-    
-    /* تحسين الأزرار */
-    .stButton button {
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-    }
-    
-    /* تحسين حقول الإدخال */
-    .stTextInput input, .stNumberInput input, .stSelectbox select {
-        border-radius: 8px !important;
-        border: 1px solid #d1d5db !important;
-    }
-    
-    /* تحسين التوسعات */
-    .streamlit-expanderHeader {
-        font-weight: 600 !important;
-        color: #1E3A8A !important;
-        border-bottom: 1px solid #e5e7eb !important;
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        border-radius: 8px 8px 0px 0px;
+        gap: 8px;
+        padding: 8px 16px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -366,7 +277,7 @@ def show_breadcrumbs(section_name):
 # 🏠 الصفحة الرئيسية
 # ==========================
 def show_home_page():
-    # عنوان المنصة مع الشعار الجديد
+    # عنوان المنصة مع الشعار الجديد بخلفية بيضاء
     st.markdown("""
     <div class="header-with-logo">
         <div class="logo-container">
