@@ -173,6 +173,32 @@ def load_custom_css():
             padding: 0.6rem !important;
             margin: 0.2rem 0 !important;
         }
+        
+        /* تحسينات التبويبات للجوال */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 2px !important;
+            flex-wrap: wrap !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            height: auto !important;
+            min-height: 40px !important;
+            white-space: normal !important;
+            font-size: 0.75rem !important;
+            padding: 6px 8px !important;
+            line-height: 1.2 !important;
+            margin: 1px !important;
+            flex: 1 1 auto !important;
+            min-width: 70px !important;
+            text-align: center !important;
+        }
+        
+        .stTabs [data-baseweb="tab"] > div {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+        }
     }
     
     /* تحسينات للشاشات الكبيرة */
@@ -203,16 +229,16 @@ def load_custom_css():
         line-height: 1.3 !important;
     }
     
-    /* تحسينات عامة للتبويبات - العودة للتنسيق الأصلي */
+    /* تحسينات عامة للتبويبات لجميع الشاشات */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 4px;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        white-space: pre-wrap;
-        border-radius: 8px 8px 0px 0px;
-        gap: 8px;
-        padding: 8px 16px;
+        height: auto;
+        min-height: 45px;
+        white-space: normal;
+        line-height: 1.3;
+        padding: 8px 12px;
     }
     </style>
     """, unsafe_allow_html=True)
