@@ -34,14 +34,64 @@ st.set_page_config(
 # ==========================
 def load_custom_css():
     st.markdown("""
-    <style>
-    /* إجبار الوضع الفاتح دائماً */
-    .stApp {
-        background-color: #ffffff !important;
-        color: #000000 !important;
+    <script>
+    // كشف الوضع المظلم تلقائياً
+    function detectColorScheme() {
+        var theme = "light";
+        
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            theme = "dark";
+        }
+        
+        document.documentElement.setAttribute('data-theme', theme);
     }
     
-    /* تصميم الهيدر مع الشعار - خلفية بيضاء */
+    // تشغيل الكشف عند تحميل الصفحة وعند التغيير
+    detectColorScheme();
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(detectColorScheme);
+    </script>
+    
+    <style>
+    /* إجبار الألوان للوضعين الفاتح والمظلم */
+    :root {
+        --primary-color: #1E3A8A;
+        --secondary-color: #4B5563;
+        --background-color: #ffffff;
+        --text-color: #000000;
+        --card-background: #ffffff;
+        --card-border: #eaeaea;
+        --warning-bg: #FEF3CD;
+        --warning-border: #F59E0B;
+        --feature-bg: #f8fafc;
+        --footer-color: #6B7280;
+        --success-bg: #f0fdf4;
+        --success-border: #22c55e;
+        --info-bg: #f0f9ff;
+        --info-border: #0ea5e9;
+    }
+    
+    [data-theme="dark"] {
+        --background-color: #0f0f0f;
+        --text-color: #ffffff;
+        --card-background: #1e1e1e;
+        --card-border: #333333;
+        --warning-bg: #332c0a;
+        --warning-border: #F59E0B;
+        --feature-bg: #2d3748;
+        --footer-color: #9ca3af;
+        --success-bg: #052e16;
+        --success-border: #22c55e;
+        --info-bg: #0c4a6e;
+        --info-border: #0ea5e9;
+    }
+    
+    /* تطبيق المتغيرات */
+    .stApp {
+        background-color: var(--background-color) !important;
+        color: var(--text-color) !important;
+    }
+    
+    /* تصميم الهيدر مع الشعار */
     .header-with-logo {
         display: flex;
         align-items: center;
@@ -54,12 +104,12 @@ def load_custom_css():
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: #ffffff !important; /* خلفية بيضاء */
+        background: var(--card-background) !important;
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border: 3px solid #e5e7eb;
+        border: 3px solid var(--card-border);
         overflow: hidden;
     }
     .logo-img {
@@ -71,75 +121,139 @@ def load_custom_css():
     .platform-name-with-logo {
         font-size: 2.8rem;
         font-weight: 800;
-        color: #1E3A8A;
+        color: var(--primary-color);
         margin-bottom: 0.5rem;
         line-height: 1.2;
         text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .platform-subtitle {
         font-size: 1.3rem;
-        color: #4B5563;
+        color: var(--secondary-color);
         margin-bottom: 1.5rem;
         font-weight: 400;
         line-height: 1.4;
         text-align: center;
     }
     
-    /* تنويه أصغر حجماً */
+    /* تنويه */
     .warning-box {
-        background: #FEF3CD;
-        border: 1px solid #F59E0B;
+        background: var(--warning-bg);
+        border: 1px solid var(--warning-border);
         border-radius: 10px;
         padding: 1rem;
         margin: 1rem 0;
         font-size: 0.9rem;
+        color: var(--text-color);
     }
     .warning-box h4 {
         margin: 0 0 0.5rem 0;
         font-size: 1rem;
-        color: #B45309;
-    }
-    .warning-box p {
-        margin: 0;
-        font-size: 0.9rem;
-        line-height: 1.4;
+        color: var(--warning-border);
     }
     
     .section-card { 
-        background: white; 
+        background: var(--card-background); 
         padding: 1.5rem; 
         border-radius: 12px; 
         box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
         margin: 1rem 0; 
-        border: 1px solid #eaeaea;
+        border: 1px solid var(--card-border);
+        color: var(--text-color);
     }
     .feature-item {
-        background: #f8fafc;
+        background: var(--feature-bg);
         padding: 0.8rem;
         border-radius: 8px;
         margin: 0.3rem 0;
-        border-right: 4px solid #2563EB;
+        border-right: 4px solid var(--primary-color);
         transition: all 0.3s ease;
+        color: var(--text-color);
     }
     .feature-item:hover {
-        background: #f0f4f8;
+        background: var(--feature-bg);
         transform: translateX(4px);
     }
     .footer {
         text-align: center;
         padding: 1.5rem;
-        color: #6B7280;
+        color: var(--footer-color);
         margin-top: 2rem;
-        border-top: 1px solid #E5E7EB;
+        border-top: 1px solid var(--card-border);
         font-size: 0.9rem;
     }
     .privacy-highlight {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
+        background: var(--warning-bg);
+        border: 1px solid var(--warning-border);
         border-radius: 8px;
         padding: 0.8rem;
         margin: 0.3rem 0;
         font-size: 0.9rem;
+        color: var(--text-color);
+    }
+    
+    /* تحسين مكونات Streamlit للوضع المظلم */
+    .stTabs [data-baseweb="tab"] {
+        background-color: var(--card-background) !important;
+        color: var(--text-color) !important;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: var(--feature-bg) !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+    }
+    
+    /* تحسينات للأزرار */
+    .stButton button {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+        border: 1px solid var(--primary-color) !important;
+    }
+    
+    .stButton button:hover {
+        background-color: var(--secondary-color) !important;
+        border-color: var(--secondary-color) !important;
+    }
+    
+    /* تحسينات لحقول الإدخال */
+    .stTextInput input, .stNumberInput input, .stSelectbox select {
+        background-color: var(--card-background) !important;
+        color: var(--text-color) !important;
+        border: 1px solid var(--card-border) !important;
+    }
+    
+    /* تحسينات للنتائج */
+    .stSuccess {
+        background-color: var(--success-bg) !important;
+        color: var(--text-color) !important;
+        border: 1px solid var(--success-border) !important;
+    }
+    
+    .stInfo {
+        background-color: var(--info-bg) !important;
+        color: var(--text-color) !important;
+        border: 1px solid var(--info-border) !important;
+    }
+    
+    .stWarning {
+        background-color: var(--warning-bg) !important;
+        color: var(--text-color) !important;
+        border: 1px solid var(--warning-border) !important;
+    }
+    
+    .stError {
+        background-color: #fed7d7 !important;
+        color: #c53030 !important;
+        border: 1px solid #fc8181 !important;
+    }
+    
+    [data-theme="dark"] .stError {
+        background-color: #742a2a !important;
+        color: #fc8181 !important;
+        border: 1px solid #fc8181 !important;
     }
     
     /* تحسينات متقدمة للجوال */
@@ -174,7 +288,6 @@ def load_custom_css():
             margin: 0.2rem 0 !important;
         }
         
-        /* تحسينات التبويبات للجوال */
         .stTabs [data-baseweb="tab-list"] {
             gap: 2px !important;
             flex-wrap: wrap !important;
@@ -192,13 +305,6 @@ def load_custom_css():
             min-width: 70px !important;
             text-align: center !important;
         }
-        
-        .stTabs [data-baseweb="tab"] > div {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            text-align: center !important;
-        }
     }
     
     /* تحسينات للشاشات الكبيرة */
@@ -211,27 +317,23 @@ def load_custom_css():
         }
     }
     
-    /* إزالة أي تأثيرات للوضع المظلم */
-    [data-theme="dark"] {
-        display: none !important;
-    }
-    
-    /* إجبار الألوان الفاتحة */
+    /* تحسين الخطوط والعناوين */
     body {
-        background-color: #ffffff !important;
-        color: #000000 !important;
+        background-color: var(--background-color) !important;
+        color: var(--text-color) !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* تحسين الخطوط والعناوين */
     h1, h2, h3, h4, h5, h6 {
         font-weight: 600 !important;
         line-height: 1.3 !important;
+        color: var(--text-color) !important;
     }
     
     /* تحسينات عامة للتبويبات لجميع الشاشات */
     .stTabs [data-baseweb="tab-list"] {
         gap: 4px;
+        background-color: var(--card-background) !important;
     }
     .stTabs [data-baseweb="tab"] {
         height: auto;
@@ -239,6 +341,48 @@ def load_custom_css():
         white-space: normal;
         line-height: 1.3;
         padding: 8px 12px;
+        background-color: var(--card-background) !important;
+        color: var(--text-color) !important;
+    }
+    
+    /* تحسينات للخانات التفاعلية */
+    .stExpander {
+        background-color: var(--card-background) !important;
+        border: 1px solid var(--card-border) !important;
+    }
+    
+    .stExpander > div {
+        background-color: var(--card-background) !important;
+    }
+    
+    /* إصلاح ألوان النص في جميع العناصر */
+    p, div, span, li {
+        color: var(--text-color) !important;
+    }
+    
+    /* تحسينات للشريط الجانبي */
+    .stSidebar {
+        background-color: var(--card-background) !important;
+    }
+    
+    .css-1d391kg, .css-1lcbmhc {
+        background-color: var(--card-background) !important;
+    }
+
+    /* تحسينات إضافية للوضع المظلم */
+    [data-theme="dark"] .stSelectbox div[data-baseweb="select"] {
+        background-color: var(--card-background) !important;
+        color: var(--text-color) !important;
+    }
+    
+    [data-theme="dark"] .stNumberInput input {
+        background-color: var(--card-background) !important;
+        color: var(--text-color) !important;
+    }
+    
+    [data-theme="dark"] .stTextInput input {
+        background-color: var(--card-background) !important;
+        color: var(--text-color) !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -282,7 +426,7 @@ def initialize_session_state():
         'current_section': None,
         'last_calculation': None,
         'user_preferences': {
-            'theme': 'light',
+            'theme': 'auto',  # auto, light, dark
             'language': 'ar',
             'notifications': True
         }
@@ -294,10 +438,40 @@ def initialize_session_state():
 
 def show_breadcrumbs(section_name):
     st.markdown(f"""
-    <div style='background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 20px;'>
+    <div style='background: var(--feature-bg); padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid var(--card-border);'>
         <strong>المسار:</strong> الرئيسية ▶ {section_name}
     </div>
     """, unsafe_allow_html=True)
+
+def apply_theme_preferences():
+    """تطبيق تفضيلات المظهر من إعدادات المستخدم"""
+    theme = st.session_state.user_preferences.get('theme', 'auto')
+    
+    if theme == 'light':
+        st.markdown("""
+        <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --card-background: #ffffff;
+            --card-border: #eaeaea;
+            --feature-bg: #f8fafc;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    elif theme == 'dark':
+        st.markdown("""
+        <style>
+        :root {
+            --background-color: #0f0f0f;
+            --text-color: #ffffff;
+            --card-background: #1e1e1e;
+            --card-border: #333333;
+            --feature-bg: #2d3748;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    # إذا كان auto نترك CSS يكتشف تلقائياً
 
 # ==========================
 # 🏠 الصفحة الرئيسية
@@ -307,7 +481,7 @@ def show_home_page():
     st.markdown("""
     <div class="header-with-logo">
         <div class="logo-container">
-            <img src="https://ibb.co/DHJn4X7F" 
+            <img src="https://particular-yellow-al3ldejxbx.edgeone.app/file_000000003d007230993c051b37edb825.png" 
                  class="logo-img" 
                  alt="سيدة العدالة - شعار SiraWork">
         </div>
