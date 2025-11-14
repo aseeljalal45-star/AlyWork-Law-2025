@@ -34,64 +34,14 @@ st.set_page_config(
 # ==========================
 def load_custom_css():
     st.markdown("""
-    <script>
-    // كشف الوضع المظلم تلقائياً
-    function detectColorScheme() {
-        var theme = "light";
-        
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            theme = "dark";
-        }
-        
-        document.documentElement.setAttribute('data-theme', theme);
-    }
-    
-    // تشغيل الكشف عند تحميل الصفحة وعند التغيير
-    detectColorScheme();
-    window.matchMedia('(prefers-color-scheme: dark)').addListener(detectColorScheme);
-    </script>
-    
     <style>
-    /* إجبار الألوان للوضعين الفاتح والمظلم */
-    :root {
-        --primary-color: #1E3A8A;
-        --secondary-color: #4B5563;
-        --background-color: #ffffff;
-        --text-color: #000000;
-        --card-background: #ffffff;
-        --card-border: #eaeaea;
-        --warning-bg: #FEF3CD;
-        --warning-border: #F59E0B;
-        --feature-bg: #f8fafc;
-        --footer-color: #6B7280;
-        --success-bg: #f0fdf4;
-        --success-border: #22c55e;
-        --info-bg: #f0f9ff;
-        --info-border: #0ea5e9;
-    }
-    
-    [data-theme="dark"] {
-        --background-color: #0f0f0f;
-        --text-color: #ffffff;
-        --card-background: #1e1e1e;
-        --card-border: #333333;
-        --warning-bg: #332c0a;
-        --warning-border: #F59E0B;
-        --feature-bg: #2d3748;
-        --footer-color: #9ca3af;
-        --success-bg: #052e16;
-        --success-border: #22c55e;
-        --info-bg: #0c4a6e;
-        --info-border: #0ea5e9;
-    }
-    
-    /* تطبيق المتغيرات */
+    /* إجبار الوضع الفاتح دائماً */
     .stApp {
-        background-color: var(--background-color) !important;
-        color: var(--text-color) !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
     }
     
-    /* تصميم الهيدر مع الشعار */
+    /* تصميم الهيدر مع الشعار - خلفية بيضاء */
     .header-with-logo {
         display: flex;
         align-items: center;
@@ -104,12 +54,12 @@ def load_custom_css():
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: var(--card-background) !important;
+        background: #ffffff !important; /* خلفية بيضاء */
         display: flex;
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border: 3px solid var(--card-border);
+        border: 3px solid #e5e7eb;
         overflow: hidden;
     }
     .logo-img {
@@ -121,139 +71,75 @@ def load_custom_css():
     .platform-name-with-logo {
         font-size: 2.8rem;
         font-weight: 800;
-        color: var(--primary-color);
+        color: #1E3A8A;
         margin-bottom: 0.5rem;
         line-height: 1.2;
         text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .platform-subtitle {
         font-size: 1.3rem;
-        color: var(--secondary-color);
+        color: #4B5563;
         margin-bottom: 1.5rem;
         font-weight: 400;
         line-height: 1.4;
         text-align: center;
     }
     
-    /* تنويه */
+    /* تنويه أصغر حجماً */
     .warning-box {
-        background: var(--warning-bg);
-        border: 1px solid var(--warning-border);
+        background: #FEF3CD;
+        border: 1px solid #F59E0B;
         border-radius: 10px;
         padding: 1rem;
         margin: 1rem 0;
         font-size: 0.9rem;
-        color: var(--text-color);
     }
     .warning-box h4 {
         margin: 0 0 0.5rem 0;
         font-size: 1rem;
-        color: var(--warning-border);
+        color: #B45309;
+    }
+    .warning-box p {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
     }
     
     .section-card { 
-        background: var(--card-background); 
+        background: white; 
         padding: 1.5rem; 
         border-radius: 12px; 
         box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
         margin: 1rem 0; 
-        border: 1px solid var(--card-border);
-        color: var(--text-color);
+        border: 1px solid #eaeaea;
     }
     .feature-item {
-        background: var(--feature-bg);
+        background: #f8fafc;
         padding: 0.8rem;
         border-radius: 8px;
         margin: 0.3rem 0;
-        border-right: 4px solid var(--primary-color);
+        border-right: 4px solid #2563EB;
         transition: all 0.3s ease;
-        color: var(--text-color);
     }
     .feature-item:hover {
-        background: var(--feature-bg);
+        background: #f0f4f8;
         transform: translateX(4px);
     }
     .footer {
         text-align: center;
         padding: 1.5rem;
-        color: var(--footer-color);
+        color: #6B7280;
         margin-top: 2rem;
-        border-top: 1px solid var(--card-border);
+        border-top: 1px solid #E5E7EB;
         font-size: 0.9rem;
     }
     .privacy-highlight {
-        background: var(--warning-bg);
-        border: 1px solid var(--warning-border);
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
         border-radius: 8px;
         padding: 0.8rem;
         margin: 0.3rem 0;
         font-size: 0.9rem;
-        color: var(--text-color);
-    }
-    
-    /* تحسين مكونات Streamlit للوضع المظلم */
-    .stTabs [data-baseweb="tab"] {
-        background-color: var(--card-background) !important;
-        color: var(--text-color) !important;
-    }
-    
-    .stTabs [data-baseweb="tab"]:hover {
-        background-color: var(--feature-bg) !important;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background-color: var(--primary-color) !important;
-        color: white !important;
-    }
-    
-    /* تحسينات للأزرار */
-    .stButton button {
-        background-color: var(--primary-color) !important;
-        color: white !important;
-        border: 1px solid var(--primary-color) !important;
-    }
-    
-    .stButton button:hover {
-        background-color: var(--secondary-color) !important;
-        border-color: var(--secondary-color) !important;
-    }
-    
-    /* تحسينات لحقول الإدخال */
-    .stTextInput input, .stNumberInput input, .stSelectbox select {
-        background-color: var(--card-background) !important;
-        color: var(--text-color) !important;
-        border: 1px solid var(--card-border) !important;
-    }
-    
-    /* تحسينات للنتائج */
-    .stSuccess {
-        background-color: var(--success-bg) !important;
-        color: var(--text-color) !important;
-        border: 1px solid var(--success-border) !important;
-    }
-    
-    .stInfo {
-        background-color: var(--info-bg) !important;
-        color: var(--text-color) !important;
-        border: 1px solid var(--info-border) !important;
-    }
-    
-    .stWarning {
-        background-color: var(--warning-bg) !important;
-        color: var(--text-color) !important;
-        border: 1px solid var(--warning-border) !important;
-    }
-    
-    .stError {
-        background-color: #fed7d7 !important;
-        color: #c53030 !important;
-        border: 1px solid #fc8181 !important;
-    }
-    
-    [data-theme="dark"] .stError {
-        background-color: #742a2a !important;
-        color: #fc8181 !important;
-        border: 1px solid #fc8181 !important;
     }
     
     /* تحسينات متقدمة للجوال */
@@ -288,6 +174,7 @@ def load_custom_css():
             margin: 0.2rem 0 !important;
         }
         
+        /* تحسينات التبويبات للجوال */
         .stTabs [data-baseweb="tab-list"] {
             gap: 2px !important;
             flex-wrap: wrap !important;
@@ -305,6 +192,13 @@ def load_custom_css():
             min-width: 70px !important;
             text-align: center !important;
         }
+        
+        .stTabs [data-baseweb="tab"] > div {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+        }
     }
     
     /* تحسينات للشاشات الكبيرة */
@@ -317,23 +211,27 @@ def load_custom_css():
         }
     }
     
-    /* تحسين الخطوط والعناوين */
+    /* إزالة أي تأثيرات للوضع المظلم */
+    [data-theme="dark"] {
+        display: none !important;
+    }
+    
+    /* إجبار الألوان الفاتحة */
     body {
-        background-color: var(--background-color) !important;
-        color: var(--text-color) !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
+    /* تحسين الخطوط والعناوين */
     h1, h2, h3, h4, h5, h6 {
         font-weight: 600 !important;
         line-height: 1.3 !important;
-        color: var(--text-color) !important;
     }
     
     /* تحسينات عامة للتبويبات لجميع الشاشات */
     .stTabs [data-baseweb="tab-list"] {
         gap: 4px;
-        background-color: var(--card-background) !important;
     }
     .stTabs [data-baseweb="tab"] {
         height: auto;
@@ -341,48 +239,6 @@ def load_custom_css():
         white-space: normal;
         line-height: 1.3;
         padding: 8px 12px;
-        background-color: var(--card-background) !important;
-        color: var(--text-color) !important;
-    }
-    
-    /* تحسينات للخانات التفاعلية */
-    .stExpander {
-        background-color: var(--card-background) !important;
-        border: 1px solid var(--card-border) !important;
-    }
-    
-    .stExpander > div {
-        background-color: var(--card-background) !important;
-    }
-    
-    /* إصلاح ألوان النص في جميع العناصر */
-    p, div, span, li {
-        color: var(--text-color) !important;
-    }
-    
-    /* تحسينات للشريط الجانبي */
-    .stSidebar {
-        background-color: var(--card-background) !important;
-    }
-    
-    .css-1d391kg, .css-1lcbmhc {
-        background-color: var(--card-background) !important;
-    }
-
-    /* تحسينات إضافية للوضع المظلم */
-    [data-theme="dark"] .stSelectbox div[data-baseweb="select"] {
-        background-color: var(--card-background) !important;
-        color: var(--text-color) !important;
-    }
-    
-    [data-theme="dark"] .stNumberInput input {
-        background-color: var(--card-background) !important;
-        color: var(--text-color) !important;
-    }
-    
-    [data-theme="dark"] .stTextInput input {
-        background-color: var(--card-background) !important;
-        color: var(--text-color) !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -426,7 +282,7 @@ def initialize_session_state():
         'current_section': None,
         'last_calculation': None,
         'user_preferences': {
-            'theme': 'auto',  # auto, light, dark
+            'theme': 'light',
             'language': 'ar',
             'notifications': True
         }
@@ -438,40 +294,10 @@ def initialize_session_state():
 
 def show_breadcrumbs(section_name):
     st.markdown(f"""
-    <div style='background: var(--feature-bg); padding: 10px; border-radius: 5px; margin-bottom: 20px; border: 1px solid var(--card-border);'>
+    <div style='background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 20px;'>
         <strong>المسار:</strong> الرئيسية ▶ {section_name}
     </div>
     """, unsafe_allow_html=True)
-
-def apply_theme_preferences():
-    """تطبيق تفضيلات المظهر من إعدادات المستخدم"""
-    theme = st.session_state.user_preferences.get('theme', 'auto')
-    
-    if theme == 'light':
-        st.markdown("""
-        <style>
-        :root {
-            --background-color: #ffffff;
-            --text-color: #000000;
-            --card-background: #ffffff;
-            --card-border: #eaeaea;
-            --feature-bg: #f8fafc;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-    elif theme == 'dark':
-        st.markdown("""
-        <style>
-        :root {
-            --background-color: #0f0f0f;
-            --text-color: #ffffff;
-            --card-background: #1e1e1e;
-            --card-border: #333333;
-            --feature-bg: #2d3748;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-    # إذا كان auto نترك CSS يكتشف تلقائياً
 
 # ==========================
 # 🏠 الصفحة الرئيسية
@@ -1697,22 +1523,25 @@ def show_administration_records_obligations():
                 st.write(f"**💰 العقوبة:** {obligation['penalty']}")
 
 # ==========================
-# 📝 قسم إدارة العقود
+# 📝 قسم إدارة العقود - النسخة المعدلة
 # ==========================
 def show_contracts_management_section():
-    """عرض نظام إدارة العقود"""
+    """عرض نظام إدارة العقود المعدل"""
     
-    st.markdown("#### 📝 نظام إدارة العقود")
+    st.markdown("#### 📝 نظام إدارة العقود القانوني")
     
     st.markdown("""
     <div class="section-card">
         <h4>💡 دليل الاستخدام</h4>
-        <p>يوفر هذا القسم نماذج عقود جاهزة ومحدثة وفق أحدث التعديلات القانونية. يمكنك تحميل النماذج مباشرة مع ضمان الامتثال القانوني الكامل.</p>
+        <p>يوفر هذا القسم نماذج عقود جاهزة ومحدثة وفق أحدث التعديلات القانونية. يمكنك نسخ النص مباشرة واستخدامه.</p>
+        <div style="background: #fff3cd; padding: 10px; border-radius: 5px; border: 1px solid #ffeaa7;">
+        <strong>🛡️ تنويه هام:</strong> هذه النماذج لأغراض إرشادية فقط ولا تغني عن استشارة محامٍ متخصص. يتحمل المستخدم المسؤولية الكاملة عن استخدام هذه النماذج.
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
     contracts_tabs = st.tabs(["📄 نماذج العقود", "🎯 منشئ العقود"])
-    
+
     with contracts_tabs[0]:
         show_contract_templates()
     
@@ -1725,67 +1554,59 @@ def show_contracts_management_section():
 def show_contract_templates():
     """عرض مكتبة نماذج العقود"""
     
-    st.markdown("##### 📄 مكتبة نماذج العقود القانونية المحدثة")
-    
+    st.markdown("##### 📄 مكتبة نماذج العقود القانونية")
+
     contract_templates = [
         {
             "النوع": "عقد عمل دائم",
-            "الوصف": "للعاملين الدائمين بدوام كامل - محدث وفق آخر التعديلات 2024",
-            "الصفحات": "18 صفحة",
-            "التحديث": "🆕 2024",
-            "المميزات": ["فترة التجربة 3 أشهر", "بنود العمل المرن", "سياسة الحماية من التحرش", "التزامات الطرفين", "إنهاء الخدمة"],
-            "الملاءمة": "جميع القطاعات"
+            "الوصف": "عقد عمل دائم شامل مع جميع البنود القانونية",
+            "المميزات": [
+                "فترة التجربة 3 أشهر", "بنود العمل المرن", "سياسة الحماية من التحرش",
+                "التزامات الطرفين", "إنهاء الخدمة", "الضمان الاجتماعي", "الإجازات"
+            ]
         },
         {
             "النوع": "عقد عمل مؤقت", 
-            "الوصف": "للمشاريع المؤقتة والعقود محددة المدة - متوافق مع القانون",
-            "الصفحات": "15 صفحة",
-            "التحديث": "🆕 2024",
-            "المميزات": ["مدة محددة", "بنود التمديد", "إنهاء مبكر", "تسليم المخرجات", "الملكية الفكرية"],
-            "الملاءمة": "المشاريع المؤقتة"
+            "الوصف": "عقد عمل مؤقت شامل للمشاريع محددة المدة",
+            "المميزات": [
+                "مدة محددة", "بنود التمديد", "إنهاء مبكر", "تسليم المخرجات",
+                "الملكية الفكرية", "التسليم والمعايير"
+            ]
         },
         {
             "النوع": "عقد عمل جزئي",
-            "الوصف": "للعاملين بدوام جزئي - يحفظ حقوق جميع الأطراف",
-            "الصفحات": "14 صفحة",
-            "التحديث": "🆕 2024", 
-            "المميزات": ["ساعات مرنة", "أجر متناسب", "استحقاقات نسبية", "التأمينات", "الإجازات"],
-            "الملاءمة": "الوظائف الجزئية"
+            "الوصف": "عقد عمل جزئي شامل مع جميع الاستحقاقات النسبية", 
+            "المميزات": [
+                "ساعات مرنة", "أجر متناسب", "استحقاقات نسبية", "التأمينات",
+                "الإجازات", "الضمان الاجتماعي"
+            ]
         }
     ]
     
     for contract in contract_templates:
-        with st.expander(f"📄 {contract['النوع']} - {contract['التحديث']}", expanded=True):
-            col1, col2 = st.columns([3, 1])
+        with st.expander(f"📄 {contract['النوع']}", expanded=False):
+            st.write(f"**📝 الوصف:** {contract['الوصف']}")
             
-            with col1:
-                st.write(f"**📝 الوصف:** {contract['الوصف']}")
-                st.write(f"**🏢 الملاءمة:** {contract['الملاءمة']}")
-                st.write(f"**📑 عدد الصفحات:** {contract['الصفحات']}")
-                
-                st.write("**✨ المميزات:**")
-                for feature in contract['المميزات']:
-                    st.write(f"• {feature}")
+            st.write("**✨ المميزات:**")
+            for feature in contract['المميزات']:
+                st.write(f"• {feature}")
             
-            with col2:
-                st.write("")  # spacer
-                if st.button(f"📥 تحميل النموذج", key=f"download_{contract['النوع']}", use_container_width=True):
-                    contract_content = generate_contract_template(contract['النوع'])
-                    st.download_button(
-                        label="💾 حفظ كملف DOCX",
-                        data=contract_content,
-                        file_name=f"عقد_عمل_{contract['النوع']}_2024.docx",
-                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                        key=f"save_{contract['النوع']}"
-                    )
+            if st.button(f"📋 عرض نص العقد", key=f"show_{contract['النوع']}", use_container_width=True):
+                contract_content = generate_contract_content(contract['النوع'])
+                st.session_state[f'current_contract'] = contract_content
+                st.session_state[f'contract_type'] = contract['النوع']
+    
+    # عرض نص العقد إذا تم اختياره
+    if 'current_contract' in st.session_state:
+        show_contract_text()
 
 # ==========================
 # 🎯 منشئ العقود
 # ==========================
 def show_contract_builder():
-    """عرض منشئ العقود الذكي"""
+    """عرض منشئ العقود البسيط"""
     
-    st.markdown("##### 🎯 منشئ العقود الذكي")
+    st.markdown("##### 🎯 منشئ العقود المخصص")
     
     with st.form("contract_builder"):
         st.subheader("إنشاء عقد عمل مخصص")
@@ -1799,43 +1620,350 @@ def show_contract_builder():
                 "عقد عمل جزئي"
             ])
             
-            employee_name = st.text_input("اسم العامل")
-            job_title = st.text_input("المسمى الوظيفي")
-            workplace = st.text_input("مكان العمل")
+            job_title = st.text_input("المسمى الوظيفي", placeholder="مثال: محاسب، مهندس، مسوق")
+            workplace = st.text_input("مكان العمل", placeholder="مثال: عمان - الشميساني")
             
         with col2:
-            start_date = st.date_input("تاريخ بدء العمل")
-            salary = st.number_input("الراتب الأساسي (دينار)", min_value=290, value=500, 
-                                   help="الحد الأدنى للأجور 290 دينار وفقاً لأحدث التعديلات")
+            salary = st.number_input("الراتب الأساسي (دينار)", min_value=290, value=500)
             probation_period = st.selectbox("فترة التجربة", ["1 شهر", "2 أشهر", "3 أشهر"])
-            contract_duration = st.text_input("مدة العقد (للمؤقت)")
+            
+            if contract_type == "عقد عمل مؤقت":
+                contract_duration = st.text_input("مدة العقد", placeholder="مثال: 6 أشهر، سنة واحدة")
+            else:
+                contract_duration = None
         
-        additional_terms = st.text_area("بنود إضافية خاصة")
+        additional_terms = st.text_area("بنود إضافية خاصة (اختياري)", placeholder="أضف أي بنود إضافية تريد تضمينها في العقد...")
         
-        if st.form_submit_button("🎯 إنشاء العقد"):
+        if st.form_submit_button("🎯 إنشاء العقد المخصص"):
             if salary < 290:
                 st.error("⚠️ الراتب الأساسي أقل من الحد الأدنى للأجور (290 دينار)")
             else:
-                generated_contract = generate_custom_contract({
+                contract_data = {
                     "type": contract_type,
-                    "employee_name": employee_name,
                     "job_title": job_title,
                     "workplace": workplace,
-                    "start_date": start_date,
                     "salary": salary,
                     "probation_period": probation_period,
                     "contract_duration": contract_duration,
                     "additional_terms": additional_terms
-                })
+                }
                 
-                st.success("✅ تم إنشاء العقد بنجاح!")
-                st.download_button(
-                    label="📥 تحميل العقد المخصص",
-                    data=generated_contract,
-                    file_name=f"عقد_عمل_مخصص_{employee_name}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
+                generated_contract = generate_custom_contract(contract_data)
+                st.session_state['current_contract'] = generated_contract
+                st.session_state['contract_type'] = "مخصص"
+                st.success("✅ تم إنشاء العقد بنجاح! انزل لأسفل لنسخ النص")
 
+# ==========================
+# 🎯 دوال المساعدة
+# ==========================
+def show_contract_text():
+    """عرض نص العقد للنسخ"""
+    st.markdown("---")
+    st.markdown(f"##### 📝 نص العقد الجاهز للنسخ")
+    
+    contract_content = st.session_state['current_contract']
+    
+    # عرض النص في صندوق يمكن نسخه
+    st.text_area(
+        "**انسخ النص أدناه واستخدمه:**", 
+        contract_content, 
+        height=400,
+        key="contract_text_area"
+    )
+    
+    # زر مساعد للنسخ
+    st.markdown("""
+    <div style="background: #e8f5e8; padding: 15px; border-radius: 5px; border: 1px solid #4caf50;">
+    <h4>💡 تعليمات النسخ:</h4>
+    <ol>
+    <li>اضغط داخل صندوق النص أعلاه</li>
+    <li>إضغط <kbd>Ctrl+A</kbd> (Windows) أو <kbd>Cmd+A</kbd> (Mac) لتحديد كل النص</li>
+    <li>إضغط <kbd>Ctrl+C</kbd> (Windows) أو <kbd>Cmd+C</kbd> (Mac) لنسخ النص</li>
+    <li>الصق النص في مستند Word أو أي محرر نصوص آخر</li>
+    </ol>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    if st.button("🔄 إنشاء عقد جديد", use_container_width=True):
+        st.session_state.pop('current_contract', None)
+        st.rerun()
+
+def generate_contract_content(contract_type):
+    """إنشاء محتوى العقد حسب النوع"""
+    
+    disclaimer = """
+    
+    ⚠️ تنويه إخلاء المسؤولية:
+    هذا النموذج معد لأغراض إرشادية فقط ولا يعتبر بديلاً عن الاستشارة القانونية المتخصصة. 
+    يتحمل المستخدم المسؤولية الكاملة عن مراجعة العقد مع محامٍ مختص قبل استخدامه.
+    """
+    
+    if contract_type == "عقد عمل دائم":
+        return f"""
+📜 عقد عمل فردي دائم
+وفقاً لقانون العمل الأردني رقم (8) لسنة 1996 وتعديلاته
+
+تم إبرام هذا العقد في تاريخ ____ الموافق __/__/____
+
+بين:
+
+الطرف الأول: صاحب العمل
+الاسم: ____________________
+العنوان: __________________
+رقم الهاتف: _______________
+
+و
+
+الطرف الثاني: العامل
+الاسم: ____________________
+العنوان: __________________
+رقم الهاتف: _______________
+
+البند الأول: التعريفات والأحكام العامة
+١.١. ينظم هذا العقد علاقة العمل بين الطرفين وفقاً لأحكام قانون العمل الأردني.
+١.٢. أي بند يخالف القانون يعتبر لاغياً وباطلاً.
+
+البند الثاني: مدة العقد وفترة التجربة
+٢.١. يعتبر هذا العقد عقد عمل دائم يبدأ من تاريخ ______.
+٢.٢. فترة التجربة: ثلاثة أشهر قابلة للتجديد لمرة واحدة وفقاً للقانون.
+٢.٣. خلال فترة التجربة، يحق لأي من الطرفين إنهاء العقد دون إنذار مسبق.
+
+البند الثالث: طبيعة العمل والمسؤوليات
+٣.١. المسمى الوظيفي: ______
+٣.٢. مكان العمل الرئيسي: ______
+٣.٣. يلتزم العامل بأداء المهام الموكلة إليه بدقة وأمانة.
+
+البند الرابع: الأجر والاستحقاقات المالية
+٤.١. الراتب الأساسي: ______ دينار أردني.
+٤.٢. بدل المواصلات: ______ دينار.
+٤.٣. بدل السكن: ______ دينار.
+٤.٤. يُدفع الراتب في موعد لا يتجاوز سبعة أيام من تاريخ الاستحقاق.
+
+البند الخامس: ساعات العمل والراحة
+٥.١. ساعات العمل: ٨ ساعات يومياً أو ٤٨ ساعة أسبوعياً.
+٥.٢. فترات الراحة: ساعة راحة لتناول الطعام لا تدخل ضمن ساعات العمل.
+٥.٣. العمل الإضافي: 
+    - ١٢٥٪ من الأجر الأساسي في الأيام العادية
+    - ١٥٠٪ من الأجر الأساسي في أيام العطل الرسمية
+
+البند السادس: الإجازات
+٦.١. الإجازة السنوية: ١٤ يوماً مدفوعة الأجر عن كل سنة خدمة.
+٦.٢. الإجازة المرضية: ١٤ يوماً بأجر كامل، و١٤ يوماً إضافية بأجر كامل في حالة التنويم.
+٦.٣. إجازة الأمومة: ١٠ أسابيع مدفوعة الأجر.
+٦.٤. إجازة الأبوة: ٣ أيام مدفوعة الأجر.
+
+البند السابع: الضمان الاجتماعي
+٧.١. يلتزم صاحب العمل بتسجيل العامل في مؤسسة الضمان الاجتماعي.
+
+البند الثامن: إنهاء العقد
+٨.١. يحق لأي طرف إنهاء العقد بإشعار خطي قبل ٣٠ يوماً على الأقل.
+٨.٢. في حال إنهاء العقد من قبل صاحب العمل دون سبب مشروع، يستحق العامل تعويضاً.
+
+البند التاسع: السرية والمنافسة
+٩.١. يلتزم العامل بالمحافظة على أسرار العمل وعدم إفشائها.
+٩.٢. لا يجوز للعامل العمل لدى جهة منافسة خلال سنة من انتهاء العقد.
+
+البند العاشر: تسوية المنازعات
+١٠.١. تحل المنازعات ودياً بين الطرفين.
+١٠.٢. في حالة عدم الاتفاق، ترفع الدعوى إلى المحاكم المختصة في المملكة الأردنية الهاشمية.
+
+توقيع صاحب العمل: __________
+الاسم: ____________________
+التاريخ: __/__/____
+
+توقيع العامل: __________
+الاسم: ____________________
+التاريخ: __/__/____
+
+{disclaimer}
+"""
+    
+    elif contract_type == "عقد عمل مؤقت":
+        return f"""
+📜 عقد عمل مؤقت
+وفقاً لقانون العمل الأردني رقم (8) لسنة 1996 وتعديلاته
+
+تم إبرام هذا العقد في تاريخ ____ الموافق __/__/____
+
+بين:
+
+الطرف الأول: صاحب العمل
+الاسم: ____________________
+العنوان: __________________
+
+و
+
+الطرف الثاني: العامل
+الاسم: ____________________
+العنوان: __________________
+
+البند الأول: أساس العقد
+١.١. يتم إبرام هذا العقد لتنفيذ عمل محدد ومؤقت.
+١.٢. طبيعة العمل المؤقت: ______
+
+البند الثاني: مدة العقد
+٢.١. تاريخ البدء: ______
+٢.٢. تاريخ الانتهاء: ______
+٢.٣. المدة الإجمالية: ______
+
+البند الثالث: المخرجات والتسليم
+٣.١. المخرجات المتوقعة: ______
+٣.٢. معايير القبول: ______
+٣.٣. جدول التسليم: ______
+
+البند الرابع: الأجر والدفع
+٤.١. القيمة الإجمالية: ______ دينار أردني
+٤.٢. خطة الدفع: ______
+٤.٣. لا يستحق العامل أي مكافأة نهاية خدمة وفقاً لنظام العقود المحددة المدة.
+
+البند الخامس: إنهاء العقد
+٥.١. ينتهي العقد تلقائياً بانتهاء مدته.
+٥.٢. يحق للطرفين إنهاء العقد بالتراضي.
+٥.٣. في حال الإنهاء المبكر، يستحق العامل الأجر مقابل ما أنجزه من العمل.
+
+توقيع صاحب العمل: __________
+الاسم: ____________________
+التاريخ: __/__/____
+
+توقيع العامل: __________
+الاسم: ____________________
+التاريخ: __/__/____
+
+{disclaimer}
+"""
+    
+    elif contract_type == "عقد عمل جزئي":
+        return f"""
+📜 عقد عمل جزئي
+وفقاً لقانون العمل الأردني رقم (8) لسنة 1996 وتعديلاته
+
+تم إبرام هذا العقد في تاريخ ____ الموافق __/__/____
+
+بين:
+
+الطرف الأول: صاحب العمل
+الاسم: ____________________
+العنوان: __________________
+
+و
+
+الطرف الثاني: العامل
+الاسم: ____________________
+العنوان: __________________
+
+البند الأول: طبيعة العقد
+١.١. يعتبر هذا العقد عقد عمل جزئي.
+١.٢. نسبة الدوام: ______٪ من دوام العمل الكامل.
+
+البند الثاني: ساعات العمل
+٢.١. عدد الساعات الأسبوعية: ______ ساعة
+٢.٢. توزيع الساعات: ______
+٢.٣. يحق لصاحب العمل تعديل توزيع الساعات بموافقة العامل.
+
+البند الثالث: الأجر والاستحقاقات
+٣.١. الأجر الشهري: ______ دينار أردني
+٣.٢. طريقة حساب الأجر: متناسب مع ساعات العمل.
+٣.٣. الاستحقاقات: تكون الاستحقاقات متناسبة مع ساعات العمل بما في ذلك الإجازات.
+
+البند الرابع: الضمان الاجتماعي
+٤.١. إذا استوفى العامل شروط الاشتراك في الضمان الاجتماعي، يلتزم صاحب العمل بتسجيله.
+
+البند الخامس: الأحكام الخاصة
+٥.١. يجوز للعامل العمل لدى جهات أخرى ما لم يتعارض مع هذا العقد.
+٥.٢. لا تطبق على العامل بعض أحكام ساعات العمل الإضافية.
+
+توقيع صاحب العمل: __________
+الاسم: ____________________
+التاريخ: __/__/____
+
+توقيع العامل: __________
+الاسم: ____________________
+التاريخ: __/__/____
+
+{disclaimer}
+"""
+
+def generate_custom_contract(contract_data):
+    """إنشاء عقد مخصص"""
+    
+    disclaimer = """
+    
+    ⚠️ تنويه إخلاء المسؤولية:
+    هذا النموذج معد لأغراض إرشادية فقط ولا يعتبر بديلاً عن الاستشارة القانونية المتخصصة. 
+    يتحمل المستخدم المسؤولية الكاملة عن مراجعة العقد مع محامٍ مختص قبل استخدامه.
+    """
+    
+    base_contract = f"""
+📜 عقد عمل {contract_data['type']}
+وفقاً لقانون العمل الأردني رقم (8) لسنة 1996 وتعديلاته
+
+تم إبرام هذا العقد في تاريخ ____ الموافق __/__/____
+
+بين:
+
+الطرف الأول: صاحب العمل
+الاسم: ____________________
+العنوان: __________________
+
+و
+
+الطرف الثاني: العامل
+الاسم: ____________________
+العنوان: __________________
+
+البند الأول: المعلومات الأساسية
+١.١. نوع العقد: {contract_data['type']}
+١.٢. المسمى الوظيفي: {contract_data['job_title'] or '______'}
+١.٣. مكان العمل: {contract_data['workplace'] or '______'}
+"""
+
+    if contract_data['type'] == "عقد عمل مؤقت" and contract_data['contract_duration']:
+        base_contract += f"١.٤. مدة العقد: {contract_data['contract_duration']}\n"
+
+    base_contract += f"""
+البند الثاني: الأجر والاستحقاقات
+٢.١. الراتب الأساسي: {contract_data['salary']} دينار أردني
+٢.٢. طريقة الدفع: ______
+٢.٣. موعد الصرف: ______
+
+البند الثالث: فترة التجربة
+٣.١. فترة التجربة: {contract_data['probation_period']}
+٣.٢. خلال فترة التجربة، يحق لأي طرف إنهاء العقد دون إنذار.
+"""
+
+    if contract_data['additional_terms']:
+        base_contract += f"""
+البند الرابع: بنود إضافية
+{contract_data['additional_terms']}
+"""
+
+    base_contract += f"""
+البند الخامس: أحكام عامة
+٥.١. يخضع هذا العقد لأحكام قانون العمل الأردني.
+٥.٢. أي بند يخالف القانون يعتبر لاغياً.
+٥.٣. الحد الأدنى للأجور: ٢٩٠ ديناراً (تحديث ٢٠٢٤).
+
+توقيع صاحب العمل: __________
+الاسم: ____________________
+التاريخ: __/__/____
+
+توقيع العامل: __________
+الاسم: ____________________
+التاريخ: __/__/____
+
+{disclaimer}
+"""
+    
+    return base_contract
+
+# ==========================
+# 🎯 تشغيل قسم العقود
+# ==========================
+def run_contracts_section():
+    """تشغيل قسم إدارة العقود"""
+    show_contracts_management_section()
 # ==========================
 # 🛡️ قسم إدارة المخاطر
 # ==========================
