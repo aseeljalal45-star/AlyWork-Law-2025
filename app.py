@@ -3928,7 +3928,7 @@ def show_complaints_section():
             <h4>🛡️ منصة حمايتي</h4>
             <p><strong>الاختصاص:</strong> المنصة الإلكترونية لتلقي الشكاوى العمالية</p>
             <p><strong>الميزة:</strong> متابعة إلكترونية للشكاوى</p>
-            <p><strong>الرابط:</strong> <a href="https://himayat.mol.gov.jo" target="_blank">himayat.mol.gov.jo</a></p>
+            <p><strong>الرابط:</strong> <a href="https://hemayeh.jo" target="_blank">hemayeh.jo</a></p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -4060,7 +4060,7 @@ def show_settings_section():
             st.markdown("##### 📧 البريد الإلكتروني")
             st.markdown("""
             <div style="background: #f0f9ff; padding: 1rem; border-radius: 10px; border-left: 4px solid #2563EB;">
-                <h4 style="margin: 0 0 0.5rem 0;">📧 support@sirawork.com</h4>
+                <h4 style="margin: 0 0 0.5rem 0;">📧 sirawork2025@gmail.com</h4>
                 <p style="margin: 0; color: #666;">للأسئلة الفنية والدعم التقني</p>
             </div>
             """, unsafe_allow_html=True)
