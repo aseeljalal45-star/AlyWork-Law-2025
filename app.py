@@ -30,18 +30,23 @@ st.set_page_config(
 )
 
 # ==========================
-# 🎨 التصميم الموحد للمنصة - محسن ومتناسق
+# 🎨 التصميم الموحد للمنصة - الوضع المظلم الاحترافي
 # ==========================
 def load_custom_css():
     st.markdown("""
     <style>
-    /* إجبار الوضع الفاتح دائماً */
+    /* التصميم المظلم الاحترافي */
     .stApp {
-        background-color: #ffffff !important;
-        color: #000000 !important;
+        background-color: #0E1117 !important;
+        color: #FAFAFA !important;
     }
     
-    /* تصميم الهيدر مع الشعار - خلفية بيضاء */
+    /* تحسينات عامة للنص */
+    .main * {
+        color: #FAFAFA !important;
+    }
+    
+    /* تصميم الهيدر مع الشعار - خلفية داكنة */
     .header-with-logo {
         display: flex;
         align-items: center;
@@ -49,17 +54,20 @@ def load_custom_css():
         gap: 1.5rem;
         padding: 1.5rem 0;
         margin-bottom: 1rem;
+        background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%);
+        border-radius: 15px;
+        border: 1px solid #334155;
     }
     .logo-container {
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: #ffffff !important; /* خلفية بيضاء */
+        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%) !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border: 3px solid #e5e7eb;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        border: 3px solid #60A5FA;
         overflow: hidden;
     }
     .logo-img {
@@ -71,24 +79,59 @@ def load_custom_css():
     .platform-name-with-logo {
         font-size: 2.8rem;
         font-weight: 800;
-        color: #1E3A8A;
+        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
         line-height: 1.2;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .platform-subtitle {
         font-size: 1.3rem;
-        color: #4B5563;
+        color: #CBD5E1 !important;
         margin-bottom: 1.5rem;
         font-weight: 400;
         line-height: 1.4;
         text-align: center;
     }
     
-    /* تنويه أصغر حجماً */
+    /* تصميم البطاقات في الوضع المظلم */
+    .section-card { 
+        background: #1E293B !important;
+        padding: 1.5rem; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); 
+        margin: 1rem 0; 
+        border: 1px solid #334155;
+        transition: all 0.3s ease;
+    }
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        border-color: #3B82F6;
+    }
+    
+    /* تصميم العناصر في الوضع المظلم */
+    .feature-item {
+        background: #1F2937;
+        padding: 0.8rem;
+        border-radius: 8px;
+        margin: 0.3rem 0;
+        border-right: 4px solid #3B82F6;
+        border-left: 1px solid #374151;
+        border-top: 1px solid #374151;
+        border-bottom: 1px solid #374151;
+        transition: all 0.3s ease;
+    }
+    .feature-item:hover {
+        background: #374151;
+        transform: translateX(4px);
+        border-right-color: #60A5FA;
+    }
+    
+    /* تصميم التنبيهات في الوضع المظلم */
     .warning-box {
-        background: #FEF3CD;
-        border: 1px solid #F59E0B;
+        background: #451A03;
+        border: 1px solid #92400E;
         border-radius: 10px;
         padding: 1rem;
         margin: 1rem 0;
@@ -97,45 +140,100 @@ def load_custom_css():
     .warning-box h4 {
         margin: 0 0 0.5rem 0;
         font-size: 1rem;
-        color: #B45309;
+        color: #F59E0B !important;
     }
     .warning-box p {
         margin: 0;
         font-size: 0.9rem;
         line-height: 1.4;
+        color: #FBBF24 !important;
     }
     
-    .section-card { 
-        background: white; 
-        padding: 1.5rem; 
-        border-radius: 12px; 
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08); 
-        margin: 1rem 0; 
-        border: 1px solid #eaeaea;
+    /* تصميم التبويبات في الوضع المظلم */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        background: #1E293B;
+        padding: 8px;
+        border-radius: 10px;
     }
-    .feature-item {
-        background: #f8fafc;
-        padding: 0.8rem;
-        border-radius: 8px;
-        margin: 0.3rem 0;
-        border-right: 4px solid #2563EB;
+    
+    .stTabs [data-baseweb="tab"] {
+        background: #334155 !important;
+        color: #CBD5E1 !important;
+        border-radius: 8px !important;
+        padding: 10px 16px !important;
+        margin: 2px !important;
         transition: all 0.3s ease;
+        border: 1px solid #475569 !important;
     }
-    .feature-item:hover {
-        background: #f0f4f8;
-        transform: translateX(4px);
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: #475569 !important;
+        color: #FFFFFF !important;
     }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%) !important;
+        color: #FFFFFF !important;
+        border-color: #60A5FA !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+    
+    /* تصميم الأزرار في الوضع المظلم */
+    .stButton button {
+        background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 20px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+    }
+    
+    /* تصميم المدخلات في الوضع المظلم */
+    .stTextInput input, .stNumberInput input, .stSelectbox select {
+        background: #1E293B !important;
+        color: #FAFAFA !important;
+        border: 1px solid #475569 !important;
+        border-radius: 8px !important;
+    }
+    
+    .stTextInput input:focus, .stNumberInput input:focus, .stSelectbox select:focus {
+        border-color: #3B82F6 !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+    }
+    
+    /* تصميم الشريط الجانبي في الوضع المظلم */
+    .css-1d391kg, .css-1lcbmhc {
+        background: #1E293B !important;
+    }
+    
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%) !important;
+        border-right: 1px solid #334155 !important;
+    }
+    
+    /* تصميم التذييل */
     .footer {
         text-align: center;
         padding: 1.5rem;
-        color: #6B7280;
+        color: #94A3B8 !important;
         margin-top: 2rem;
-        border-top: 1px solid #E5E7EB;
+        border-top: 1px solid #334155;
         font-size: 0.9rem;
+        background: #1E293B;
+        border-radius: 10px;
     }
+    
     .privacy-highlight {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
+        background: #451A03;
+        border: 1px solid #92400E;
         border-radius: 8px;
         padding: 0.8rem;
         margin: 0.3rem 0;
@@ -192,13 +290,6 @@ def load_custom_css():
             min-width: 70px !important;
             text-align: center !important;
         }
-        
-        .stTabs [data-baseweb="tab"] > div {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            text-align: center !important;
-        }
     }
     
     /* تحسينات للشاشات الكبيرة */
@@ -211,34 +302,70 @@ def load_custom_css():
         }
     }
     
-    /* إزالة أي تأثيرات للوضع المظلم */
-    [data-theme="dark"] {
-        display: none !important;
+    /* تحسينات الأدوات التفاعلية */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 100%);
     }
     
-    /* إجبار الألوان الفاتحة */
-    body {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* تحسينات المتركس والبيانات */
+    .stMetric {
+        background: #1E293B;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #334155;
     }
     
-    /* تحسين الخطوط والعناوين */
+    /* تحسينات النتائج */
+    .stSuccess {
+        background: #064E3B !important;
+        border: 1px solid #047857 !important;
+        color: #A7F3D0 !important;
+    }
+    
+    .stInfo {
+        background: #1E3A8A !important;
+        border: 1px solid #3B82F6 !important;
+        color: #BFDBFE !important;
+    }
+    
+    .stWarning {
+        background: #451A03 !important;
+        border: 1px solid #92400E !important;
+        color: #FDE68A !important;
+    }
+    
+    .stError {
+        background: #7F1D1D !important;
+        border: 1px solid #DC2626 !important;
+        color: #FECACA !important;
+    }
+    
+    /* تحسينات الخطوط */
     h1, h2, h3, h4, h5, h6 {
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         line-height: 1.3 !important;
+        color: #F8FAFC !important;
     }
     
-    /* تحسينات عامة للتبويبات لجميع الشاشات */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 4px;
+    p, span, div {
+        color: #E2E8F0 !important;
     }
-    .stTabs [data-baseweb="tab"] {
-        height: auto;
-        min-height: 45px;
-        white-space: normal;
-        line-height: 1.3;
-        padding: 8px 12px;
+    
+    /* تحسينات الجداول */
+    .dataframe {
+        background: #1E293B !important;
+        color: #E2E8F0 !important;
+    }
+    
+    .dataframe th {
+        background: #334155 !important;
+        color: #F8FAFC !important;
+    }
+    
+    .dataframe td {
+        background: #1E293B !important;
+        color: #E2E8F0 !important;
+        border-color: #475569 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -246,7 +373,7 @@ def load_custom_css():
 load_custom_css()
 
 # ==========================
-# 🧭 نظام التنقل الموحد
+# 🧭 نظام التنقل الموحد المحسن
 # ==========================
 def setup_navigation():
     page_options = {
@@ -261,17 +388,39 @@ def setup_navigation():
     return page_options
 
 def show_sidebar_navigation():
-    """إظهار القائمة الجانبية للتنقل"""
-    st.sidebar.markdown("# 🧭 التنقل")
+    """إظهار القائمة الجانبية للتنقل مع تصميم مظلم"""
+    st.sidebar.markdown("""
+    <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%); border-radius: 10px; margin-bottom: 1rem;">
+        <h3 style="margin: 0; color: #60A5FA;">🧭 التنقل</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    
     page_options = setup_navigation()
     
     for page_name, page_id in page_options.items():
-        if st.sidebar.button(page_name, key=page_id, use_container_width=True):
+        btn_key = f"nav_{page_id}"
+        if st.sidebar.button(
+            page_name, 
+            key=btn_key, 
+            use_container_width=True,
+            help=f"الانتقال إلى {page_name}"
+        ):
             st.session_state.selected_page = page_id
             st.rerun()
+    
+    # إضافة معلومات إضافية في الشريط الجانبي
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("""
+    <div style="background: #1E293B; padding: 1rem; border-radius: 8px; border: 1px solid #334155;">
+        <p style="margin: 0; font-size: 0.9rem; color: #94A3B8; text-align: center;">
+        🚀 منصة SiraWork سيرا<br>
+        <small>الإصدار 2.0.0</small>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==========================
-# 🧮 دوال مساعدة مشتركة
+# 🧮 دوال مساعدة مشتركة محسنة
 # ==========================
 def initialize_session_state():
     """تهيئة حالة الجلسة بشكل شامل"""
@@ -282,7 +431,7 @@ def initialize_session_state():
         'current_section': None,
         'last_calculation': None,
         'user_preferences': {
-            'theme': 'light',
+            'theme': 'dark',
             'language': 'ar',
             'notifications': True
         }
@@ -294,16 +443,44 @@ def initialize_session_state():
 
 def show_breadcrumbs(section_name):
     st.markdown(f"""
-    <div style='background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 20px;'>
-        <strong>المسار:</strong> الرئيسية ▶ {section_name}
+    <div style='
+        background: linear-gradient(135deg, #1E293B 0%, #334155 100%); 
+        padding: 12px 16px; 
+        border-radius: 8px; 
+        margin-bottom: 20px; 
+        border: 1px solid #475569;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    '>
+        <strong style='color: #60A5FA;'>المسار:</strong> 
+        <span style='color: #CBD5E1;'>الرئيسية ▶ {section_name}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+def show_metric_card(title, value, subtitle, icon="📊"):
+    """عرض بطاقة متركس بتصميم مظلم"""
+    st.markdown(f"""
+    <div style='
+        background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #475569;
+        text-align: center;
+        margin: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    '>
+        <div style='font-size: 2rem; margin-bottom: 0.5rem;'>{icon}</div>
+        <h3 style='margin: 0; color: #F8FAFC; font-size: 1.8rem;'>{value}</h3>
+        <p style='margin: 0.5rem 0 0 0; color: #94A3B8; font-size: 0.9rem;'>{title}</p>
+        <p style='margin: 0.2rem 0 0 0; color: #CBD5E1; font-size: 0.8rem;'>{subtitle}</p>
     </div>
     """, unsafe_allow_html=True)
 
 # ==========================
-# 🏠 الصفحة الرئيسية
+# 🏠 الصفحة الرئيسية - النسخة المظلمة
 # ==========================
 def show_home_page():
-    # عنوان المنصة مع الشعار الجديد بخلفية بيضاء
+    # عنوان المنصة مع الشعار الجديد بالتصميم المظلم
     st.markdown("""
     <div class="header-with-logo">
         <div class="logo-container">
@@ -325,6 +502,22 @@ def show_home_page():
         <p>منصة توعوية تعليمية - المعلومات مقدمة لأغراض التعلم والمعرفة العامة ولا تغني عن استشارة المختصين.</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # إحصائيات سريعة
+    st.markdown("### 📈 نظرة سريعة على المنصة")
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        show_metric_card("أداة حسابية", "6+", "حاسبات متخصصة", "🧮")
+    
+    with col2:
+        show_metric_card("مادة قانونية", "50+", "مادة قانونية", "⚖️")
+    
+    with col3:
+        show_metric_card("نموذج عقد", "8+", "نماذج جاهزة", "📝")
+    
+    with col4:
+        show_metric_card("دليل بحثي", "20+", "مصدر موثوق", "🔍")
     
     # الفئات المستهدفة
     st.markdown("### 🎯 الفئات المستهدفة")
@@ -368,6 +561,37 @@ def show_home_page():
         </ol>
     </div>
     """, unsafe_allow_html=True)
+    
+    # المميزات الرئيسية
+    st.markdown("### ✨ المميزات الرئيسية")
+    
+    features = [
+        {"icon": "⚡", "title": "سرعة الأداء", "desc": "تصميم سريع الاستجابة وسهل الاستخدام"},
+        {"icon": "🎨", "title": "واجهة مظلمة", "desc": "تصميم مظلم مريح للعين واحترافي"},
+        {"icon": "📱", "title": "متجاوب", "desc": "يعمل على جميع الأجهزة والشاشات"},
+        {"icon": "🔒", "title": "آمن", "desc": "لا يجمع أو يخزن أي بيانات شخصية"},
+        {"icon": "🆓", "title": "مجاني", "desc": "خدمة مجانية بالكامل بدون أي رسوم"},
+        {"icon": "📚", "title": "شامل", "desc": "يغطي جميع جوانب قانون العمل الأردني"}
+    ]
+    
+    cols = st.columns(3)
+    for idx, feature in enumerate(features):
+        with cols[idx % 3]:
+            st.markdown(f"""
+            <div style='
+                background: #1E293B;
+                padding: 1rem;
+                border-radius: 10px;
+                border: 1px solid #334155;
+                margin: 0.5rem 0;
+                text-align: center;
+                transition: all 0.3s ease;
+            '>
+                <div style='font-size: 2rem; margin-bottom: 0.5rem;'>{feature['icon']}</div>
+                <h4 style='margin: 0.5rem 0; color: #F8FAFC;'>{feature['title']}</h4>
+                <p style='margin: 0; color: #CBD5E1; font-size: 0.9rem;'>{feature['desc']}</p>
+            </div>
+            """, unsafe_allow_html=True)
     
     # تذييل الصفحة
     st.markdown(f"""
